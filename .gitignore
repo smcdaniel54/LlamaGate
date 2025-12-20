@@ -1,0 +1,51 @@
+# Binaries
+llamagate
+llamagate.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Log files
+*.log
+llamagate.log
+
+# Keep install scripts and directories
+!install/
+!install.sh
+!install.cmd
+!scripts/
+!run.sh
+!run.cmd
+!test.sh
+!test.cmd
+!build.cmd
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Dependency directories
+vendor/
+
+# Go workspace file
+go.work
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+

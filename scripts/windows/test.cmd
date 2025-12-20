@@ -1,0 +1,120 @@
+@echo off
+REM LlamaGate Test Script for Windows
+REM This script tests all LlamaGate endpoints
+
+echo ========================================
+echo LlamaGate Test Suite
+echo ========================================
+echo.
+echo Prerequisites:
+echo   1. Ollama must be running on http://localhost:11434
+echo   2. LlamaGate must be running on http://localhost:8080
+echo   3. At least one model should be available in Ollama (e.g., llama2)
+echo.
+echo Press any key to start testing...
+pause >nul
+echo.
+
+set BASE_URL=http://localhost:8080
+set API_KEY=sk-llamagate
+
+echo [1/5] Testing Health Check...
+curl -s %BASE_URL%/health
+if %ERRORLEVEL% EQU 0 (
+    echo.
+    echo ✓ Health check passed
+) else (
+    echo.
+    echo ✗ Health check failed - Is LlamaGate running?
+    goto :end
+)
+echo.
+
+echo [2/5] Testing Models Endpoint...
+if "%API_KEY%"=="" (
+    curl -s %BASE_URL%/v1/models
+) else (
+    curl -s -H "X-API-Key: %API_KEY%" %BASE_URL%/v1/models
+)
+if %ERRORLEVEL% EQU 0 (
+    echo.
+    echo ✓ Models endpoint passed
+) else (
+    echo.
+    echo ✗ Models endpoint failed
+)
+echo.
+
+echo [3/5] Testing Chat Completions (Non-Streaming)...
+if "%API_KEY%"=="" (
+    curl -s -X POST %BASE_URL%/v1/chat/completions ^
+        -H "Content-Type: application/json" ^
+        -d "{\"model\":\"llama2\",\"messages\":[{\"role\":\"user\",\"content\":\"Say hello in one word\"}]}"
+) else (
+    curl -s -X POST %BASE_URL%/v1/chat/completions ^
+        -H "Content-Type: application/json" ^
+        -H "X-API-Key: %API_KEY%" ^
+        -d "{\"model\":\"llama2\",\"messages\":[{\"role\":\"user\",\"content\":\"Say hello in one word\"}]}"
+)
+if %ERRORLEVEL% EQU 0 (
+    echo.
+    echo ✓ Chat completions (non-streaming) passed
+) else (
+    echo.
+    echo ✗ Chat completions failed
+)
+echo.
+
+echo [4/5] Testing Caching (Same Request Twice)...
+echo First request (should be slow):
+if "%API_KEY%"=="" (
+    curl -s -w "\nTime: %%{time_total}s\n" -X POST %BASE_URL%/v1/chat/completions ^
+        -H "Content-Type: application/json" ^
+        -d "{\"model\":\"llama2\",\"messages\":[{\"role\":\"user\",\"content\":\"What is 2+2?\"}]}"
+) else (
+    curl -s -w "\nTime: %%{time_total}s\n" -X POST %BASE_URL%/v1/chat/completions ^
+        -H "Content-Type: application/json" ^
+        -H "X-API-Key: %API_KEY%" ^
+        -d "{\"model\":\"llama2\",\"messages\":[{\"role\":\"user\",\"content\":\"What is 2+2?\"}]}"
+)
+echo.
+echo Second request (should be fast - cached):
+if "%API_KEY%"=="" (
+    curl -s -w "\nTime: %%{time_total}s\n" -X POST %BASE_URL%/v1/chat/completions ^
+        -H "Content-Type: application/json" ^
+        -d "{\"model\":\"llama2\",\"messages\":[{\"role\":\"user\",\"content\":\"What is 2+2?\"}]}"
+) else (
+    curl -s -w "\nTime: %%{time_total}s\n" -X POST %BASE_URL%/v1/chat/completions ^
+        -H "Content-Type: application/json" ^
+        -H "X-API-Key: %API_KEY%" ^
+        -d "{\"model\":\"llama2\",\"messages\":[{\"role\":\"user\",\"content\":\"What is 2+2?\"}]}"
+)
+echo.
+echo ✓ Cache test completed (check times above - second should be much faster)
+echo.
+
+echo [5/5] Testing Authentication (if enabled)...
+if "%API_KEY%"=="" (
+    echo Authentication is disabled, skipping auth test
+) else (
+    echo Testing with invalid API key (should fail)...
+    curl -s -w "\nHTTP Status: %%{http_code}\n" -X GET %BASE_URL%/v1/models ^
+        -H "X-API-Key: invalid-key"
+    echo.
+    echo Testing with valid API key (should succeed)...
+    curl -s -w "\nHTTP Status: %%{http_code}\n" -X GET %BASE_URL%/v1/models ^
+        -H "X-API-Key: %API_KEY%"
+    echo.
+    echo ✓ Authentication test completed
+)
+echo.
+
+:end
+echo ========================================
+echo Testing Complete!
+echo ========================================
+echo.
+echo Check the log file if LOG_FILE is set in your .env
+echo Check console output for request logs
+echo.
+

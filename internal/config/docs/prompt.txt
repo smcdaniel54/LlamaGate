@@ -1,0 +1,59 @@
+You are an expert Golang developer building LlamaGate: a production-ready, OpenAI-compatible HTTP proxy/gateway for local Ollama instances. It's a lightweight, single-binary tool that forwards requests to Ollama with added features like caching, auth, rate limiting, and structured logging. Focus on MVP but make it extensible for future cloud fallback.
+
+Key Requirements:
+- Use Go 1.23+ standards (e.g., slog for logging fallback, but prefer zerolog for speed).
+- Module: github.com/[YOUR_USERNAME]/llamagate
+- Binary name: llamagate
+- Run on port 8080 by default.
+- OpenAI-compatible endpoints: Primarily proxy /v1/chat/completions (map to Ollama /api/chat), /v1/models (list Ollama models). Support streaming responses.
+- Config via env vars (e.g., OLLAMA_HOST="http://localhost:11434", API_KEY="sk-llamagate", RATE_LIMIT_RPS=10). Use Viper for loading.
+- Auth: Check X-API-Key or Authorization: Bearer header against env API_KEY (optional; skip if empty).
+- Rate Limiting: Global leaky bucket (use golang.org/x/time/rate) — configurable RPS.
+- Caching: In-memory (sync.Map) for identical prompts (key: hash of model + messages). Cache responses for exact matches.
+- Logging: Zerolog with JSON output, timestamps, request_id. Levels: Info default, Debug via env DEBUG=true. Log incoming requests, durations, cache hits/misses, errors.
+- Concurrency: Use goroutines for safe handling; support parallel requests.
+- Graceful shutdown on signals.
+- Extensibility: Design proxy handler to allow easy addition of cloud fallback (e.g., via provider list).
+
+Recommended Libraries (add to go.mod):
+- github.com/gin-gonic/gin (HTTP server)
+- github.com/ollama/ollama/api (official Ollama client for clean forwarding)
+- github.com/spf13/viper (config)
+- github.com/rs/zerolog (logging)
+- golang.org/x/time/rate (rate limiting)
+- github.com/google/uuid (request IDs)
+- crypto/sha256 (for hashing cache keys)
+
+Project Structure:
+- cmd/llamagate/main.go: Entrypoint, config load, server start.
+- internal/config/config.go: Viper setup, struct for configs.
+- internal/logger/logger.go: Zerolog init and helpers.
+- internal/middleware/auth.go: Gin middleware for API key.
+- internal/middleware/rate_limit.go: Gin middleware for limiting.
+- internal/proxy/proxy.go: Core handler — check cache, forward to Ollama via client, stream response, cache if success.
+- internal/cache/cache.go: sync.Map with hash function.
+- go.mod, go.sum
+- Dockerfile: Multi-stage build for single binary.
+- README.md: With install (`go install`), usage (curl + OpenAI Python SDK examples), env vars.
+
+MVP Implementation Steps:
+1. Generate go.mod with dependencies.
+2. Config: Load env vars into struct (OllamaHost, APIKey, RateLimitRPS, Debug).
+3. Logger: Global zerolog with level toggle.
+4. Cache: Struct with sync.Map; methods to Get/Set with SHA256 hash of request (model + JSON messages).
+5. Middleware: Auth (abort 401 if mismatch), RateLimit (abort 429 if exceeded).
+6. Proxy Handler: For /v1/chat/completions — Parse body, generate cache key, check cache (hit ? return cached), else use Ollama client to call /api/chat, stream response to client, log duration/cache miss, cache if 200.
+7. Add /v1/models proxy to Ollama /api/tags.
+8. Main: Load config, init logger/cache, Gin router with middleware, routes, graceful shutdown.
+9. Dockerfile: FROM golang:1.23 AS builder ? build binary; FROM scratch ? copy binary.
+10. README: Full docs with examples.
+
+Ensure:
+- Idiomatic Go: Small funcs, explicit errors, concurrency-safe.
+- Tests: Basic unit tests for proxy and cache (in _test.go files).
+- Comments: Explain key parts.
+- Clean, fast, minimal deps.
+
+Think step-by-step: Output one file/section at a time, then ask for confirmation/modifications. At end, provide full Dockerfile and README.
+
+Build the entire MVP now.
