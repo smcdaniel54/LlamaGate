@@ -6,6 +6,8 @@
 
 LlamaGate is a production-ready, OpenAI-compatible HTTP proxy/gateway for local Ollama instances. It's a lightweight, single-binary tool that forwards requests to Ollama with added features like caching, authentication, rate limiting, and structured logging.
 
+> 🚀 **New to LlamaGate?** Check out the **[Demo & Quick-Start Showcase](DEMO_QUICKSTART.md)** to see how to swap your ChatGPT/OpenAI app to LlamaGate in under 5 minutes!
+
 ## Features
 
 - ✅ **OpenAI-Compatible API**: Drop-in replacement for OpenAI API endpoints
@@ -146,6 +148,8 @@ Or use the provided batch files (see Windows Quick Start above).
 **Note:** If you use a `.env` file, you don't need to set environment variables manually - just create `.env` and run the application!
 
 ## Usage
+
+> 💡 **Migrating from OpenAI?** See the [Demo & Quick-Start Showcase](DEMO_QUICKSTART.md) for step-by-step migration examples.
 
 ### Health Check
 
