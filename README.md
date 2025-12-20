@@ -320,6 +320,8 @@ LlamaGate uses structured JSON logging with Zerolog. Each request is assigned a 
 
 ## Testing
 
+### Application Testing
+
 See [TESTING.md](TESTING.md) for a comprehensive testing guide, or use the provided test script:
 
 **Windows:**
@@ -329,6 +331,22 @@ test.cmd
 Or use `scripts\windows\test.cmd` directly.
 
 This will test all endpoints, caching, authentication, and more.
+
+### Installer Testing
+
+To validate installer scripts before deployment, see [INSTALLER_TESTING.md](INSTALLER_TESTING.md):
+
+```powershell
+# Test all installers
+.\test-all-installers.ps1
+
+# Test Windows installer only
+.\test-installer-windows.ps1
+
+# Test Unix installer (requires bash/WSL)
+chmod +x test-installer-unix.sh
+./test-installer-unix.sh
+```
 
 ## Development
 
