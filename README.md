@@ -26,9 +26,9 @@ The easiest way to install LlamaGate:
 
 **Windows:**
 ```cmd
-install.cmd
+install\windows\install.cmd
 ```
-Or double-click `install.cmd`
+Or double-click `install\windows\install.cmd`
 
 **Unix/Linux/macOS:**
 ```bash
@@ -46,7 +46,7 @@ chmod +x install.sh
 
 **Follow the prompts** to configure your installation
 
-> **Note:** Installers are organized by OS in `install/` directory. Root-level `install.sh` and `install.cmd` are convenience launchers.
+> **Note:** Installers are organized by OS in `install/` directory. Use `install/windows/install.cmd` for Windows or `install/unix/install.sh` for Unix/Linux/macOS.
 
 ### From Source
 
@@ -56,16 +56,16 @@ go install github.com/llamagate/llamagate/cmd/llamagate@latest
 
 ### Windows Quick Start
 
-For Windows users, convenient batch files are provided:
+For Windows users, convenient batch files are provided in `scripts/windows/`:
 
-- **`run.cmd`** - Run with default settings (no authentication)
-- **`run-with-auth.cmd`** - Run with API key authentication enabled
-- **`run-debug.cmd`** - Run with debug logging enabled
-- **`build.cmd`** - Build the binary (`llamagate.exe`)
+- **`scripts/windows/run.cmd`** - Run with default settings (no authentication)
+- **`scripts/windows/run-with-auth.cmd`** - Run with API key authentication enabled
+- **`scripts/windows/run-debug.cmd`** - Run with debug logging enabled
+- **`scripts/windows/build.cmd`** - Build the binary (`llamagate.exe`)
 
 Simply double-click any of the run scripts, or run from command prompt:
 ```cmd
-run.cmd
+scripts\windows\run.cmd
 ```
 
 To customize settings, edit the batch file or set environment variables before running:
@@ -322,7 +322,7 @@ See [TESTING.md](TESTING.md) for a comprehensive testing guide, or use the provi
 
 **Windows:**
 ```cmd
-test.cmd
+scripts\windows\test.cmd
 ```
 
 This will test all endpoints, caching, authentication, and more.
@@ -333,7 +333,7 @@ This will test all endpoints, caching, authentication, and more.
 
 **Using the installer (recommended):**
 ```cmd
-install.cmd
+install\windows\install.cmd
 ```
 
 **Manual build:**
@@ -343,7 +343,7 @@ go build -o llamagate ./cmd/llamagate
 
 Or use the build script:
 ```cmd
-build.cmd
+scripts\windows\build.cmd
 ```
 
 ### Running Tests

@@ -7,9 +7,9 @@ This guide explains how to install LlamaGate on Windows using the automated inst
 1. **Download or clone** the LlamaGate repository
 2. **Run the installer:**
    ```cmd
-   install.cmd
+   install\windows\install.cmd
    ```
-   Or simply double-click `install.cmd`
+   Or simply double-click `install\windows\install.cmd`
 
 3. **Follow the prompts** - the installer will guide you through the process
 
@@ -115,12 +115,12 @@ After installation:
 
 2. **Test the installation:**
    ```cmd
-   test.cmd
+   scripts\windows\test.cmd
    ```
 
 3. **Start LlamaGate:**
    ```cmd
-   run.cmd
+   scripts\windows\run.cmd
    ```
    Or use the desktop shortcut
 
@@ -156,7 +156,7 @@ After installation:
 - **Issue:** Access denied errors
 - **Solution:**
   1. Run PowerShell as Administrator
-  2. Or run `install.cmd` as Administrator
+  2. Or run `install\windows\install.cmd` as Administrator
 
 ### Port Already in Use
 

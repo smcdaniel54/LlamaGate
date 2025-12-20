@@ -18,7 +18,7 @@ This guide explains how to test LlamaGate to ensure everything is working correc
 
 3. **LlamaGate built and ready**
    ```cmd
-   build.cmd
+   scripts\windows\build.cmd
    ```
    Or use `go run ./cmd/llamagate`
 
@@ -28,7 +28,7 @@ This guide explains how to test LlamaGate to ensure everything is working correc
 
 1. **Start LlamaGate:**
    ```cmd
-   run.cmd
+   scripts\windows\run.cmd
    ```
    Or if you have a `.env` file configured:
    ```cmd
@@ -37,7 +37,7 @@ This guide explains how to test LlamaGate to ensure everything is working correc
 
 2. **Run the test script:**
    ```cmd
-   test.cmd
+   scripts\windows\test.cmd
    ```
 
 ## Manual Testing

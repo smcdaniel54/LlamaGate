@@ -35,12 +35,8 @@ LlamaGate/
 │   └── proxy/                 # Proxy handlers
 │
 ├── install.sh                 # Universal installer (auto-detects OS)
-├── install.cmd                # Windows installer launcher
 ├── run.sh                     # Universal runner (Unix/macOS)
-├── run.cmd                    # Universal runner (Windows)
 ├── test.sh                    # Universal test script (Unix/macOS)
-├── test.cmd                   # Universal test script (Windows)
-├── build.cmd                  # Universal build script (Windows)
 │
 ├── README.md                  # Main documentation
 ├── INSTALL.md                 # Installation guide
@@ -59,25 +55,21 @@ For convenience, root-level launchers are provided that automatically detect the
 
 ### Installers
 - **`install.sh`** (Unix/macOS) - Detects OS and launches appropriate installer
-- **`install.cmd`** (Windows) - Launches Windows installer
+- **`install/windows/install.cmd`** (Windows) - Windows installer
 
 ### Runners
 - **`run.sh`** (Unix/macOS) - Launches Unix runner
-- **`run.cmd`** (Windows) - Launches Windows runner
+- **`scripts/windows/run.cmd`** (Windows) - Windows runner
 
 ### Test Scripts
 - **`test.sh`** (Unix/macOS) - Launches Unix test script
-- **`test.cmd`** (Windows) - Launches Windows test script
+- **`scripts/windows/test.cmd`** (Windows) - Windows test script
 
 ## Usage
 
 ### Installation
 
 **Windows:**
-```cmd
-install.cmd
-```
-or
 ```cmd
 install\windows\install.cmd
 ```
@@ -97,10 +89,6 @@ chmod +x install/unix/install.sh
 
 **Windows:**
 ```cmd
-run.cmd
-```
-or
-```cmd
 scripts\windows\run.cmd
 ```
 
@@ -116,10 +104,6 @@ or
 ### Testing
 
 **Windows:**
-```cmd
-test.cmd
-```
-or
 ```cmd
 scripts\windows\test.cmd
 ```
@@ -155,6 +139,6 @@ To add support for a new OS:
 
 - Unix scripts are shared between Linux and macOS (both use bash)
 - Windows scripts use both `.cmd` (batch) and `.ps1` (PowerShell)
-- All scripts in `scripts/` directories are OS-specific
-- Root-level scripts are convenience launchers that route to OS-specific versions
+- All scripts in `scripts/` and `install/` directories are OS-specific
+- Root-level `install.sh`, `run.sh`, and `test.sh` are convenience launchers for Unix/macOS
 
