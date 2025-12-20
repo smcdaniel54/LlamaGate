@@ -28,8 +28,9 @@ This guide explains how to test LlamaGate to ensure everything is working correc
 
 1. **Start LlamaGate:**
    ```cmd
-   scripts\windows\run.cmd
+   run.cmd
    ```
+   Or use `scripts\windows\run.cmd` directly.
    Or if you have a `.env` file configured:
    ```cmd
    llamagate.exe
@@ -37,8 +38,9 @@ This guide explains how to test LlamaGate to ensure everything is working correc
 
 2. **Run the test script:**
    ```cmd
-   scripts\windows\test.cmd
+   test.cmd
    ```
+   Or use `scripts\windows\test.cmd` directly.
 
 ## Manual Testing
 

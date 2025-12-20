@@ -115,13 +115,15 @@ After installation:
 
 2. **Test the installation:**
    ```cmd
-   scripts\windows\test.cmd
+   test.cmd
    ```
+   Or use `scripts\windows\test.cmd` directly.
 
 3. **Start LlamaGate:**
    ```cmd
-   scripts\windows\run.cmd
+   run.cmd
    ```
+   Or use `scripts\windows\run.cmd` directly.
    Or use the desktop shortcut
 
 ## Troubleshooting

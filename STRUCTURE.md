@@ -36,7 +36,9 @@ LlamaGate/
 │
 ├── install.sh                 # Universal installer (auto-detects OS)
 ├── run.sh                     # Universal runner (Unix/macOS)
+├── run.cmd                    # Windows runner launcher
 ├── test.sh                    # Universal test script (Unix/macOS)
+├── test.cmd                   # Windows test launcher
 │
 ├── README.md                  # Main documentation
 ├── INSTALL.md                 # Installation guide
@@ -59,11 +61,13 @@ For convenience, root-level launchers are provided that automatically detect the
 
 ### Runners
 - **`run.sh`** (Unix/macOS) - Launches Unix runner
-- **`scripts/windows/run.cmd`** (Windows) - Windows runner
+- **`run.cmd`** (Windows) - Launches Windows runner
+- **`scripts/windows/run.cmd`** (Windows) - Direct Windows runner
 
 ### Test Scripts
 - **`test.sh`** (Unix/macOS) - Launches Unix test script
-- **`scripts/windows/test.cmd`** (Windows) - Windows test script
+- **`test.cmd`** (Windows) - Launches Windows test script
+- **`scripts/windows/test.cmd`** (Windows) - Direct Windows test script
 
 ## Usage
 
@@ -89,8 +93,9 @@ chmod +x install/unix/install.sh
 
 **Windows:**
 ```cmd
-scripts\windows\run.cmd
+run.cmd
 ```
+Or use `scripts\windows\run.cmd` directly.
 
 **Unix/Linux/macOS:**
 ```bash
@@ -105,8 +110,9 @@ or
 
 **Windows:**
 ```cmd
-scripts\windows\test.cmd
+test.cmd
 ```
+Or use `scripts\windows\test.cmd` directly.
 
 **Unix/Linux/macOS:**
 ```bash

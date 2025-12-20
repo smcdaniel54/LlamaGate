@@ -28,7 +28,7 @@ The easiest way to install LlamaGate:
 ```cmd
 install\windows\install.cmd
 ```
-Or double-click `install\windows\install.cmd`
+Or use the root-level launcher (if available).
 
 **Unix/Linux/macOS:**
 ```bash
@@ -46,7 +46,7 @@ chmod +x install.sh
 
 **Follow the prompts** to configure your installation
 
-> **Note:** Installers are organized by OS in `install/` directory. Use `install/windows/install.cmd` for Windows or `install/unix/install.sh` for Unix/Linux/macOS.
+> **Note:** Installers are organized by OS in `install/` directory. Root-level launchers (`install.sh`, `run.sh`, `test.sh` for Unix/macOS and `run.cmd`, `test.cmd` for Windows) provide convenient access.
 
 ### From Source
 
@@ -56,17 +56,19 @@ go install github.com/llamagate/llamagate/cmd/llamagate@latest
 
 ### Windows Quick Start
 
-For Windows users, convenient batch files are provided in `scripts/windows/`:
+For Windows users, convenient batch files are provided:
 
-- **`scripts/windows/run.cmd`** - Run with default settings (no authentication)
+- **`run.cmd`** - Run with default settings (no authentication)
 - **`scripts/windows/run-with-auth.cmd`** - Run with API key authentication enabled
 - **`scripts/windows/run-debug.cmd`** - Run with debug logging enabled
 - **`scripts/windows/build.cmd`** - Build the binary (`llamagate.exe`)
 
-Simply double-click any of the run scripts, or run from command prompt:
+Simply double-click `run.cmd`, or run from command prompt:
 ```cmd
-scripts\windows\run.cmd
+run.cmd
 ```
+
+Or use the scripts directly from `scripts/windows/` directory.
 
 To customize settings, edit the batch file or set environment variables before running:
 ```cmd
@@ -322,8 +324,9 @@ See [TESTING.md](TESTING.md) for a comprehensive testing guide, or use the provi
 
 **Windows:**
 ```cmd
-scripts\windows\test.cmd
+test.cmd
 ```
+Or use `scripts\windows\test.cmd` directly.
 
 This will test all endpoints, caching, authentication, and more.
 
