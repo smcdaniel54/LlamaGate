@@ -1,0 +1,203 @@
+# LlamaGate MCP Demo Configuration
+# This configuration connects LlamaGate to multiple MCP servers for document processing
+# Place this file as llamagate.yaml in the project root or ~/.llamagate/
+#
+# IMPORTANT: Before using this config, verify that the MCP server packages exist.
+# Search npm: npm search mcp-server
+# Check: https://github.com/modelcontextprotocol/servers
+
+mcp:
+  # Enable MCP client functionality
+  enabled: true
+
+  # Maximum number of tool execution rounds before stopping
+  max_tool_rounds: 15
+
+  # Maximum number of tool calls allowed per round
+  max_tool_calls_per_round: 10
+
+  # Default timeout for tool execution
+  default_tool_timeout: 60s
+
+  # Maximum size of tool result before truncation (in bytes)
+  max_tool_result_size: 5242880  # 5MB (for document processing)
+
+  # Allow list: glob patterns for tools that are allowed
+  # Allow all official and demo tools
+  allow_tools:
+    - "mcp.filesystem.*"
+    - "mcp.fetch.*"
+    - "mcp.puppeteer.*"
+    - "mcp.postgres.*"
+    - "mcp.sqlite.*"
+    - "mcp.github.*"
+    - "mcp.slack.*"
+
+  # Deny list: glob patterns for tools that are denied
+  # Deny destructive operations
+  deny_tools:
+    - "*.delete_*"
+    - "*.remove_*"
+    - "*.drop_*"
+    - "*.destroy_*"
+
+  # MCP server configurations
+  servers:
+    # 1. Official Filesystem MCP Server
+    # Provides file system operations (read, write, list, search)
+    # Package: @modelcontextprotocol/server-filesystem
+    # Documentation: https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem
+    - name: filesystem
+      enabled: true
+      transport: stdio
+      command: npx
+      args:
+        - -y
+        - @modelcontextprotocol/server-filesystem
+        # IMPORTANT: Specify allowed directory for security
+        # Unix/Linux/macOS: Use ${HOME} or absolute path
+        - ${HOME}/llamagate-workspace
+        # Windows: Use absolute path like C:\llamagate-workspace
+        # - C:\llamagate-workspace
+      env:
+        NODE_ENV: production
+      timeout: 30s
+
+    # 2. Official Fetch MCP Server
+    # Provides HTTP request capabilities (GET, POST, etc.)
+    # Package: @modelcontextprotocol/server-fetch
+    # Documentation: https://github.com/modelcontextprotocol/servers/tree/main/src/fetch
+    - name: fetch
+      enabled: true
+      transport: stdio
+      command: npx
+      args:
+        - -y
+        - @modelcontextprotocol/server-fetch
+      env:
+        NODE_ENV: production
+      timeout: 60s
+
+    # 3. Official Puppeteer MCP Server (Optional)
+    # Provides web browsing and screenshot capabilities
+    # Package: @modelcontextprotocol/server-puppeteer
+    # Documentation: https://github.com/modelcontextprotocol/servers/tree/main/src/puppeteer
+    # Note: Requires Chrome/Chromium to be installed
+    - name: puppeteer
+      enabled: false  # Disabled by default - enable if needed
+      transport: stdio
+      command: npx
+      args:
+        - -y
+        - @modelcontextprotocol/server-puppeteer
+      env:
+        NODE_ENV: production
+        # Optional: Specify Chrome path if not in PATH
+        # PUPPETEER_EXECUTABLE_PATH: /path/to/chrome
+      timeout: 120s  # Web operations can be slow
+
+    # 4. Official PostgreSQL MCP Server (Optional)
+    # Provides database query capabilities
+    # Package: @modelcontextprotocol/server-postgres
+    # Documentation: https://github.com/modelcontextprotocol/servers/tree/main/src/postgres
+    # Note: Requires PostgreSQL connection string
+    - name: postgres
+      enabled: false  # Disabled by default - enable if you have PostgreSQL
+      transport: stdio
+      command: npx
+      args:
+        - -y
+        - @modelcontextprotocol/server-postgres
+        # PostgreSQL connection string
+        # Format: postgresql://user:password@host:port/database
+        - postgresql://localhost:5432/mydb
+      env:
+        NODE_ENV: production
+        # Alternative: Use environment variable for connection string
+        # POSTGRES_CONNECTION_STRING: postgresql://...
+      timeout: 30s
+
+    # 5. Official SQLite MCP Server (Optional)
+    # Provides SQLite database query capabilities
+    # Package: @modelcontextprotocol/server-sqlite
+    # Documentation: https://github.com/modelcontextprotocol/servers/tree/main/src/sqlite
+    - name: sqlite
+      enabled: false  # Disabled by default - enable if needed
+      transport: stdio
+      command: npx
+      args:
+        - -y
+        - @modelcontextprotocol/server-sqlite
+        # Path to SQLite database file
+        - ${HOME}/llamagate-workspace/demo.db
+        # Windows: C:\llamagate-workspace\demo.db
+      env:
+        NODE_ENV: production
+      timeout: 30s
+
+    # 6. Official GitHub MCP Server (Optional)
+    # Provides GitHub API access (repos, issues, PRs, etc.)
+    # Package: @modelcontextprotocol/server-github
+    # Documentation: https://github.com/modelcontextprotocol/servers/tree/main/src/github
+    # Note: Requires GitHub personal access token
+    - name: github
+      enabled: false  # Disabled by default - enable if needed
+      transport: stdio
+      command: npx
+      args:
+        - -y
+        - @modelcontextprotocol/server-github
+      env:
+        NODE_ENV: production
+        # Required: GitHub personal access token
+        # Create one at: https://github.com/settings/tokens
+        GITHUB_PERSONAL_ACCESS_TOKEN: your-token-here
+      timeout: 60s
+
+    # 7. Official Slack MCP Server (Optional)
+    # Provides Slack API access
+    # Package: @modelcontextprotocol/server-slack
+    # Documentation: https://github.com/modelcontextprotocol/servers/tree/main/src/slack
+    # Note: Requires Slack bot token
+    - name: slack
+      enabled: false  # Disabled by default - enable if needed
+      transport: stdio
+      command: npx
+      args:
+        - -y
+        - @modelcontextprotocol/server-slack
+      env:
+        NODE_ENV: production
+        # Required: Slack bot token
+        # Create one at: https://api.slack.com/apps
+        SLACK_BOT_TOKEN: xoxb-your-token-here
+      timeout: 60s
+
+    # ============================================================
+    # Community/Third-Party MCP Servers
+    # ============================================================
+    # The following servers are examples - verify they exist before using
+    # Search npm: npm search mcp-server pdf
+    # Check: https://github.com/modelcontextprotocol/awesome-mcp
+
+    # Example: PDF Processing Server (if available)
+    # Search for: npm search mcp pdf
+    # - name: pdf-reader
+    #   enabled: false
+    #   transport: stdio
+    #   command: npx
+    #   args:
+    #     - -y
+    #     - @some-org/mcp-server-pdf  # Replace with actual package name
+    #   timeout: 90s
+
+    # Example: Document Conversion Server (if available)
+    # Search for: npm search mcp document
+    # - name: document-converter
+    #   enabled: false
+    #   transport: stdio
+    #   command: npx
+    #   args:
+    #     - -y
+    #     - @some-org/mcp-server-documents  # Replace with actual package name
+    #   timeout: 120s
