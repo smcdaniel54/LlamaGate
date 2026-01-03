@@ -41,10 +41,12 @@ LlamaGate/
 │   ├── STRUCTURE.md           # This file
 │   └── INSTALLER_TESTING.md   # Installer testing guide
 │
-├── README.md                  # Main documentation
-├── INSTALL.md                 # Installation guide
-├── TESTING.md                 # Testing guide
-├── STRUCTURE.md               # This file
+├── README.md                  # Main project documentation
+├── QUICKSTART.md              # Quick start guide
+├── CHANGELOG.md               # Version history
+├── CONTRIBUTING.md            # Contribution guidelines
+├── SECURITY.md                # Security policy
+├── LICENSE                    # License file
 │
 ├── Dockerfile                 # Docker build file
 ├── .env.example              # Configuration template

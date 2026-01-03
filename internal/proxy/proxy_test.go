@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -23,9 +24,15 @@ func TestProxy_HandleModels(t *testing.T) {
 				},
 			}
 			w.Header().Set("Content-Type", "application/json")
-			if err := json.NewEncoder(w).Encode(response); err != nil {
+			// Encode to buffer first to check for errors before writing headers
+			var buf bytes.Buffer
+			if err := json.NewEncoder(&buf).Encode(response); err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
+				_, _ = w.Write([]byte(`{"error":"failed to encode response"}`))
+				return
 			}
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write(buf.Bytes())
 		} else {
 			w.WriteHeader(http.StatusNotFound)
 		}
