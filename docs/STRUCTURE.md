@@ -4,7 +4,7 @@ This document describes the organized structure of LlamaGate, with OS-specific i
 
 ## Directory Structure
 
-```
+```text
 LlamaGate/
 ├── install/                    # Installation scripts organized by OS
 │   ├── windows/                # Windows installers
@@ -34,11 +34,12 @@ LlamaGate/
 │   ├── middleware/             # HTTP middleware
 │   └── proxy/                 # Proxy handlers
 │
-├── install.sh                 # Universal installer (auto-detects OS)
-├── run.sh                     # Universal runner (Unix/macOS)
-├── run.cmd                    # Windows runner launcher
-├── test.sh                    # Universal test script (Unix/macOS)
-├── test.cmd                   # Windows test launcher
+├── docs/                      # Documentation
+│   ├── README.md              # Documentation index
+│   ├── INSTALL.md             # Installation guide
+│   ├── TESTING.md             # Testing guide
+│   ├── STRUCTURE.md           # This file
+│   └── INSTALLER_TESTING.md   # Installer testing guide
 │
 ├── README.md                  # Main documentation
 ├── INSTALL.md                 # Installation guide
@@ -51,39 +52,39 @@ LlamaGate/
 └── go.sum                    # Go dependencies checksum
 ```
 
-## Universal Launchers
+## Script Organization
 
-For convenience, root-level launchers are provided that automatically detect the OS and call the appropriate script:
+All scripts are organized by OS in their respective directories. Use the scripts directly from their OS-specific directories:
 
 ### Installers
-- **`install.sh`** (Unix/macOS) - Detects OS and launches appropriate installer
+
 - **`install/windows/install.cmd`** (Windows) - Windows installer
+- **`install/unix/install.sh`** (Unix/Linux/macOS) - Unix installer
 
 ### Runners
-- **`run.sh`** (Unix/macOS) - Launches Unix runner
-- **`run.cmd`** (Windows) - Launches Windows runner
-- **`scripts/windows/run.cmd`** (Windows) - Direct Windows runner
+
+- **`scripts/windows/run.cmd`** (Windows) - Main Windows runner
+- **`scripts/windows/run-with-auth.cmd`** (Windows) - Runner with authentication
+- **`scripts/windows/run-debug.cmd`** (Windows) - Runner with debug mode
+- **`scripts/unix/run.sh`** (Unix/Linux/macOS) - Main Unix runner
 
 ### Test Scripts
-- **`test.sh`** (Unix/macOS) - Launches Unix test script
-- **`test.cmd`** (Windows) - Launches Windows test script
-- **`scripts/windows/test.cmd`** (Windows) - Direct Windows test script
+
+- **`scripts/windows/test.cmd`** (Windows) - Windows test script
+- **`scripts/unix/test.sh`** (Unix/Linux/macOS) - Unix test script
 
 ## Usage
 
 ### Installation
 
 **Windows:**
+
 ```cmd
 install\windows\install.cmd
 ```
 
 **Unix/Linux/macOS:**
-```bash
-chmod +x install.sh
-./install.sh
-```
-or
+
 ```bash
 chmod +x install/unix/install.sh
 ./install/unix/install.sh
@@ -92,16 +93,13 @@ chmod +x install/unix/install.sh
 ### Running
 
 **Windows:**
+
 ```cmd
-run.cmd
+scripts\windows\run.cmd
 ```
-Or use `scripts\windows\run.cmd` directly.
 
 **Unix/Linux/macOS:**
-```bash
-./run.sh
-```
-or
+
 ```bash
 ./scripts/unix/run.sh
 ```
@@ -109,16 +107,13 @@ or
 ### Testing
 
 **Windows:**
+
 ```cmd
-test.cmd
+scripts\windows\test.cmd
 ```
-Or use `scripts\windows\test.cmd` directly.
 
 **Unix/Linux/macOS:**
-```bash
-./test.sh
-```
-or
+
 ```bash
 ./scripts/unix/test.sh
 ```
@@ -129,7 +124,7 @@ or
 2. **Maintainability**: Easy to find and update OS-specific code
 3. **Clarity**: Users know which files are for their OS
 4. **Flexibility**: Can add OS-specific features without cluttering root
-5. **Convenience**: Root-level launchers provide easy access
+5. **Consistency**: All scripts follow the same directory structure pattern
 
 ## Adding New OS Support
 
@@ -138,13 +133,11 @@ To add support for a new OS:
 1. Create `install/<new-os>/` directory
 2. Create `scripts/<new-os>/` directory
 3. Add OS-specific installers and scripts
-4. Update `install.sh` to detect and route to new OS
-5. Update this documentation
+4. Update this documentation
 
 ## Notes
 
 - Unix scripts are shared between Linux and macOS (both use bash)
 - Windows scripts use both `.cmd` (batch) and `.ps1` (PowerShell)
 - All scripts in `scripts/` and `install/` directories are OS-specific
-- Root-level `install.sh`, `run.sh`, and `test.sh` are convenience launchers for Unix/macOS
-
+- Scripts are accessed directly from their OS-specific directories
