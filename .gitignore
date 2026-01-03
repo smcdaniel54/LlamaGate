@@ -1,5 +1,5 @@
-# Binaries
-llamagate
+# Binaries (only match at root level, not source directories)
+/llamagate
 llamagate.exe
 *.exe~
 *.dll
