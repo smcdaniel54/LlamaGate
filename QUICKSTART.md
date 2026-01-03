@@ -23,11 +23,13 @@ That's it. Your existing OpenAI code works immediately.
 ### Step 1: Install (1 minute)
 
 **Windows:**
+
 ```cmd
 scripts\windows\install.cmd
 ```
 
 **Mac/Linux:**
+
 ```bash
 chmod +x scripts/unix/install.sh && ./scripts/unix/install.sh
 ```
@@ -35,11 +37,13 @@ chmod +x scripts/unix/install.sh && ./scripts/unix/install.sh
 ### Step 2: Start (30 seconds)
 
 **Windows:**
+
 ```cmd
 scripts\windows\run.cmd
 ```
 
 **Mac/Linux:**
+
 ```bash
 ./scripts/unix/run.sh
 ```
@@ -47,11 +51,13 @@ scripts\windows\run.cmd
 ### Step 3: Run the Demo (30 seconds)
 
 **Windows:**
+
 ```cmd
 scripts\windows\demo.cmd
 ```
 
 **Mac/Linux:**
+
 ```bash
 chmod +x scripts/unix/demo.sh && ./scripts/unix/demo.sh
 ```
@@ -97,6 +103,7 @@ print(response.choices[0].message.content)
 **Best Practices:**
 
 1. **Pre-warm models** - Make a simple request at app startup:
+
    ```python
    # Pre-warm on startup
    client.chat.completions.create(
@@ -120,6 +127,7 @@ print(response.choices[0].message.content)
 ### Example 1: Python with OpenAI SDK
 
 **Before (Using OpenAI):**
+
 ```python
 from openai import OpenAI
 
@@ -138,6 +146,7 @@ print(response.choices[0].message.content)
 ```
 
 **After (Using LlamaGate) ✨:**
+
 ```python
 from openai import OpenAI
 
@@ -161,6 +170,7 @@ print(response.choices[0].message.content)
 ### Example 2: JavaScript/Node.js
 
 **Before:**
+
 ```javascript
 import OpenAI from 'openai';
 
@@ -179,6 +189,7 @@ console.log(response.choices[0].message.content);
 ```
 
 **After:**
+
 ```javascript
 import OpenAI from 'openai';
 
@@ -200,6 +211,7 @@ console.log(response.choices[0].message.content);
 ### Example 3: cURL
 
 **Before (OpenAI API):**
+
 ```bash
 curl https://api.openai.com/v1/chat/completions \
   -H "Content-Type: application/json" \
@@ -211,6 +223,7 @@ curl https://api.openai.com/v1/chat/completions \
 ```
 
 **After (LlamaGate) ✨:**
+
 ```bash
 curl http://localhost:8080/v1/chat/completions \
   -H "Content-Type: application/json" \
@@ -222,6 +235,7 @@ curl http://localhost:8080/v1/chat/completions \
 ```
 
 **Changes:**
+
 1. URL: `https://api.openai.com/v1` → `http://localhost:8080/v1`
 2. Header: `Authorization: Bearer` → `X-API-Key` (or keep `Authorization: Bearer`)
 3. Model: `gpt-3.5-turbo` → `llama2` (or any Ollama model)
@@ -282,6 +296,7 @@ ollama list
 ### Example A: LangChain Application
 
 **Before:**
+
 ```python
 from langchain.chat_models import ChatOpenAI
 
@@ -294,6 +309,7 @@ response = llm.invoke("What is machine learning?")
 ```
 
 **After:**
+
 ```python
 from langchain.chat_models import ChatOpenAI
 
@@ -309,6 +325,7 @@ response = llm.invoke("What is machine learning?")
 ### Example B: FastAPI Application
 
 **Before:**
+
 ```python
 from fastapi import FastAPI
 from openai import OpenAI
@@ -326,6 +343,7 @@ async def chat(message: str):
 ```
 
 **After:**
+
 ```python
 from fastapi import FastAPI
 from openai import OpenAI
@@ -362,21 +380,25 @@ async def chat(message: str):
 ## 🎯 Common Use Cases
 
 ### Use Case 1: Development & Testing
+
 **Scenario:** You're building an AI app but don't want to pay for OpenAI API during development.
 
 **Solution:** Use LlamaGate with local models for free development and testing. Switch to OpenAI (or keep using LlamaGate) in production.
 
 ### Use Case 2: Privacy-Sensitive Applications
+
 **Scenario:** You're building a healthcare or financial app that can't send data to external APIs.
 
 **Solution:** LlamaGate keeps everything local. Your data never leaves your infrastructure.
 
 ### Use Case 3: Cost Optimization
+
 **Scenario:** Your OpenAI API costs are getting high with high usage.
 
 **Solution:** Use LlamaGate with local models for non-critical requests, saving API costs while maintaining functionality.
 
 ### Use Case 4: Model Experimentation
+
 **Scenario:** You want to test different models to find the best one for your use case.
 
 **Solution:** Install multiple Ollama models and switch between them instantly with LlamaGate - no code changes needed beyond the model name.
@@ -386,6 +408,7 @@ async def chat(message: str):
 ## 🚦 Troubleshooting
 
 ### Issue: "Connection refused" or "Failed to connect to Ollama"
+
 ```bash
 # Make sure Ollama is running
 ollama serve
@@ -395,6 +418,7 @@ curl http://localhost:11434/api/tags
 ```
 
 ### Issue: "Model not found"
+
 ```bash
 # List installed models
 ollama list
@@ -404,11 +428,13 @@ ollama pull llama2  # or mistral, codellama, etc.
 ```
 
 ### Issue: "401 Unauthorized"
+
 - Check if `API_KEY` is set in your `.env` file
 - Include the API key in your requests: `X-API-Key: sk-llamagate`
 - Or remove `API_KEY` from `.env` to disable authentication
 
 ### Issue: "429 Too Many Requests"
+
 - Adjust `RATE_LIMIT_RPS` in your `.env` file
 - Default is 10 requests per second
 
@@ -417,7 +443,7 @@ ollama pull llama2  # or mistral, codellama, etc.
 ## 📊 Comparison Table
 
 | Feature | OpenAI API | LlamaGate |
-|---------|-----------|-----------|
+| ------- | ---------- | --------- |
 | **Cost** | Per-token pricing | Free (local) |
 | **Privacy** | Data sent to OpenAI | 100% local |
 | **Model Selection** | Limited to OpenAI models | Any Ollama model |

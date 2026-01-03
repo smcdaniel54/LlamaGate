@@ -161,7 +161,26 @@ func (c *Cache) Set(model string, messages interface{}, response []byte) error {
 	// Check if we need to evict BEFORE storing to maintain accurate count
 	if c.maxSize > 0 && c.entryCount >= c.maxSize {
 		// Evict oldest entry (simple FIFO eviction)
-		c.evictOldest()
+		// evictOldest() may fail if Get() concurrently deleted the entry
+		// We need to verify eviction succeeded before proceeding
+		// Retry eviction up to 3 times to handle concurrent deletions
+		maxRetries := 3
+		for retry := 0; retry < maxRetries && c.entryCount >= c.maxSize; retry++ {
+			oldCount := c.entryCount
+			c.evictOldest()
+			// If eviction succeeded, entryCount will have decreased
+			if c.entryCount < oldCount {
+				break // Eviction succeeded, we can proceed
+			}
+			// Eviction failed - entry was already deleted by Get() or cleanupExpired()
+			// Try again with a different entry
+		}
+		// If still at capacity after retries, we cannot safely add without exceeding limit
+		// This is a rare race condition where all eviction attempts failed
+		// Skip adding to prevent cache growth beyond limit
+		if c.entryCount >= c.maxSize {
+			return nil // Skip adding to prevent exceeding maxSize
+		}
 	}
 
 	// Now store the new entry and increment counter

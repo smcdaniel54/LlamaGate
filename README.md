@@ -6,8 +6,8 @@
 
 LlamaGate is a production-ready, OpenAI-compatible HTTP proxy/gateway for local Ollama instances. It's a lightweight, single-binary tool that forwards requests to Ollama with added features like caching, authentication, rate limiting, and structured logging.
 
-> 🚀 **New to LlamaGate?** 
-> - **[Quick Start Guide](QUICKSTART.md)** - Get running in 2 minutes
+> 🚀 **New to LlamaGate?**  
+> **[Quick Start Guide](QUICKSTART.md)** - Get running in 2 minutes
 
 ## Features
 
@@ -28,17 +28,20 @@ LlamaGate is a production-ready, OpenAI-compatible HTTP proxy/gateway for local 
 The easiest way to install LlamaGate:
 
 **Windows:**
+
 ```cmd
 scripts\windows\install.cmd
 ```
 
 **Unix/Linux/macOS:**
+
 ```bash
 chmod +x scripts/unix/install.sh
 ./scripts/unix/install.sh
 ```
 
 **The installer will:**
+
 - Check for Go and install it if needed
 - Check for Ollama and guide you to install it
 - Install all Go dependencies
@@ -64,11 +67,13 @@ For Windows users, convenient batch files are provided:
 - **`scripts/windows/build.cmd`** - Build the binary (`llamagate.exe`)
 
 Run from command prompt:
+
 ```cmd
 scripts\windows\run.cmd
 ```
 
 To customize settings, edit the batch file or set environment variables before running:
+
 ```cmd
 set OLLAMA_HOST=http://localhost:11434
 set API_KEY=sk-llamagate
@@ -86,12 +91,13 @@ docker run -p 8080:8080 llamagate
 ## Configuration
 
 LlamaGate can be configured via:
+
 1. **`.env` file** (recommended for development) - Create a `.env` file in the project root
 2. **Environment variables** - Takes precedence over `.env` file values
 3. **Default values** - Used if neither `.env` nor environment variables are set
 
 | Variable | Default | Description |
-|----------|---------|-------------|
+| -------- | ------- | ----------- |
 | `OLLAMA_HOST` | `http://localhost:11434` | Ollama server URL |
 | `API_KEY` | (empty) | API key for authentication (optional) |
 | `RATE_LIMIT_RPS` | `10` | Requests per second limit |
@@ -239,6 +245,7 @@ print(response.content)
 OpenAI-compatible chat completions endpoint. Forwards requests to Ollama `/api/chat`.
 
 **Request Body:**
+
 ```json
 {
   "model": "llama2",
@@ -259,6 +266,7 @@ Lists available Ollama models. Forwards requests to Ollama `/api/tags` and conve
 Health check endpoint that verifies both server and Ollama connectivity.
 
 **Response (healthy):**
+
 ```json
 {
   "status": "healthy",
@@ -268,6 +276,7 @@ Health check endpoint that verifies both server and Ollama connectivity.
 ```
 
 **Response (unhealthy):**
+
 ```json
 {
   "status": "unhealthy",
@@ -283,11 +292,13 @@ Returns `200 OK` when healthy, `503 Service Unavailable` when Ollama is unreacha
 If `API_KEY` is set, all requests must include the API key in one of these ways:
 
 1. **X-API-Key header:**
+
    ```bash
    curl -H "X-API-Key: sk-llamagate" ...
    ```
 
 2. **Authorization Bearer header:**
+
    ```bash
    curl -H "Authorization: Bearer sk-llamagate" ...
    ```
@@ -297,6 +308,7 @@ If `API_KEY` is not set, authentication is disabled and all requests are allowed
 ## Caching
 
 LlamaGate caches responses for non-streaming requests. The cache key is based on:
+
 - Model name
 - Messages content
 
@@ -313,20 +325,25 @@ When the limit is exceeded, requests receive a `429 Too Many Requests` response.
 LlamaGate uses structured JSON logging with Zerolog. Each request is assigned a unique request ID.
 
 **Log Levels:**
+
 - `INFO`: Default level, logs all requests and important events
 - `DEBUG`: Enabled with `DEBUG=true`, includes detailed debugging information
 
 **Log Output:**
+
 - By default, logs are written to stdout (console)
 - To also write logs to a file, set the `LOG_FILE` environment variable:
+
   ```bash
   LOG_FILE=llamagate.log
   ```
+
 - When `LOG_FILE` is set, logs are written to both console and file
 - The log file is created automatically if it doesn't exist, and new logs are appended to it
 - **Note:** The log file is not automatically rotated. For production use, consider using a log rotation tool or process manager
 
 **Example log entry:**
+
 ```json
 {
   "level": "info",
@@ -347,11 +364,13 @@ LlamaGate uses structured JSON logging with Zerolog. Each request is assigned a 
 See [docs/TESTING.md](docs/TESTING.md) for a comprehensive testing guide, or use the provided test script:
 
 **Windows:**
+
 ```cmd
 scripts\windows\test.cmd
 ```
 
 **Unix/Linux/macOS:**
+
 ```bash
 ./scripts/unix/test.sh
 ```
@@ -379,16 +398,19 @@ chmod +x test-installer-unix.sh
 ### Building
 
 **Using the installer (recommended):**
+
 ```cmd
 scripts\windows\install.cmd
 ```
 
 **Manual build:**
+
 ```bash
 go build -o llamagate ./cmd/llamagate
 ```
 
 Or use the build script:
+
 ```cmd
 scripts\windows\build.cmd
 ```
@@ -411,7 +433,7 @@ go run ./cmd/llamagate
 
 ## Project Structure
 
-```
+```text
 .
 ├── cmd/
 │   └── llamagate/
@@ -442,4 +464,3 @@ MIT
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
-
