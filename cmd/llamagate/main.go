@@ -68,7 +68,7 @@ func main() {
 		requestID := c.GetString("request_id")
 
 		if raw != "" {
-			path = path + "?" + raw
+			path = fmt.Sprintf("%s?%s", path, raw)
 		}
 
 		log.Info().
