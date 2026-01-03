@@ -53,16 +53,36 @@ func (p *Proxy) executeToolLoop(ctx context.Context, requestID string, model str
 			"stream":   false, // Tool execution only supports non-streaming
 		}
 
+		// Add tools to the request (OpenAI format)
+		// Ollama may support tools directly, or we may need to handle them differently
+		// For now, we add them in OpenAI format and also inject as system message for compatibility
+		if len(toolDefs) > 0 {
+			ollamaReq["tools"] = toolDefs
+		}
+
 		if temperature > 0 {
 			ollamaReq["options"] = map[string]interface{}{
 				"temperature": temperature,
 			}
 		}
 
-		// Convert tools to Ollama format (if Ollama supports it)
-		// Note: Ollama may not support tools directly, so we might need to handle this differently
-		// For now, we'll inject tools as part of the system message or use a different approach
-		// This is a placeholder - actual implementation depends on Ollama's tool support
+		// Also inject tools as system message for models that don't support tools directly
+		// This ensures tool information is available to the model
+		if len(availableTools) > 0 {
+			toolDescriptions := make([]string, 0, len(availableTools))
+			for _, tool := range availableTools {
+				toolDescriptions = append(toolDescriptions, fmt.Sprintf("- %s: %s", tool.NamespacedName, tool.Description))
+			}
+			systemMsg := Message{
+				Role:    "system",
+				Content: fmt.Sprintf("Available tools:\n%s\n\nYou can call these tools by responding with tool_calls in your response.", strings.Join(toolDescriptions, "\n")),
+			}
+			// Prepend system message if not already present
+			if len(messages) == 0 || messages[0].Role != "system" {
+				messages = append([]Message{systemMsg}, messages...)
+				ollamaReq["messages"] = messages
+			}
+		}
 
 		reqBody, err := json.Marshal(ollamaReq)
 		if err != nil {

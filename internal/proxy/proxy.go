@@ -1,3 +1,4 @@
+// Package proxy provides HTTP proxy handlers for OpenAI-compatible chat completions.
 package proxy
 
 import (

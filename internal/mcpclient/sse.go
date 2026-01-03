@@ -24,7 +24,7 @@ func NewSSETransport(url string, headers map[string]string) (*SSETransport, erro
 }
 
 // SendRequest sends a JSON-RPC request over SSE
-func (t *SSETransport) SendRequest(ctx context.Context, method string, params interface{}) (*JSONRPCResponse, error) {
+func (t *SSETransport) SendRequest(_ context.Context, _ string, _ interface{}) (*JSONRPCResponse, error) {
 	return nil, fmt.Errorf("SSE transport not yet implemented")
 }
 

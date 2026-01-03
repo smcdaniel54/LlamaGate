@@ -11,6 +11,8 @@ import (
 )
 
 // CacheEntry holds a cached response with timestamp
+//
+//nolint:revive // CacheEntry is the preferred name for external API
 type CacheEntry struct {
 	Response  []byte
 	Timestamp time.Time
@@ -28,6 +30,8 @@ type Cache struct {
 }
 
 // CacheOptions holds configuration options for the cache
+//
+//nolint:revive // CacheOptions is the preferred name for external API
 type CacheOptions struct {
 	MaxSize int           // Maximum number of entries (0 = unlimited, default: 1000)
 	TTL     time.Duration // Time-to-live for entries (0 = no expiration, default: 1 hour)
@@ -326,7 +330,7 @@ func (c *Cache) cleanupExpired() {
 
 // Clear removes all entries from the cache
 func (c *Cache) Clear() {
-	c.store.Range(func(key, value interface{}) bool {
+	c.store.Range(func(key, _ interface{}) bool {
 		c.store.Delete(key)
 		return true
 	})

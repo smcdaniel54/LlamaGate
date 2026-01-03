@@ -34,6 +34,8 @@ func (t *Tool) ToOpenAIFormat() OpenAIFunction {
 }
 
 // ToolsToOpenAIFormat converts multiple tools to OpenAI format
+//
+//nolint:revive // ToolsToOpenAIFormat is the preferred name for external API
 func ToolsToOpenAIFormat(tools []*Tool) []OpenAIFunction {
 	result := make([]OpenAIFunction, len(tools))
 	for i, tool := range tools {

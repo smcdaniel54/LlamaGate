@@ -43,8 +43,8 @@ func NewClientWithTimeout(name, command string, args []string, env map[string]st
 
 	// Create context with timeout if specified
 	var ctx context.Context
-	var cancel context.CancelFunc
 	if timeout > 0 {
+		var cancel context.CancelFunc
 		ctx, cancel = context.WithTimeout(context.Background(), timeout)
 		defer cancel()
 	} else {
