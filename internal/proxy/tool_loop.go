@@ -16,6 +16,7 @@ import (
 
 // executeToolLoop executes tools in a loop until no more tool calls or max rounds reached
 func (p *Proxy) executeToolLoop(ctx context.Context, requestID string, model string, initialMessages []Message, ollamaHost string, stream bool, temperature float64) ([]byte, error) {
+	_ = stream // stream parameter is reserved for future use
 	if p.toolManager == nil || p.guardrails == nil {
 		// No tool support, return error or handle normally
 		return nil, fmt.Errorf("tool execution not available")
@@ -81,9 +82,14 @@ func (p *Proxy) executeToolLoop(ctx context.Context, requestID string, model str
 		if err != nil {
 			return nil, fmt.Errorf("failed to forward request to Ollama: %w", err)
 		}
-		defer resp.Body.Close()
 
 		body, err := io.ReadAll(resp.Body)
+		if closeErr := resp.Body.Close(); closeErr != nil {
+			log.Warn().
+				Str("request_id", requestID).
+				Err(closeErr).
+				Msg("Failed to close response body")
+		}
 		if err != nil {
 			return nil, fmt.Errorf("failed to read response: %w", err)
 		}
@@ -100,7 +106,8 @@ func (p *Proxy) executeToolLoop(ctx context.Context, requestID string, model str
 
 		// Extract message from response
 		var assistantMessage Message
-		if messageData, ok := ollamaResp["message"].(map[string]interface{}); ok {
+		switch messageData := ollamaResp["message"].(type) {
+		case map[string]interface{}:
 			// Convert to our Message type
 			if role, ok := messageData["role"].(string); ok {
 				assistantMessage.Role = role
@@ -114,13 +121,11 @@ func (p *Proxy) executeToolLoop(ctx context.Context, requestID string, model str
 			if toolCallsData, ok := messageData["tool_calls"].([]interface{}); ok {
 				assistantMessage.ToolCalls = parseToolCalls(toolCallsData)
 			}
-		} else {
-			// Fallback: try to extract from response directly
-			if content, ok := ollamaResp["message"].(map[string]interface{})["content"].(string); ok {
-				assistantMessage = Message{
-					Role:    "assistant",
-					Content: content,
-				}
+		default:
+			// Fallback: create default assistant message
+			assistantMessage = Message{
+				Role:    "assistant",
+				Content: "",
 			}
 		}
 
@@ -131,7 +136,8 @@ func (p *Proxy) executeToolLoop(ctx context.Context, requestID string, model str
 		if len(assistantMessage.ToolCalls) == 0 {
 			// No more tool calls, return the final response
 			// Convert back to OpenAI format
-			return convertToOpenAIResponse(messages[len(messages)-1], model), nil
+			lastMsg := messages[len(messages)-1]
+			return convertToOpenAIResponse(&lastMsg, model), nil
 		}
 
 		// Validate tool calls count
@@ -211,7 +217,8 @@ func (p *Proxy) executeToolLoop(ctx context.Context, requestID string, model str
 	}
 
 	// Final response
-	return convertToOpenAIResponse(messages[len(messages)-1], model), nil
+	lastMsg := messages[len(messages)-1]
+	return convertToOpenAIResponse(&lastMsg, model), nil
 }
 
 // executeTool executes a single tool call
@@ -299,7 +306,7 @@ func parseToolCalls(data []interface{}) []ToolCall {
 					toolCall.Function.Arguments = args
 				} else if argsObj, ok := functionData["arguments"].(map[string]interface{}); ok {
 					// Convert object to JSON string
-					if argsJSON, err := json.Marshal(argsObj); err == nil {
+					if argsJSON, marshalErr := json.Marshal(argsObj); marshalErr == nil {
 						toolCall.Function.Arguments = string(argsJSON)
 					}
 				}
@@ -311,7 +318,7 @@ func parseToolCalls(data []interface{}) []ToolCall {
 }
 
 // convertToOpenAIResponse converts a message to OpenAI response format
-func convertToOpenAIResponse(message Message, model string) []byte {
+func convertToOpenAIResponse(message *Message, model string) []byte {
 	response := map[string]interface{}{
 		"id":      fmt.Sprintf("chatcmpl-%d", time.Now().UnixNano()),
 		"object":  "chat.completion",
@@ -357,4 +364,3 @@ func createErrorResponse(errorType, message, requestID string) []byte {
 	jsonData, _ := json.Marshal(response)
 	return jsonData
 }
-

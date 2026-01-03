@@ -10,8 +10,8 @@ import (
 
 // Manager manages tools from multiple MCP servers
 type Manager struct {
-	mu     sync.RWMutex
-	tools  map[string]*Tool // keyed by namespaced name
+	mu      sync.RWMutex
+	tools   map[string]*Tool             // keyed by namespaced name
 	clients map[string]*mcpclient.Client // keyed by server name
 }
 
@@ -48,13 +48,13 @@ func (m *Manager) AddClient(client *mcpclient.Client) error {
 	// Register tools with namespace
 	for _, mcpTool := range mcpTools {
 		namespacedName := fmt.Sprintf("mcp.%s.%s", serverName, mcpTool.Name)
-		
+
 		tool := &Tool{
 			NamespacedName: namespacedName,
 			ServerName:     serverName,
 			OriginalName:   mcpTool.Name,
-			Description:   mcpTool.Description,
-			InputSchema:   mcpTool.InputSchema,
+			Description:    mcpTool.Description,
+			InputSchema:    mcpTool.InputSchema,
 		}
 
 		m.tools[namespacedName] = tool
@@ -179,4 +179,3 @@ func (m *Manager) CloseAll() error {
 
 	return firstErr
 }
-

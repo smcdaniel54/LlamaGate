@@ -1,3 +1,4 @@
+// Package cache provides in-memory caching for chat completion responses.
 package cache
 
 import (

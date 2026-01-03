@@ -12,27 +12,27 @@ import (
 
 // Client represents an MCP client connection
 type Client struct {
-	name      string
-	transport Transport
-	mu        sync.RWMutex
-	initialized bool
-	serverInfo *ServerInfo
+	name         string
+	transport    Transport
+	mu           sync.RWMutex
+	initialized  bool
+	serverInfo   *ServerInfo
 	capabilities *ServerCapabilities
-	tools     []Tool
-	toolsMap  map[string]*Tool // For quick lookup
+	tools        []Tool
+	toolsMap     map[string]*Tool // For quick lookup
 }
 
 // NewClient creates a new MCP client with stdio transport
-func NewClient(name string, command string, args []string, env map[string]string) (*Client, error) {
+func NewClient(name, command string, args []string, env map[string]string) (*Client, error) {
 	transport, err := NewStdioTransport(command, args, env)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create stdio transport: %w", err)
 	}
 
 	client := &Client{
-		name:     name,
+		name:      name,
 		transport: transport,
-		toolsMap: make(map[string]*Tool),
+		toolsMap:  make(map[string]*Tool),
 	}
 
 	// Initialize the connection
@@ -54,16 +54,16 @@ func NewClient(name string, command string, args []string, env map[string]string
 
 // NewClientWithSSE creates a new MCP client with SSE transport
 // Note: This is a stub for future implementation
-func NewClientWithSSE(name string, url string, headers map[string]string) (*Client, error) {
+func NewClientWithSSE(name, url string, headers map[string]string) (*Client, error) {
 	transport, err := NewSSETransport(url, headers)
 	if err != nil {
 		return nil, err
 	}
 
 	return &Client{
-		name:     name,
+		name:      name,
 		transport: transport,
-		toolsMap: make(map[string]*Tool),
+		toolsMap:  make(map[string]*Tool),
 	}, nil
 }
 
@@ -71,7 +71,7 @@ func NewClientWithSSE(name string, url string, headers map[string]string) (*Clie
 func (c *Client) initialize(ctx context.Context) error {
 	params := InitializeParams{
 		ProtocolVersion: "2024-11-05", // MCP protocol version
-		Capabilities: ClientCapabilities{},
+		Capabilities:    ClientCapabilities{},
 		ClientInfo: ClientInfo{
 			Name:    "llamagate",
 			Version: "1.1.0",
@@ -229,4 +229,3 @@ func (c *Client) Close() error {
 func (c *Client) IsClosed() bool {
 	return c.transport.IsClosed()
 }
-

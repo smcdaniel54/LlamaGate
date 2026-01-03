@@ -11,4 +11,3 @@ func TestManager_NewManager(t *testing.T) {
 	assert.NotNil(t, manager)
 	assert.Len(t, manager.GetAllTools(), 0)
 }
-

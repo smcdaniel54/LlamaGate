@@ -1,3 +1,4 @@
+// Package logger provides structured logging setup using Zerolog.
 package logger
 
 import (

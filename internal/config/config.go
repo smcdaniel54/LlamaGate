@@ -1,3 +1,4 @@
+// Package config provides configuration management for LlamaGate.
 package config
 
 import (
@@ -20,7 +21,7 @@ type Config struct {
 	Port         string
 	LogFile      string
 	Timeout      time.Duration // HTTP client timeout
-	MCP          *MCPConfig     // MCP configuration (optional)
+	MCP          *MCPConfig    // MCP configuration (optional)
 }
 
 // MCPConfig holds MCP client configuration

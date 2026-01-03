@@ -284,10 +284,10 @@ func (p *Proxy) handleStreamingResponse(c *gin.Context, httpReq *http.Request, r
 		return
 	}
 	defer func() {
-		if err := resp.Body.Close(); err != nil {
+		if closeErr := resp.Body.Close(); closeErr != nil {
 			log.Warn().
 				Str("request_id", requestID).
-				Err(err).
+				Err(closeErr).
 				Msg("Failed to close response body")
 		}
 	}()
@@ -333,10 +333,10 @@ func (p *Proxy) handleNonStreamingResponse(c *gin.Context, httpReq *http.Request
 		return
 	}
 	defer func() {
-		if err := resp.Body.Close(); err != nil {
+		if closeErr := resp.Body.Close(); closeErr != nil {
 			log.Warn().
 				Str("request_id", requestID).
-				Err(err).
+				Err(closeErr).
 				Msg("Failed to close response body")
 		}
 	}()
@@ -385,7 +385,7 @@ func (p *Proxy) HandleModels(c *gin.Context) {
 
 	// Forward to Ollama /api/tags
 	ollamaURL := fmt.Sprintf("%s/api/tags", p.ollamaHost)
-	httpReq, err := http.NewRequestWithContext(c.Request.Context(), "GET", ollamaURL, nil)
+	httpReq, err := http.NewRequestWithContext(c.Request.Context(), "GET", ollamaURL, http.NoBody)
 	if err != nil {
 		log.Error().
 			Str("request_id", requestID).
@@ -417,10 +417,10 @@ func (p *Proxy) HandleModels(c *gin.Context) {
 		return
 	}
 	defer func() {
-		if err := resp.Body.Close(); err != nil {
+		if closeErr := resp.Body.Close(); closeErr != nil {
 			log.Warn().
 				Str("request_id", requestID).
-				Err(err).
+				Err(closeErr).
 				Msg("Failed to close response body")
 		}
 	}()

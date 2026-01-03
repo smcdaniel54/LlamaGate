@@ -143,4 +143,3 @@ func TestGuardrails_GetTimeout(t *testing.T) {
 
 	assert.Equal(t, timeout, guardrails.GetTimeout())
 }
-

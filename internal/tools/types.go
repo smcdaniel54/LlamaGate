@@ -1,3 +1,4 @@
+// Package tools provides tool management, mapping, and guardrails for MCP tools.
 package tools
 
 // Tool represents a namespaced tool definition
@@ -27,4 +28,3 @@ type ToolResult struct {
 	Content    string
 	IsError    bool
 }
-

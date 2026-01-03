@@ -1,3 +1,4 @@
+// Package tools provides tool management, mapping, and guardrails for MCP tools.
 package tools
 
 // OpenAIFunction represents an OpenAI function definition
@@ -40,4 +41,3 @@ func ToolsToOpenAIFormat(tools []*Tool) []OpenAIFunction {
 	}
 	return result
 }
-

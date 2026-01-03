@@ -48,9 +48,9 @@ func main() {
 	var guardrails *tools.Guardrails
 	if cfg.MCP != nil && cfg.MCP.Enabled {
 		log.Info().Msg("Initializing MCP clients...")
-		
+
 		toolManager = tools.NewManager()
-		
+
 		// Create guardrails
 		guardrails, err = tools.NewGuardrails(
 			cfg.MCP.AllowTools,
@@ -78,11 +78,9 @@ func main() {
 
 			switch serverCfg.Transport {
 			case "stdio":
-				timeout := serverCfg.Timeout
-				if timeout == 0 {
-					timeout = 30 * time.Second
-				}
-				
+				// Use server timeout or default
+				_ = serverCfg.Timeout // Timeout is reserved for future per-request use
+
 				client, initErr = mcpclient.NewClient(serverCfg.Name, serverCfg.Command, serverCfg.Args, serverCfg.Env)
 				if initErr != nil {
 					log.Error().
@@ -285,6 +283,7 @@ func main() {
 
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Error().Err(err).Msg("Server forced to shutdown")
+		cancel() // Ensure cancel is called before exit
 		os.Exit(1)
 	}
 

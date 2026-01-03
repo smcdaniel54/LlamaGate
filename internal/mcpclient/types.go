@@ -35,9 +35,9 @@ type JSONRPCError struct {
 
 // InitializeParams represents the initialize request parameters
 type InitializeParams struct {
-	ProtocolVersion string                 `json:"protocolVersion"`
-	Capabilities    ClientCapabilities      `json:"capabilities"`
-	ClientInfo      ClientInfo              `json:"clientInfo"`
+	ProtocolVersion string             `json:"protocolVersion"`
+	Capabilities    ClientCapabilities `json:"capabilities"`
+	ClientInfo      ClientInfo         `json:"clientInfo"`
 }
 
 // ClientCapabilities represents client capabilities
@@ -53,9 +53,9 @@ type ClientInfo struct {
 
 // InitializeResult represents the initialize response
 type InitializeResult struct {
-	ProtocolVersion string                 `json:"protocolVersion"`
-	Capabilities    ServerCapabilities     `json:"capabilities"`
-	ServerInfo      ServerInfo              `json:"serverInfo"`
+	ProtocolVersion string             `json:"protocolVersion"`
+	Capabilities    ServerCapabilities `json:"capabilities"`
+	ServerInfo      ServerInfo         `json:"serverInfo"`
 }
 
 // ServerCapabilities represents server capabilities
@@ -115,4 +115,3 @@ const (
 func (e *JSONRPCError) Error() string {
 	return fmt.Sprintf("JSON-RPC error %d: %s", e.Code, e.Message)
 }
-

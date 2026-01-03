@@ -45,4 +45,3 @@ type Transport interface {
 	Close() error
 	IsClosed() bool
 }
-

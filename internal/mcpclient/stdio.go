@@ -247,7 +247,9 @@ func (t *StdioTransport) Close() error {
 		}
 	case <-time.After(5 * time.Second):
 		log.Warn().Msg("MCP server process did not exit, killing")
-		t.cmd.Process.Kill()
+		if killErr := t.cmd.Process.Kill(); killErr != nil {
+			log.Warn().Err(killErr).Msg("Failed to kill MCP server process")
+		}
 		<-done
 	}
 
@@ -268,4 +270,3 @@ func (t *StdioTransport) IsClosed() bool {
 	defer t.mu.Unlock()
 	return t.closed
 }
-

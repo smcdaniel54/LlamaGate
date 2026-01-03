@@ -119,7 +119,7 @@ func (g *Guardrails) TruncateResult(result string) string {
 
 	// Truncate and add indicator
 	truncated := result[:g.maxResultSize]
-	
+
 	// Try to truncate at a safe boundary (end of a line or JSON boundary)
 	// For simplicity, we'll just truncate and add a marker
 	// In production, you might want to be smarter about JSON truncation
@@ -129,7 +129,7 @@ func (g *Guardrails) TruncateResult(result string) string {
 	}
 
 	truncated += "\n... [truncated]"
-	
+
 	log.Warn().
 		Int64("original_size", int64(len(result))).
 		Int64("max_size", g.maxResultSize).
@@ -173,4 +173,3 @@ func RedactSensitiveData(data interface{}) interface{} {
 		return v
 	}
 }
-

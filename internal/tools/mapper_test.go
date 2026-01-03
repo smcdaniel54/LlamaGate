@@ -50,4 +50,3 @@ func TestToolsToOpenAIFormat(t *testing.T) {
 	assert.Equal(t, "mcp.server.tool1", openAITools[0].Name)
 	assert.Equal(t, "mcp.server.tool2", openAITools[1].Name)
 }
-
