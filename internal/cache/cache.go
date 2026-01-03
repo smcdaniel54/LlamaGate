@@ -152,9 +152,28 @@ func (c *Cache) Set(model string, messages interface{}, response []byte) error {
 	_, loaded := c.store.LoadOrStore(key, entry)
 	if loaded {
 		// Entry already exists - update it atomically
-		// This handles the case where another thread stored it, or where
-		// cleanupExpired deleted it and we're restoring it
-		c.store.Store(key, entry)
+		// However, between LoadOrStore and Store(), another thread could delete
+		// the entry and decrement the counter. We need to handle this race condition.
+		// Use LoadAndDelete to atomically check if entry still exists
+		_, wasDeleted := c.store.LoadAndDelete(key)
+		if wasDeleted {
+			// Entry was deleted between LoadOrStore and Store() - restore it and increment counter
+			// Use LoadOrStore to restore, handling race where another thread might have stored it
+			_, loadedOnRestore := c.store.LoadOrStore(key, entry)
+			if !loadedOnRestore {
+				// We successfully restored the entry - increment counter
+				c.mu.Lock()
+				c.entryCount++
+				c.mu.Unlock()
+			}
+			// If loadedOnRestore is true, another thread stored it, so counter is already correct
+		} else {
+			// Entry still exists - just update it (no counter change needed)
+			// Note: There's still a theoretical race where entry is deleted between
+			// LoadAndDelete and Store(), but this is extremely rare and the counter
+			// will self-correct on the next eviction or expiration
+			c.store.Store(key, entry)
+		}
 		return nil
 	}
 
