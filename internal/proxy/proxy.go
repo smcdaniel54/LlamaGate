@@ -66,8 +66,8 @@ func (p *Proxy) HandleChatCompletions(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": gin.H{
 				"message":    "Invalid request body",
-				"type":        "invalid_request_error",
-				"request_id":  requestID,
+				"type":       "invalid_request_error",
+				"request_id": requestID,
 			},
 		})
 		return
@@ -78,8 +78,8 @@ func (p *Proxy) HandleChatCompletions(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": gin.H{
 				"message":    "Model is required",
-				"type":        "invalid_request_error",
-				"request_id":  requestID,
+				"type":       "invalid_request_error",
+				"request_id": requestID,
 			},
 		})
 		return
@@ -89,8 +89,8 @@ func (p *Proxy) HandleChatCompletions(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": gin.H{
 				"message":    "Messages are required",
-				"type":        "invalid_request_error",
-				"request_id":  requestID,
+				"type":       "invalid_request_error",
+				"request_id": requestID,
 			},
 		})
 		return
@@ -136,8 +136,8 @@ func (p *Proxy) HandleChatCompletions(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": gin.H{
 				"message":    "Internal server error",
-				"type":        "internal_error",
-				"request_id":  requestID,
+				"type":       "internal_error",
+				"request_id": requestID,
 			},
 		})
 		return
@@ -154,8 +154,8 @@ func (p *Proxy) HandleChatCompletions(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": gin.H{
 				"message":    "Internal server error",
-				"type":        "internal_error",
-				"request_id":  requestID,
+				"type":       "internal_error",
+				"request_id": requestID,
 			},
 		})
 		return
@@ -182,8 +182,8 @@ func (p *Proxy) handleStreamingResponse(c *gin.Context, httpReq *http.Request, r
 		c.JSON(http.StatusBadGateway, gin.H{
 			"error": gin.H{
 				"message":    "Failed to connect to Ollama",
-				"type":        "server_error",
-				"request_id":  requestID,
+				"type":       "server_error",
+				"request_id": requestID,
 			},
 		})
 		return
@@ -224,8 +224,8 @@ func (p *Proxy) handleNonStreamingResponse(c *gin.Context, httpReq *http.Request
 		c.JSON(http.StatusBadGateway, gin.H{
 			"error": gin.H{
 				"message":    "Failed to connect to Ollama",
-				"type":        "server_error",
-				"request_id":  requestID,
+				"type":       "server_error",
+				"request_id": requestID,
 			},
 		})
 		return
@@ -242,8 +242,8 @@ func (p *Proxy) handleNonStreamingResponse(c *gin.Context, httpReq *http.Request
 		c.JSON(http.StatusBadGateway, gin.H{
 			"error": gin.H{
 				"message":    "Failed to read response from Ollama",
-				"type":        "server_error",
-				"request_id":  requestID,
+				"type":       "server_error",
+				"request_id": requestID,
 			},
 		})
 		return
@@ -285,8 +285,8 @@ func (p *Proxy) HandleModels(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": gin.H{
 				"message":    "Internal server error",
-				"type":        "internal_error",
-				"request_id":  requestID,
+				"type":       "internal_error",
+				"request_id": requestID,
 			},
 		})
 		return
@@ -301,8 +301,8 @@ func (p *Proxy) HandleModels(c *gin.Context) {
 		c.JSON(http.StatusBadGateway, gin.H{
 			"error": gin.H{
 				"message":    "Failed to connect to Ollama",
-				"type":        "server_error",
-				"request_id":  requestID,
+				"type":       "server_error",
+				"request_id": requestID,
 			},
 		})
 		return
@@ -319,8 +319,8 @@ func (p *Proxy) HandleModels(c *gin.Context) {
 		c.JSON(http.StatusBadGateway, gin.H{
 			"error": gin.H{
 				"message":    "Failed to parse response from Ollama",
-				"type":        "server_error",
-				"request_id":  requestID,
+				"type":       "server_error",
+				"request_id": requestID,
 			},
 		})
 		return
@@ -333,9 +333,9 @@ func (p *Proxy) HandleModels(c *gin.Context) {
 			if modelMap, ok := modelData.(map[string]interface{}); ok {
 				if name, ok := modelMap["name"].(string); ok {
 					models = append(models, map[string]interface{}{
-						"id":      name,
-						"object":  "model",
-						"created": 0,
+						"id":       name,
+						"object":   "model",
+						"created":  0,
 						"owned_by": "ollama",
 					})
 				}
@@ -356,4 +356,3 @@ func (p *Proxy) HandleModels(c *gin.Context) {
 		Int("count", len(models)).
 		Msg("Models list retrieved")
 }
-

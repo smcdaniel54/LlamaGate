@@ -50,4 +50,3 @@ func AuthMiddleware(apiKey string) gin.HandlerFunc {
 		c.Next()
 	}
 }
-

@@ -45,4 +45,3 @@ func (rl *RateLimitMiddleware) Handler() gin.HandlerFunc {
 		c.Next()
 	}
 }
-

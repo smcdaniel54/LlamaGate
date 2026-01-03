@@ -80,4 +80,3 @@ func TestProxy_HandleChatCompletions_Validation(t *testing.T) {
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
-
