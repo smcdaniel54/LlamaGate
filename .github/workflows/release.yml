@@ -1,0 +1,126 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # Trigger on version tags like v1.0.0
+
+jobs:
+  build:
+    name: Build Release Binaries
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            goos: linux
+            goarch: amd64
+            binary_name: llamagate-linux-amd64
+          - os: ubuntu-latest
+            goos: linux
+            goarch: arm64
+            binary_name: llamagate-linux-arm64
+          - os: windows-latest
+            goos: windows
+            goarch: amd64
+            binary_name: llamagate-windows-amd64.exe
+          - os: macos-latest
+            goos: darwin
+            goarch: amd64
+            binary_name: llamagate-darwin-amd64
+          - os: macos-latest
+            goos: darwin
+            goarch: arm64
+            binary_name: llamagate-darwin-arm64
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.23'
+    
+    - name: Download dependencies
+      run: go mod download
+    
+    - name: Run tests
+      run: go test ./...
+    
+    - name: Build binary
+      env:
+        GOOS: ${{ matrix.goos }}
+        GOARCH: ${{ matrix.goarch }}
+        CGO_ENABLED: 0
+      run: |
+        go build -ldflags="-s -w -X main.version=${GITHUB_REF#refs/tags/}" \
+          -o ${{ matrix.binary_name }} ./cmd/llamagate
+    
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.binary_name }}
+        path: ${{ matrix.binary_name }}
+        retention-days: 30
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+    
+    - name: Create checksums
+      run: |
+        cd artifacts
+        find . -type f -name 'llamagate*' -exec sha256sum {} \; > checksums.txt
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          artifacts/*
+        body: |
+          ## LlamaGate ${{ github.ref_name }}
+          
+          ### Downloads
+          
+          **Windows:**
+          - [llamagate-windows-amd64.exe](https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/llamagate-windows-amd64.exe)
+          
+          **Linux:**
+          - [llamagate-linux-amd64](https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/llamagate-linux-amd64)
+          - [llamagate-linux-arm64](https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/llamagate-linux-arm64)
+          
+          **macOS:**
+          - [llamagate-darwin-amd64](https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/llamagate-darwin-amd64) (Intel)
+          - [llamagate-darwin-arm64](https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/llamagate-darwin-arm64) (Apple Silicon)
+          
+          ### Installation
+          
+          1. Download the binary for your platform
+          2. Make it executable (Linux/macOS): `chmod +x llamagate-*`
+          3. Run it: `./llamagate-*` (or `llamagate-windows-amd64.exe` on Windows)
+          
+          See [README.md](https://github.com/${{ github.repository }}/blob/main/README.md) for full documentation.
+          
+          ### Checksums
+          
+          ```
+          ${{ github.ref_name }}
+          ```
+          
+          See checksums.txt file for SHA256 hashes.
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
