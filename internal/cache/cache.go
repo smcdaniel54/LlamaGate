@@ -116,12 +116,9 @@ func (c *Cache) Get(model string, messages interface{}) ([]byte, bool) {
 				// Entry was updated with a new valid timestamp - restore it
 				// Use LoadOrStore to prevent overwriting a fresh entry that may have
 				// been stored by Set() between LoadAndDelete and this restore
-				_, loaded := c.store.LoadOrStore(key, deletedEntry)
-				if loaded {
-					// Another thread stored a fresh entry - don't overwrite it
-					// The fresh entry is already in the cache, so we don't need to do anything
-				}
-				// If !loaded, we successfully restored the entry
+				// If another thread stored a fresh entry, LoadOrStore will return it and we won't overwrite
+				// If no fresh entry exists, we restore the deleted entry
+				c.store.LoadOrStore(key, deletedEntry)
 				// Note: We do NOT increment the counter here because the entry was never
 				// removed from the counter (only from the store). The counter still accounts
 				// for this entry, so restoring it doesn't change the count.
@@ -298,22 +295,20 @@ func (c *Cache) cleanupExpired() {
 							// Entry was replaced with a new valid one - restore it
 							// Use LoadOrStore to prevent overwriting a fresh entry that may have
 							// been stored by Set() between LoadAndDelete and this restore
-							_, loaded := c.store.LoadOrStore(key, deletedEntry)
-							if loaded {
-								// Another thread stored a fresh entry - don't overwrite it
-								// The deleted entry was never decremented from the counter (only expired
-								// entries are decremented). The other thread's Set() may have incremented
-								// the counter if it was a new entry, or left it unchanged if it was an update.
-								// We cannot safely decrement here without knowing which case occurred,
-								// and doing so would cause counter corruption since the deleted entry
-								// was never removed from the counter in the first place.
-								// The counter will be accurate: it accounts for the deleted entry OR the
-								// new entry (depending on whether Set() incremented), and the store has
-								// the new entry. This is acceptable - the counter may be slightly off
-								// in this rare race condition, but it will self-correct on the next
-								// eviction or expiration.
-							}
-							// If !loaded, we successfully restored the entry
+							// If another thread stored a fresh entry, LoadOrStore will return it and we won't overwrite
+							// If no fresh entry exists, we restore the deleted entry
+							c.store.LoadOrStore(key, deletedEntry)
+							// Note: The deleted entry was never decremented from the counter (only expired
+							// entries are decremented). The other thread's Set() may have incremented
+							// the counter if it was a new entry, or left it unchanged if it was an update.
+							// We cannot safely decrement here without knowing which case occurred,
+							// and doing so would cause counter corruption since the deleted entry
+							// was never removed from the counter in the first place.
+							// The counter will be accurate: it accounts for the deleted entry OR the
+							// new entry (depending on whether Set() incremented), and the store has
+							// the new entry. This is acceptable - the counter may be slightly off
+							// in this rare race condition, but it will self-correct on the next
+							// eviction or expiration.
 							// Note: We do NOT increment the counter here because the entry was never
 							// removed from the counter (only from the store). The counter still accounts
 							// for this entry, so restoring it doesn't change the count.

@@ -7,8 +7,9 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/llamagate/llamagate/internal/cache"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/llamagate/llamagate/internal/cache"
 )
 
 func TestProxy_HandleModels(t *testing.T) {
@@ -22,7 +23,9 @@ func TestProxy_HandleModels(t *testing.T) {
 				},
 			}
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(response)
+			if err := json.NewEncoder(w).Encode(response); err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
 		} else {
 			w.WriteHeader(http.StatusNotFound)
 		}
