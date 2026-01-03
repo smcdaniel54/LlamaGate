@@ -6,21 +6,21 @@ This guide explains how to test LlamaGate installers on different operating syst
 
 Run the comprehensive test script:
 ```powershell
-.\test-all-installers.ps1
+.\tests\installer\test-all-installers.ps1
 ```
 
 ## Individual Tests
 
 ### Test Windows Installer Only
 ```powershell
-.\test-installer-windows.ps1
+.\tests\installer\test-installer-windows.ps1
 ```
 
 ### Test Unix Installer Only
 ```bash
 # In WSL or Git Bash
-chmod +x test-installer-unix.sh
-./test-installer-unix.sh
+chmod +x tests/installer/test-installer-unix.sh
+./tests/installer/test-installer-unix.sh
 ```
 
 ## Manual Testing

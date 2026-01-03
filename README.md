@@ -396,14 +396,14 @@ To validate installer scripts before deployment, see [docs/INSTALLER_TESTING.md]
 
 ```powershell
 # Test all installers
-.\test-all-installers.ps1
+.\tests\installer\test-all-installers.ps1
 
 # Test Windows installer only
-.\test-installer-windows.ps1
+.\tests\installer\test-installer-windows.ps1
 
 # Test Unix installer (requires bash/WSL)
-chmod +x test-installer-unix.sh
-./test-installer-unix.sh
+chmod +x tests/installer/test-installer-unix.sh
+./tests/installer/test-installer-unix.sh
 ```
 
 ## Development

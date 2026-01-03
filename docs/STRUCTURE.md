@@ -24,6 +24,12 @@ LlamaGate/
 │       ├── run.sh             # Main runner
 │       └── test.sh            # Test script
 │
+├── tests/                      # Test scripts
+│   └── installer/             # Installer test scripts
+│       ├── test-all-installers.ps1      # Comprehensive installer test suite
+│       ├── test-installer-windows.ps1   # Windows installer tests
+│       └── test-installer-unix.sh       # Unix installer tests
+│
 ├── cmd/llamagate/             # Application entry point
 │   └── main.go
 │
