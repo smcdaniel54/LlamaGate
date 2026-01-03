@@ -8,7 +8,6 @@ LlamaGate is a production-ready, OpenAI-compatible HTTP proxy/gateway for local 
 
 > 🚀 **New to LlamaGate?** 
 > - **[Quick Start Guide](QUICKSTART.md)** - Get running in 2 minutes
-> - **[Demo & Migration Guide](DEMO_QUICKSTART.md)** - See how to swap your ChatGPT/OpenAI app to LlamaGate
 
 ## Features
 
@@ -30,14 +29,13 @@ The easiest way to install LlamaGate:
 
 **Windows:**
 ```cmd
-install\windows\install.cmd
+scripts\windows\install.cmd
 ```
-Or use the root-level launcher (if available).
 
 **Unix/Linux/macOS:**
 ```bash
-chmod +x install.sh
-./install.sh
+chmod +x scripts/unix/install.sh
+./scripts/unix/install.sh
 ```
 
 **The installer will:**
@@ -50,8 +48,6 @@ chmod +x install.sh
 
 **Follow the prompts** to configure your installation
 
-> **Note:** Installers are organized by OS in `install/` directory. Root-level launchers (`install.sh`, `run.sh`, `test.sh` for Unix/macOS and `run.cmd`, `test.cmd` for Windows) provide convenient access.
-
 ### From Source
 
 ```bash
@@ -62,24 +58,22 @@ go install github.com/llamagate/llamagate/cmd/llamagate@latest
 
 For Windows users, convenient batch files are provided:
 
-- **`run.cmd`** - Run with default settings (no authentication)
+- **`scripts/windows/run.cmd`** - Run with default settings (no authentication)
 - **`scripts/windows/run-with-auth.cmd`** - Run with API key authentication enabled
 - **`scripts/windows/run-debug.cmd`** - Run with debug logging enabled
 - **`scripts/windows/build.cmd`** - Build the binary (`llamagate.exe`)
 
-Simply double-click `run.cmd`, or run from command prompt:
+Run from command prompt:
 ```cmd
-run.cmd
+scripts\windows\run.cmd
 ```
-
-Or use the scripts directly from `scripts/windows/` directory.
 
 To customize settings, edit the batch file or set environment variables before running:
 ```cmd
 set OLLAMA_HOST=http://localhost:11434
 set API_KEY=sk-llamagate
 set RATE_LIMIT_RPS=20
-run.cmd
+scripts\windows\run.cmd
 ```
 
 ### From Docker
@@ -153,7 +147,7 @@ Or use the provided batch files (see Windows Quick Start above).
 
 ## Usage
 
-> 💡 **Migrating from OpenAI?** See the [Demo & Quick-Start Showcase](DEMO_QUICKSTART.md) for step-by-step migration examples.
+> 💡 **Migrating from OpenAI?** See the [Quick Start Guide](QUICKSTART.md) for step-by-step migration examples.
 
 ### Health Check
 
@@ -350,19 +344,23 @@ LlamaGate uses structured JSON logging with Zerolog. Each request is assigned a 
 
 ### Application Testing
 
-See [TESTING.md](TESTING.md) for a comprehensive testing guide, or use the provided test script:
+See [docs/TESTING.md](docs/TESTING.md) for a comprehensive testing guide, or use the provided test script:
 
 **Windows:**
 ```cmd
-test.cmd
+scripts\windows\test.cmd
 ```
-Or use `scripts\windows\test.cmd` directly.
+
+**Unix/Linux/macOS:**
+```bash
+./scripts/unix/test.sh
+```
 
 This will test all endpoints, caching, authentication, and more.
 
 ### Installer Testing
 
-To validate installer scripts before deployment, see [INSTALLER_TESTING.md](INSTALLER_TESTING.md):
+To validate installer scripts before deployment, see [docs/INSTALLER_TESTING.md](docs/INSTALLER_TESTING.md):
 
 ```powershell
 # Test all installers
@@ -382,7 +380,7 @@ chmod +x test-installer-unix.sh
 
 **Using the installer (recommended):**
 ```cmd
-install\windows\install.cmd
+scripts\windows\install.cmd
 ```
 
 **Manual build:**

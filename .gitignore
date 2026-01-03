@@ -10,17 +10,6 @@ llamagate.exe
 *.log
 llamagate.log
 
-# Keep install scripts and directories
-!install/
-!install.sh
-!install.cmd
-!scripts/
-!run.sh
-!run.cmd
-!test.sh
-!test.cmd
-!build.cmd
-
 # Test binary, built with `go test -c`
 *.test
 
