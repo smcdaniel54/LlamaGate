@@ -105,7 +105,14 @@ func main() {
 		// Register defer immediately after request to ensure body is always closed
 		// This handles both success and error cases where resp might be non-nil
 		if resp != nil {
-			defer resp.Body.Close()
+			defer func() {
+				if closeErr := resp.Body.Close(); closeErr != nil {
+					log.Warn().
+						Str("request_id", c.GetString("request_id")).
+						Err(closeErr).
+						Msg("Failed to close health check response body")
+				}
+			}()
 		}
 		if err != nil {
 			log.Warn().

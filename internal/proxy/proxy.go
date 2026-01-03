@@ -188,7 +188,14 @@ func (p *Proxy) handleStreamingResponse(c *gin.Context, httpReq *http.Request, r
 		})
 		return
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			log.Warn().
+				Str("request_id", requestID).
+				Err(err).
+				Msg("Failed to close response body")
+		}
+	}()
 
 	// Set headers for streaming
 	c.Header("Content-Type", "text/event-stream")
@@ -230,7 +237,14 @@ func (p *Proxy) handleNonStreamingResponse(c *gin.Context, httpReq *http.Request
 		})
 		return
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			log.Warn().
+				Str("request_id", requestID).
+				Err(err).
+				Msg("Failed to close response body")
+		}
+	}()
 
 	// Read response body
 	body, err := io.ReadAll(resp.Body)
@@ -307,7 +321,14 @@ func (p *Proxy) HandleModels(c *gin.Context) {
 		})
 		return
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			log.Warn().
+				Str("request_id", requestID).
+				Err(err).
+				Msg("Failed to close response body")
+		}
+	}()
 
 	// Read Ollama response
 	var ollamaResp map[string]interface{}
