@@ -24,6 +24,12 @@ type Client struct {
 
 // NewClient creates a new MCP client with stdio transport
 func NewClient(name, command string, args []string, env map[string]string) (*Client, error) {
+	return NewClientWithTimeout(name, command, args, env, 0)
+}
+
+// NewClientWithTimeout creates a new MCP client with stdio transport and a timeout
+// If timeout is 0, it uses context.Background() (no timeout)
+func NewClientWithTimeout(name, command string, args []string, env map[string]string, timeout time.Duration) (*Client, error) {
 	transport, err := NewStdioTransport(command, args, env)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create stdio transport: %w", err)
@@ -35,14 +41,24 @@ func NewClient(name, command string, args []string, env map[string]string) (*Cli
 		toolsMap:  make(map[string]*Tool),
 	}
 
+	// Create context with timeout if specified
+	var ctx context.Context
+	var cancel context.CancelFunc
+	if timeout > 0 {
+		ctx, cancel = context.WithTimeout(context.Background(), timeout)
+		defer cancel()
+	} else {
+		ctx = context.Background()
+	}
+
 	// Initialize the connection
-	if err := client.initialize(context.Background()); err != nil {
+	if err := client.initialize(ctx); err != nil {
 		transport.Close()
 		return nil, fmt.Errorf("failed to initialize MCP client: %w", err)
 	}
 
 	// Discover tools
-	if err := client.discoverTools(context.Background()); err != nil {
+	if err := client.discoverTools(ctx); err != nil {
 		log.Warn().
 			Str("server", name).
 			Err(err).

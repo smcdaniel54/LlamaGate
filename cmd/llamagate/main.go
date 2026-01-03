@@ -79,9 +79,12 @@ func main() {
 			switch serverCfg.Transport {
 			case "stdio":
 				// Use server timeout or default
-				_ = serverCfg.Timeout // Timeout is reserved for future per-request use
+				timeout := serverCfg.Timeout
+				if timeout == 0 {
+					timeout = 30 * time.Second // Default timeout
+				}
 
-				client, initErr = mcpclient.NewClient(serverCfg.Name, serverCfg.Command, serverCfg.Args, serverCfg.Env)
+				client, initErr = mcpclient.NewClientWithTimeout(serverCfg.Name, serverCfg.Command, serverCfg.Args, serverCfg.Env, timeout)
 				if initErr != nil {
 					log.Error().
 						Str("server", serverCfg.Name).

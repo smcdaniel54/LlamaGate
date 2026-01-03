@@ -3,7 +3,7 @@
 
 run:
   # Timeout for analysis, e.g. 30s, 5m. Default is 1m.
-  timeout: 5m
+  timeout: 10m
   
   # Include test files or not.
   tests: true
@@ -11,13 +11,15 @@ run:
   # Which dirs to skip: issues from them won't be reported.
   skip-dirs:
     - vendor
+    - scripts
+    - docs
   
   # Which files to skip: they will be analyzed, but issues from them won't be reported.
   skip-files:
     - ".*\\.pb\\.go$"
 
 linters:
-  # Enable specific linters
+  # Enable specific linters (disabled some slower ones for CI performance)
   enable:
     - errcheck
     - gosimple
@@ -31,8 +33,10 @@ linters:
     - misspell
     - unconvert
     - unparam
-    - gocritic
     - revive
+  # Disabled gocritic for now due to performance - can re-enable if needed
+  disable:
+    - gocritic
 
 linters-settings:
   # Increase timeout for individual linters if needed

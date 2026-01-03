@@ -206,15 +206,27 @@ func (p *Proxy) executeToolLoop(ctx context.Context, requestID string, model str
 			Int("round", round).
 			Int("tool_calls", len(assistantMessage.ToolCalls)).
 			Msg("Tool execution round completed")
+
+		// Check if we've hit the max rounds limit
+		// If we have tool calls and we're at or past the limit, we need to exit with an error
+		// Note: round is now the number of completed rounds (1-indexed), so round == maxRounds means we've done maxRounds rounds
+		if round >= maxRounds {
+			// Check if there are pending tool calls that we couldn't execute
+			// If assistantMessage still has tool calls, it means we hit the limit with pending work
+			if len(assistantMessage.ToolCalls) > 0 {
+				log.Warn().
+					Str("request_id", requestID).
+					Int("rounds", round).
+					Msg("Maximum tool rounds reached with pending tool calls")
+				return createErrorResponse("max_tool_rounds_exceeded", fmt.Sprintf("Maximum tool rounds (%d) exceeded", maxRounds), requestID), nil
+			}
+			// If no tool calls, we completed naturally at the limit - this is fine
+			// The loop will exit naturally and we'll return the final response below
+		}
 	}
 
-	if round >= maxRounds {
-		log.Warn().
-			Str("request_id", requestID).
-			Int("rounds", round).
-			Msg("Maximum tool rounds reached")
-		return createErrorResponse("max_tool_rounds_exceeded", fmt.Sprintf("Maximum tool rounds (%d) exceeded", maxRounds), requestID), nil
-	}
+	// If we exit the loop naturally (no more tool calls), return the final response
+	// This handles the case where we completed exactly maxRounds rounds with no pending tool calls
 
 	// Final response
 	lastMsg := messages[len(messages)-1]
