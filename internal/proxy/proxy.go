@@ -6,18 +6,22 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/llamagate/llamagate/internal/cache"
+	"github.com/llamagate/llamagate/internal/tools"
 	"github.com/rs/zerolog/log"
 )
 
 // Proxy handles forwarding requests to Ollama
 type Proxy struct {
-	ollamaHost string
-	cache      *cache.Cache
-	client     *http.Client
+	ollamaHost  string
+	cache       *cache.Cache
+	client      *http.Client
+	toolManager *tools.Manager    // Optional tool manager for MCP
+	guardrails  *tools.Guardrails // Optional guardrails for tool execution
 }
 
 // New creates a new proxy instance with default timeout (5 minutes)
@@ -36,19 +40,57 @@ func NewWithTimeout(ollamaHost string, cache *cache.Cache, timeout time.Duration
 	}
 }
 
+// SetToolManager sets the tool manager for MCP tool support
+func (p *Proxy) SetToolManager(toolManager *tools.Manager, guardrails *tools.Guardrails) {
+	p.toolManager = toolManager
+	p.guardrails = guardrails
+}
+
 // ChatCompletionRequest represents an OpenAI-compatible chat completion request
 type ChatCompletionRequest struct {
-	Model       string    `json:"model"`
-	Messages    []Message `json:"messages"`
-	Stream      bool      `json:"stream,omitempty"`
-	Temperature float64   `json:"temperature,omitempty"`
-	MaxTokens   int       `json:"max_tokens,omitempty"`
+	Model       string           `json:"model"`
+	Messages    []Message        `json:"messages"`
+	Stream      bool             `json:"stream,omitempty"`
+	Temperature float64          `json:"temperature,omitempty"`
+	MaxTokens   int              `json:"max_tokens,omitempty"`
+	Tools       []OpenAITool     `json:"tools,omitempty"`       // OpenAI tools format
+	Functions   []OpenAIFunction `json:"functions,omitempty"`   // Legacy functions format
+	ToolChoice  interface{}      `json:"tool_choice,omitempty"` // "none", "auto", or object
 }
 
 // Message represents a chat message
 type Message struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
+	Role       string      `json:"role"`
+	Content    interface{} `json:"content"` // Can be string or array
+	ToolCalls  []ToolCall  `json:"tool_calls,omitempty"`
+	ToolCallID string      `json:"tool_call_id,omitempty"` // For tool role messages
+	Name       string      `json:"name,omitempty"`         // For function role messages (legacy)
+}
+
+// ToolCall represents a tool call in a message
+type ToolCall struct {
+	ID       string           `json:"id"`
+	Type     string           `json:"type"` // "function"
+	Function ToolCallFunction `json:"function"`
+}
+
+// ToolCallFunction represents the function details in a tool call
+type ToolCallFunction struct {
+	Name      string `json:"name"`
+	Arguments string `json:"arguments"` // JSON string
+}
+
+// OpenAITool represents an OpenAI tool definition
+type OpenAITool struct {
+	Type     string         `json:"type"` // "function"
+	Function OpenAIFunction `json:"function"`
+}
+
+// OpenAIFunction represents an OpenAI function definition
+type OpenAIFunction struct {
+	Name        string                 `json:"name"`
+	Description string                 `json:"description"`
+	Parameters  map[string]interface{} `json:"parameters"` // JSON Schema
 }
 
 // HandleChatCompletions handles /v1/chat/completions endpoint
@@ -96,9 +138,62 @@ func (p *Proxy) HandleChatCompletions(c *gin.Context) {
 		return
 	}
 
-	// Check cache for non-streaming requests
+	// Handle tool execution if MCP is enabled and tools are available
+	if p.toolManager != nil && p.guardrails != nil && !req.Stream {
+		// Check if tools are requested or if we should inject available tools
+		hasTools := len(req.Tools) > 0 || len(req.Functions) > 0
+		availableTools := p.toolManager.GetAllTools()
+
+		if hasTools || len(availableTools) > 0 {
+			// Use tool execution loop
+			result, err := p.executeToolLoop(c.Request.Context(), requestID, req.Model, req.Messages, p.ollamaHost, req.Stream, req.Temperature)
+			if err != nil {
+				log.Error().
+					Str("request_id", requestID).
+					Err(err).
+					Msg("Tool execution loop failed")
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"error": gin.H{
+						"message":    "Tool execution failed",
+						"type":       "internal_error",
+						"request_id": requestID,
+					},
+				})
+				return
+			}
+
+			c.Data(http.StatusOK, "application/json", result)
+			log.Info().
+				Str("request_id", requestID).
+				Dur("duration", time.Since(startTime)).
+				Msg("Tool execution completed")
+			return
+		}
+	}
+
+	// Build final messages - check if tools will be injected before checking cache
+	// This ensures cache keys match the actual query sent to Ollama
+	finalMessages := req.Messages
+	if p.toolManager != nil && (len(req.Tools) > 0 || len(req.Functions) > 0) {
+		availableTools := p.toolManager.GetAllTools()
+		if len(availableTools) > 0 {
+			// Build messages with tool context for cache key
+			toolDescriptions := make([]string, 0, len(availableTools))
+			for _, tool := range availableTools {
+				toolDescriptions = append(toolDescriptions, fmt.Sprintf("- %s: %s", tool.NamespacedName, tool.Description))
+			}
+			systemMsg := Message{
+				Role:    "system",
+				Content: fmt.Sprintf("Available tools:\n%s", strings.Join(toolDescriptions, "\n")),
+			}
+			// Prepend system message to final messages
+			finalMessages = append([]Message{systemMsg}, req.Messages...)
+		}
+	}
+
+	// Check cache for non-streaming requests using final messages (with tool context if applicable)
 	if !req.Stream {
-		if cached, found := p.cache.Get(req.Model, req.Messages); found {
+		if cached, found := p.cache.Get(req.Model, finalMessages); found {
 			log.Info().
 				Str("request_id", requestID).
 				Str("model", req.Model).
@@ -113,10 +208,10 @@ func (p *Proxy) HandleChatCompletions(c *gin.Context) {
 			Msg("Cache miss")
 	}
 
-	// Convert to Ollama format
+	// Convert to Ollama format using final messages
 	ollamaReq := map[string]interface{}{
 		"model":    req.Model,
-		"messages": req.Messages,
+		"messages": finalMessages,
 		"stream":   req.Stream,
 	}
 
@@ -167,7 +262,7 @@ func (p *Proxy) HandleChatCompletions(c *gin.Context) {
 	if req.Stream {
 		p.handleStreamingResponse(c, httpReq, requestID, startTime)
 	} else {
-		p.handleNonStreamingResponse(c, httpReq, requestID, startTime, req.Model, req.Messages)
+		p.handleNonStreamingResponse(c, httpReq, requestID, startTime, req.Model, finalMessages)
 	}
 }
 
