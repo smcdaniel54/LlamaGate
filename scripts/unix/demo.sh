@@ -25,7 +25,7 @@ echo -e "${BLUE}[1/5]${NC} Checking LlamaGate..."
 if curl -s -f "${BASE_URL}/health" > /dev/null; then
     echo -e "${GREEN}✓${NC} LlamaGate is running!"
 else
-    echo -e "${YELLOW}✗${NC} LlamaGate is not running. Start it with: ./run.sh"
+    echo -e "${YELLOW}✗${NC} LlamaGate is not running. Start it with: ./scripts/unix/run.sh"
     exit 1
 fi
 echo ""
@@ -125,8 +125,7 @@ if [ $TIME1 -gt 0 ] && [ $TIME2 -gt 0 ] && [ $TIME1 -gt $TIME2 ]; then
     echo ""
     echo "Next steps:"
     echo "  • See README.md for full documentation"
-    echo "  • See QUICKSTART.md for quick setup guide"
-    echo "  • See DEMO_QUICKSTART.md for migration examples"
+    echo "  • See QUICKSTART.md for quick setup guide and migration examples"
     echo "  • Edit .env file to customize settings"
     echo ""
 else
@@ -141,8 +140,7 @@ else
     echo ""
     echo "Next steps:"
     echo "  • See README.md for full documentation"
-    echo "  • See QUICKSTART.md for quick setup guide"
-    echo "  • See DEMO_QUICKSTART.md for migration examples"
+    echo "  • See QUICKSTART.md for quick setup guide and migration examples"
     echo ""
 fi
 

@@ -1,5 +1,5 @@
-# Binaries
-llamagate
+# Binaries (only match at root level, not source directories)
+/llamagate
 llamagate.exe
 *.exe~
 *.dll
@@ -9,17 +9,6 @@ llamagate.exe
 # Log files
 *.log
 llamagate.log
-
-# Keep install scripts and directories
-!install/
-!install.sh
-!install.cmd
-!scripts/
-!run.sh
-!run.cmd
-!test.sh
-!test.cmd
-!build.cmd
 
 # Test binary, built with `go test -c`
 *.test

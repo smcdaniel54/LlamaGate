@@ -274,7 +274,7 @@ Write-Host "LlamaGate has been installed successfully!" -ForegroundColor Green
 Write-Host ""
 Write-Host "Quick Start:" -ForegroundColor Yellow
 Write-Host "  1. Double-click 'LlamaGate.lnk' on your desktop, or" -ForegroundColor White
-Write-Host "  2. Run: .\run.cmd" -ForegroundColor White
+Write-Host "  2. Run: scripts\windows\run.cmd" -ForegroundColor White
 Write-Host "  3. Or run: .\llamagate.exe" -ForegroundColor White
 Write-Host ""
 Write-Host "Configuration:" -ForegroundColor Yellow
@@ -282,9 +282,9 @@ Write-Host "  Edit .env file to change settings" -ForegroundColor White
 Write-Host ""
 Write-Host "Documentation:" -ForegroundColor Yellow
 Write-Host "  See README.md for full documentation" -ForegroundColor White
-Write-Host "  See TESTING.md for testing instructions" -ForegroundColor White
+Write-Host "  See docs\TESTING.md for testing instructions" -ForegroundColor White
 Write-Host ""
 Write-Host "Test the installation:" -ForegroundColor Yellow
-Write-Host "  Run: .\test.cmd" -ForegroundColor White
+Write-Host "  Run: scripts\windows\test.cmd" -ForegroundColor White
 Write-Host ""
 

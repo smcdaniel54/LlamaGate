@@ -18,7 +18,7 @@ curl -s -f "%BASE_URL%/health" >nul 2>&1
 if %ERRORLEVEL% EQU 0 (
     echo ✓ LlamaGate is running!
 ) else (
-    echo ✗ LlamaGate is not running. Start it with: run.cmd
+    echo ✗ LlamaGate is not running. Start it with: scripts\windows\run.cmd
     exit /b 1
 )
 echo.
@@ -96,8 +96,7 @@ echo Your OpenAI code works immediately - just change the base_url!
 echo.
 echo Next steps:
 echo   • See README.md for full documentation
-echo   • See QUICKSTART.md for quick setup guide
-echo   • See DEMO_QUICKSTART.md for migration examples
+echo   • See QUICKSTART.md for quick setup guide and migration examples
 echo   • Edit .env file to customize settings
 echo.
 

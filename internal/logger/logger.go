@@ -39,7 +39,9 @@ func Init(debug bool, logFile string) {
 		// Close any previously opened log file to prevent file descriptor leak
 		logFileMutex.Lock()
 		if logFileHandle != nil {
-			logFileHandle.Close()
+			if err := logFileHandle.Close(); err != nil {
+				log.Warn().Err(err).Msg("Failed to close log file handle")
+			}
 			logFileHandle = nil
 		}
 		logFileMutex.Unlock()
@@ -73,7 +75,9 @@ func Close() {
 	logFileMutex.Lock()
 	defer logFileMutex.Unlock()
 	if logFileHandle != nil {
-		logFileHandle.Close()
+		if err := logFileHandle.Close(); err != nil {
+			log.Warn().Err(err).Msg("Failed to close log file handle")
+		}
 		logFileHandle = nil
 	}
 	// Update the global logger to only write to stdout after file is closed
@@ -82,7 +86,11 @@ func Close() {
 	if !loggerClosed {
 		loggerClosed = true
 		currentLevel := zerolog.GlobalLevel()
-		log.Logger = zerolog.New(os.Stdout).With().Timestamp().Logger().Level(currentLevel)
+		// Create new logger with stdout output
+		log.Logger = zerolog.New(os.Stdout).With().Timestamp().Logger()
+		// Set the global level to preserve log filtering
+		// Using .Level() on the logger instance doesn't affect global filtering
+		zerolog.SetGlobalLevel(currentLevel)
 	}
 }
 
