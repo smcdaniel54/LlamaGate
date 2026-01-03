@@ -30,14 +30,14 @@ The easiest way to install LlamaGate:
 **Windows:**
 
 ```cmd
-scripts\windows\install.cmd
+install\windows\install.cmd
 ```
 
 **Unix/Linux/macOS:**
 
 ```bash
-chmod +x scripts/unix/install.sh
-./scripts/unix/install.sh
+chmod +x install/unix/install.sh
+./install/unix/install.sh
 ```
 
 **The installer will:**
@@ -400,7 +400,7 @@ chmod +x test-installer-unix.sh
 **Using the installer (recommended):**
 
 ```cmd
-scripts\windows\install.cmd
+install\windows\install.cmd
 ```
 
 **Manual build:**

@@ -25,13 +25,13 @@ That's it. Your existing OpenAI code works immediately.
 **Windows:**
 
 ```cmd
-scripts\windows\install.cmd
+install\windows\install.cmd
 ```
 
 **Mac/Linux:**
 
 ```bash
-chmod +x scripts/unix/install.sh && ./scripts/unix/install.sh
+chmod +x install/unix/install.sh && ./install/unix/install.sh
 ```
 
 ### Step 2: Start (30 seconds)
