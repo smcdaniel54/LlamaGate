@@ -82,7 +82,11 @@ func Close() {
 	if !loggerClosed {
 		loggerClosed = true
 		currentLevel := zerolog.GlobalLevel()
-		log.Logger = zerolog.New(os.Stdout).With().Timestamp().Logger().Level(currentLevel)
+		// Create new logger with stdout output
+		log.Logger = zerolog.New(os.Stdout).With().Timestamp().Logger()
+		// Set the global level to preserve log filtering
+		// Using .Level() on the logger instance doesn't affect global filtering
+		zerolog.SetGlobalLevel(currentLevel)
 	}
 }
 
