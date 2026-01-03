@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"crypto/subtle"
 	"net/http"
 	"strings"
 
@@ -30,8 +31,8 @@ func AuthMiddleware(apiKey string) gin.HandlerFunc {
 			}
 		}
 
-		// Validate the key
-		if providedKey != apiKey {
+		// Validate the key using constant-time comparison to prevent timing attacks
+		if subtle.ConstantTimeCompare([]byte(providedKey), []byte(apiKey)) != 1 {
 			log.Warn().
 				Str("request_id", c.GetString("request_id")).
 				Str("ip", c.ClientIP()).

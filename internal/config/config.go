@@ -2,6 +2,9 @@ package config
 
 import (
 	"fmt"
+	"net/url"
+	"strconv"
+	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
@@ -15,6 +18,7 @@ type Config struct {
 	Debug        bool
 	Port         string
 	LogFile      string
+	Timeout      time.Duration // HTTP client timeout
 }
 
 // Load reads configuration from .env file (if present) and environment variables using Viper
@@ -33,6 +37,7 @@ func Load() (*Config, error) {
 	viper.SetDefault("DEBUG", false)
 	viper.SetDefault("PORT", "8080")
 	viper.SetDefault("LOG_FILE", "")
+	viper.SetDefault("TIMEOUT", "5m") // 5 minutes default
 
 	cfg := &Config{
 		OllamaHost:   viper.GetString("OLLAMA_HOST"),
@@ -43,10 +48,62 @@ func Load() (*Config, error) {
 		LogFile:      viper.GetString("LOG_FILE"),
 	}
 
-	// Validate required config
-	if cfg.OllamaHost == "" {
-		return nil, fmt.Errorf("OLLAMA_HOST is required")
+	// Parse timeout duration
+	timeoutStr := viper.GetString("TIMEOUT")
+	if timeoutStr == "" {
+		timeoutStr = "5m" // Default to 5 minutes
+	}
+	timeout, err := time.ParseDuration(timeoutStr)
+	if err != nil {
+		return nil, fmt.Errorf("invalid TIMEOUT format: %w (expected duration like '5m', '30s', '1h')", err)
+	}
+	cfg.Timeout = timeout
+
+	// Validate configuration
+	if err := cfg.Validate(); err != nil {
+		return nil, err
 	}
 
 	return cfg, nil
+}
+
+// Validate validates all configuration values
+func (c *Config) Validate() error {
+	// Validate OLLAMA_HOST
+	if c.OllamaHost == "" {
+		return fmt.Errorf("OLLAMA_HOST is required")
+	}
+
+	// Validate OLLAMA_HOST is a valid URL
+	parsedURL, err := url.Parse(c.OllamaHost)
+	if err != nil {
+		return fmt.Errorf("invalid OLLAMA_HOST URL: %w", err)
+	}
+	if parsedURL.Scheme != "http" && parsedURL.Scheme != "https" {
+		return fmt.Errorf("invalid OLLAMA_HOST scheme: must be http or https")
+	}
+
+	// Validate PORT
+	port, err := strconv.Atoi(c.Port)
+	if err != nil {
+		return fmt.Errorf("invalid PORT: %s (must be a number)", c.Port)
+	}
+	if port < 1 || port > 65535 {
+		return fmt.Errorf("invalid PORT: %d (must be between 1 and 65535)", port)
+	}
+
+	// Validate RATE_LIMIT_RPS
+	if c.RateLimitRPS <= 0 {
+		return fmt.Errorf("invalid RATE_LIMIT_RPS: %f (must be greater than 0)", c.RateLimitRPS)
+	}
+
+	// Validate TIMEOUT
+	if c.Timeout <= 0 {
+		return fmt.Errorf("invalid TIMEOUT: %v (must be greater than 0)", c.Timeout)
+	}
+	if c.Timeout > 30*time.Minute {
+		return fmt.Errorf("invalid TIMEOUT: %v (must be less than 30 minutes)", c.Timeout)
+	}
+
+	return nil
 }

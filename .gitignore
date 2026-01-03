@@ -49,3 +49,7 @@ go.work
 .DS_Store
 Thumbs.db
 
+# Temporary files
+temp_*.json
+*.tmp
+

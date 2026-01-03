@@ -6,7 +6,9 @@
 
 LlamaGate is a production-ready, OpenAI-compatible HTTP proxy/gateway for local Ollama instances. It's a lightweight, single-binary tool that forwards requests to Ollama with added features like caching, authentication, rate limiting, and structured logging.
 
-> 🚀 **New to LlamaGate?** Check out the **[Demo & Quick-Start Showcase](DEMO_QUICKSTART.md)** to see how to swap your ChatGPT/OpenAI app to LlamaGate in under 5 minutes!
+> 🚀 **New to LlamaGate?** 
+> - **[Quick Start Guide](QUICKSTART.md)** - Get running in 2 minutes
+> - **[Demo & Migration Guide](DEMO_QUICKSTART.md)** - See how to swap your ChatGPT/OpenAI app to LlamaGate
 
 ## Features
 
@@ -102,6 +104,7 @@ LlamaGate can be configured via:
 | `DEBUG` | `false` | Enable debug logging |
 | `PORT` | `8080` | Server port |
 | `LOG_FILE` | (empty) | Path to log file (optional, logs to console if empty) |
+| `TIMEOUT` | `5m` | HTTP client timeout for Ollama requests (e.g., `5m`, `30s`, `30m` - max 30 minutes) |
 
 ### Using .env File (Recommended)
 
@@ -115,6 +118,7 @@ RATE_LIMIT_RPS=10
 DEBUG=false
 PORT=8080
 LOG_FILE=llamagate.log
+TIMEOUT=5m
 ```
 
 The `.env` file is automatically loaded when the application starts. Environment variables set directly will override `.env` file values, making it easy to override settings for specific runs.
@@ -258,7 +262,27 @@ Lists available Ollama models. Forwards requests to Ollama `/api/tags` and conve
 
 ### `GET /health`
 
-Health check endpoint.
+Health check endpoint that verifies both server and Ollama connectivity.
+
+**Response (healthy):**
+```json
+{
+  "status": "healthy",
+  "ollama": "connected",
+  "ollama_host": "http://localhost:11434"
+}
+```
+
+**Response (unhealthy):**
+```json
+{
+  "status": "unhealthy",
+  "error": "Ollama unreachable",
+  "ollama_host": "http://localhost:11434"
+}
+```
+
+Returns `200 OK` when healthy, `503 Service Unavailable` when Ollama is unreachable.
 
 ## Authentication
 
