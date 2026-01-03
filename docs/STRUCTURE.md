@@ -20,9 +20,13 @@ LlamaGate/
 │   │   ├── run-debug.cmd      # Runner with debug mode
 │   │   ├── test.cmd           # Test script
 │   │   └── build.cmd          # Build script
-│   └── unix/                  # Unix/Linux/macOS scripts
-│       ├── run.sh             # Main runner
-│       └── test.sh            # Test script
+│   ├── unix/                  # Unix/Linux/macOS scripts
+│   │   ├── run.sh             # Main runner
+│   │   └── test.sh            # Test script
+│   └── demo/                  # Demo and example scripts
+│       ├── mcp-demo-workflow.py   # Python demo workflow
+│       ├── mcp-demo-workflow.sh   # Bash demo workflow
+│       └── mcp-demo-workflow.ps1  # PowerShell demo workflow
 │
 ├── tests/                      # Test scripts
 │   └── installer/             # Installer test scripts
@@ -45,7 +49,10 @@ LlamaGate/
 │   ├── INSTALL.md             # Installation guide
 │   ├── TESTING.md             # Testing guide
 │   ├── STRUCTURE.md           # This file
-│   └── INSTALLER_TESTING.md   # Installer testing guide
+│   ├── INSTALLER_TESTING.md   # Installer testing guide
+│   ├── MCP.md                 # MCP client documentation
+│   ├── MCP_QUICKSTART.md      # MCP quick start guide
+│   └── MCP_DEMO_QUICKSTART.md # MCP demo with multiple servers
 │
 ├── README.md                  # Main project documentation
 ├── QUICKSTART.md              # Quick start guide
@@ -56,6 +63,8 @@ LlamaGate/
 │
 ├── Dockerfile                 # Docker build file
 ├── .env.example              # Configuration template
+├── mcp-config.example.yaml    # MCP configuration example
+├── mcp-demo-config.yaml       # MCP demo configuration
 ├── go.mod                    # Go module definition
 └── go.sum                    # Go dependencies checksum
 ```

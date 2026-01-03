@@ -168,6 +168,8 @@ Or use the provided batch files (see Windows Quick Start above).
 
 > 🔧 **Using MCP Tools?** See the [MCP Quick Start Guide](docs/MCP_QUICKSTART.md) to get started with MCP integration.
 
+> 🎯 **Want to see MCP in action?** Check out the [MCP Demo QuickStart](docs/MCP_DEMO_QUICKSTART.md) for a complete example with multiple document processing servers.
+
 ### Health Check
 
 ```bash
