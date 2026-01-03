@@ -6,15 +6,15 @@ We release patches for security vulnerabilities. Which versions are eligible for
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 0.1.x   | :white_check_mark: |
-| < 0.1   | :x:                |
+| 1.0.x   | :white_check_mark: |
+| < 1.0   | :x:                |
 
 ## Reporting a Vulnerability
 
 If you discover a security vulnerability in LlamaGate, please report it responsibly:
 
 1. **Do NOT** open a public GitHub issue
-2. Email security details to: [Your Security Email] (or create a private security advisory on GitHub)
+2. Create a private security advisory at: https://github.com/llamagate/llamagate/security/advisories/new
 3. Include:
    - Description of the vulnerability
    - Steps to reproduce
@@ -103,7 +103,7 @@ We will:
 
 ## Security Updates
 
-Security updates will be released as patch versions (e.g., 0.1.1, 0.1.2) and will be clearly marked in the CHANGELOG.
+Security updates will be released as patch versions (e.g., 1.0.1, 1.0.2) and will be clearly marked in the CHANGELOG.
 
 ## Acknowledgments
 
