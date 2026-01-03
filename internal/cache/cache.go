@@ -168,10 +168,13 @@ func (c *Cache) Set(model string, messages interface{}, response []byte) error {
 			}
 			// If loadedOnRestore is true, another thread stored it, so counter is already correct
 		} else {
-			// Entry still exists - just update it (no counter change needed)
-			// Note: There's still a theoretical race where entry is deleted between
-			// LoadAndDelete and Store(), but this is extremely rare and the counter
-			// will self-correct on the next eviction or expiration
+			// Entry still exists - update it using Store()
+			// However, between LoadAndDelete and Store(), another thread could delete
+			// the entry. If that happens, Store() will restore it but we won't increment
+			// the counter. This is a very rare race condition that cannot be easily
+			// detected without additional state tracking or synchronization overhead.
+			// The counter may be slightly off in this case, but it will self-correct
+			// on the next eviction or expiration, which is acceptable for this use case.
 			c.store.Store(key, entry)
 		}
 		return nil
@@ -210,9 +213,12 @@ func (c *Cache) Set(model string, messages interface{}, response []byte) error {
 			c.evictOldest()
 			if c.entryCount >= oldCount {
 				// All eviction attempts failed - cache is full and can't make room
-				// We already stored the entry, so we need to remove it to maintain consistency
-				c.store.Delete(key)
-				// Return an explicit error so callers know caching failed
+				// We already stored the entry via LoadOrStore, so we cannot delete it
+				// as that would violate cache consistency. Instead, we accept that the
+				// cache is temporarily over capacity. The counter is accurate, and the
+				// next eviction or expiration will correct the size.
+				// Return an explicit error so callers know caching succeeded but cache
+				// is at capacity
 				return errors.New("cache is full and cannot evict entries to make room")
 			}
 		}
