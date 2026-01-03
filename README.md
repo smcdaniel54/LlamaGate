@@ -12,11 +12,13 @@ LlamaGate is a production-ready, OpenAI-compatible HTTP proxy/gateway for local 
 ## Features
 
 - ✅ **OpenAI-Compatible API**: Drop-in replacement for OpenAI API endpoints
+- ✅ **MCP Client Support**: Connect to MCP servers and expose their tools to models (v1.1)
 - ✅ **Caching**: In-memory caching for identical prompts to reduce Ollama load
 - ✅ **Authentication**: Optional API key authentication via headers
 - ✅ **Rate Limiting**: Configurable rate limiting using leaky bucket algorithm
 - ✅ **Structured Logging**: JSON logging with request IDs using Zerolog
 - ✅ **Streaming Support**: Full support for streaming chat completions
+- ✅ **Tool/Function Calling**: Execute MCP tools in multi-round loops
 - ✅ **Graceful Shutdown**: Clean shutdown on SIGINT/SIGTERM
 - ✅ **Single Binary**: Lightweight, easy to deploy
 - ✅ **Docker Support**: Multi-stage Dockerfile for minimal image size
@@ -105,6 +107,15 @@ LlamaGate can be configured via:
 | `PORT` | `8080` | Server port |
 | `LOG_FILE` | (empty) | Path to log file (optional, logs to console if empty) |
 | `TIMEOUT` | `5m` | HTTP client timeout for Ollama requests (e.g., `5m`, `30s`, `30m` - max 30 minutes) |
+| `MCP_ENABLED` | `false` | Enable MCP client functionality (see [MCP docs](docs/MCP.md)) |
+| `MCP_MAX_TOOL_ROUNDS` | `10` | Maximum tool execution rounds |
+| `MCP_MAX_TOOL_CALLS_PER_ROUND` | `10` | Maximum tool calls per round |
+| `MCP_DEFAULT_TOOL_TIMEOUT` | `30s` | Default timeout for tool execution |
+| `MCP_MAX_TOOL_RESULT_SIZE` | `1048576` | Maximum tool result size in bytes (1MB) |
+| `MCP_ALLOW_TOOLS` | (empty) | Comma-separated glob patterns for allowed tools |
+| `MCP_DENY_TOOLS` | (empty) | Comma-separated glob patterns for denied tools |
+
+**Note:** MCP server configuration is best done via YAML/JSON config file. See [mcp-config.example.yaml](mcp-config.example.yaml) and [MCP Documentation](docs/MCP.md).
 
 ### Using .env File (Recommended)
 
@@ -154,6 +165,8 @@ Or use the provided batch files (see Windows Quick Start above).
 ## Usage
 
 > 💡 **Migrating from OpenAI?** See the [Quick Start Guide](QUICKSTART.md) for step-by-step migration examples.
+
+> 🔧 **Using MCP Tools?** See the [MCP Quick Start Guide](docs/MCP_QUICKSTART.md) to get started with MCP integration.
 
 ### Health Check
 
@@ -431,6 +444,17 @@ ollama serve
 go run ./cmd/llamagate
 ```
 
+## MCP Client Support
+
+LlamaGate v1.1 includes support for the Model Context Protocol (MCP) as a client. This allows you to:
+
+- Connect to MCP servers and discover their tools
+- Expose tools to chat completion requests  
+- Execute tool calls in multi-round loops
+- Enforce security with allow/deny lists
+
+See [MCP Documentation](docs/MCP.md) for full details and [MCP Quick Start](docs/MCP_QUICKSTART.md) for a getting started guide.
+
 ## Project Structure
 
 ```text
@@ -445,12 +469,28 @@ go run ./cmd/llamagate
 │   │   └── logger.go        # Logger initialization
 │   ├── cache/
 │   │   └── cache.go         # In-memory cache
+│   ├── mcpclient/
+│   │   ├── client.go        # MCP client implementation
+│   │   ├── stdio.go         # stdio transport
+│   │   ├── sse.go           # SSE transport (stub)
+│   │   ├── types.go         # MCP protocol types
+│   │   └── errors.go        # MCP errors
+│   ├── tools/
+│   │   ├── manager.go       # Tool registry and management
+│   │   ├── mapper.go        # MCP to OpenAI format conversion
+│   │   ├── guardrails.go    # Security and limits
+│   │   └── types.go         # Tool types
 │   ├── middleware/
 │   │   ├── auth.go          # Authentication middleware
 │   │   ├── rate_limit.go    # Rate limiting middleware
 │   │   └── request_id.go    # Request ID middleware
 │   └── proxy/
-│       └── proxy.go          # Proxy handlers
+│       ├── proxy.go          # Proxy handlers
+│       └── tool_loop.go     # Tool execution loop
+├── docs/
+│   ├── MCP.md               # MCP documentation
+│   └── MCP_QUICKSTART.md    # MCP quick start guide
+├── mcp-config.example.yaml  # MCP configuration example
 ├── Dockerfile
 ├── go.mod
 ├── go.sum

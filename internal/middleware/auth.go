@@ -1,3 +1,4 @@
+// Package middleware provides HTTP middleware for authentication, rate limiting, and request tracking.
 package middleware
 
 import (
@@ -25,7 +26,7 @@ func AuthMiddleware(apiKey string) gin.HandlerFunc {
 			authHeader := c.GetHeader("Authorization")
 			if authHeader != "" {
 				parts := strings.SplitN(authHeader, " ", 2)
-				if len(parts) == 2 && strings.ToLower(parts[0]) == "bearer" {
+				if len(parts) == 2 && strings.EqualFold(parts[0], "bearer") {
 					providedKey = parts[1]
 				}
 			}

@@ -1,3 +1,4 @@
+// Package middleware provides HTTP middleware for authentication, rate limiting, and request tracking.
 package middleware
 
 import (

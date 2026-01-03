@@ -1,0 +1,92 @@
+# golangci-lint configuration file
+# See https://golangci-lint.run/usage/configuration/
+
+run:
+  # Timeout for analysis, e.g. 30s, 5m. Default is 1m.
+  timeout: 15m
+  
+  # Include test files or not.
+  tests: true
+  
+  # Build tags to use
+  build-tags: []
+
+linters:
+  # Enable specific linters (disabled some slower ones for CI performance)
+  enable:
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - typecheck
+    - unused
+    - gofmt
+    - goimports
+    - misspell
+    - unconvert
+    - unparam
+    - revive
+  # Disabled gocritic for now due to performance - can re-enable if needed
+  disable:
+    - gocritic
+
+linters-settings:
+  # Increase timeout for individual linters if needed
+  shadow:
+    enabled: true
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - experimental
+      - opinionated
+      - performance
+      - style
+    disabled-checks:
+      - dupImport # https://github.com/go-critic/go-critic/issues/845
+      - ifElseChain
+      - octalLiteral
+      - whyNoLint
+      - wrapperFunc
+
+issues:
+  # Which dirs to exclude: issues from them won't be reported.
+  exclude-dirs:
+    - vendor
+    - scripts
+    - docs
+    - .git
+  
+  # Which files to exclude: they will be analyzed, but issues from them won't be reported.
+  exclude-files:
+    - ".*\\.pb\\.go$"
+  
+  # Excluding configuration per-path, per-linter, per-text and per-source
+  exclude-rules:
+    # Exclude some linters from running on tests files.
+    - path: _test\.go
+      linters:
+        - errcheck
+        - gosec
+        - goconst
+        - gocritic
+        - unparam
+        - gosec
+    # Exclude known linter issues
+    - text: "Error return value of .((os\\.stdout|os\\.stderr|os\\.stdin)\\.|.*Close|.*Flush|os\\.Remove(All)?|.*printf?|os\\.(Un)?Setenv). is not checked"
+      linters:
+        - errcheck
+    - text: "exported function .* should have comment or be unexported"
+      linters:
+        - revive
+        - golint
+
+  # The default value is false. If set to true exclude-rules regular expressions become case sensitive.
+  exclude-use-default: false
+  
+  # The maximum number of issues per one linter. Set to 0 to disable. Default is 50.
+  max-issues-per-linter: 0
+  
+  # The maximum count of issues with the same text. Set to 0 to disable. Default is 3.
+  max-same-issues: 0
+

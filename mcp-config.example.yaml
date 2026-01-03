@@ -1,0 +1,77 @@
+# LlamaGate MCP Configuration Example
+# Place this file as llamagate.yaml in the project root or ~/.llamagate/
+
+mcp:
+  # Enable MCP client functionality
+  enabled: true
+
+  # Maximum number of tool execution rounds before stopping
+  max_tool_rounds: 10
+
+  # Maximum number of tool calls allowed per round
+  max_tool_calls_per_round: 10
+
+  # Default timeout for tool execution
+  default_tool_timeout: 30s
+
+  # Maximum size of tool result before truncation (in bytes)
+  max_tool_result_size: 1048576  # 1MB
+
+  # Allow list: glob patterns for tools that are allowed
+  # Empty list means all tools are allowed (except denied ones)
+  allow_tools:
+    - "mcp.filesystem.*"
+    - "mcp.fetch.*"
+    - "mcp.database.read_*"
+
+  # Deny list: glob patterns for tools that are denied
+  # Deny takes precedence over allow
+  deny_tools:
+    - "mcp.dangerous.*"
+    - "mcp.filesystem.delete_*"
+
+  # MCP server configurations
+  servers:
+    # Filesystem MCP Server
+    - name: filesystem
+      enabled: true
+      transport: stdio
+      command: npx
+      args:
+        - -y
+        - @modelcontextprotocol/server-filesystem
+        - /tmp  # Allowed directory
+      env:
+        NODE_ENV: production
+      timeout: 30s
+
+    # Fetch MCP Server (for HTTP requests)
+    - name: fetch
+      enabled: true
+      transport: stdio
+      command: npx
+      args:
+        - -y
+        - @modelcontextprotocol/server-fetch
+      timeout: 60s
+
+    # Example: Custom Python MCP Server
+    # - name: custom
+    #   enabled: false
+    #   transport: stdio
+    #   command: python
+    #   args:
+    #     - /path/to/mcp_server.py
+    #   env:
+    #     PYTHONPATH: /path/to/lib
+    #   timeout: 45s
+
+    # Example: SSE transport (not yet implemented)
+    # - name: remote
+    #   enabled: false
+    #   transport: sse
+    #   url: http://localhost:3000/mcp
+    #   headers:
+    #     Authorization: Bearer token123
+    #   timeout: 30s
+
