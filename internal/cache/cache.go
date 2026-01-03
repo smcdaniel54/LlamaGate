@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"sync"
 	"time"
 )
@@ -163,8 +164,9 @@ func (c *Cache) Set(model string, messages interface{}, response []byte) error {
 		// Evict oldest entry (simple FIFO eviction)
 		// evictOldest() may fail if Get() concurrently deleted the entry
 		// We need to verify eviction succeeded before proceeding
-		// Retry eviction up to 3 times to handle concurrent deletions
-		maxRetries := 3
+		// Retry eviction with a higher limit to handle concurrent deletions
+		// We must succeed in evicting at least one entry to make room
+		maxRetries := 10 // Increased retries to handle high concurrency
 		for retry := 0; retry < maxRetries && c.entryCount >= c.maxSize; retry++ {
 			oldCount := c.entryCount
 			c.evictOldest()
@@ -175,11 +177,18 @@ func (c *Cache) Set(model string, messages interface{}, response []byte) error {
 			// Eviction failed - entry was already deleted by Get() or cleanupExpired()
 			// Try again with a different entry
 		}
-		// If still at capacity after retries, we cannot safely add without exceeding limit
-		// This is a rare race condition where all eviction attempts failed
-		// Skip adding to prevent cache growth beyond limit
+		// If still at capacity after retries, we must force eviction or return an error
+		// Silent failure is not acceptable - callers need to know if caching failed
 		if c.entryCount >= c.maxSize {
-			return nil // Skip adding to prevent exceeding maxSize
+			// Last resort: try one more eviction attempt
+			// If this fails, the cache is truly full and we return an error
+			oldCount := c.entryCount
+			c.evictOldest()
+			if c.entryCount >= oldCount {
+				// All eviction attempts failed - cache is full and can't make room
+				// Return an explicit error so callers know caching failed
+				return errors.New("cache is full and cannot evict entries to make room")
+			}
 		}
 	}
 
