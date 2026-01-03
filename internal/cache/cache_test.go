@@ -47,8 +47,12 @@ func TestCache_DifferentModels(t *testing.T) {
 	response1 := []byte(`{"response": "Response 1"}`)
 	response2 := []byte(`{"response": "Response 2"}`)
 
-	c.Set(model1, messages, response1)
-	c.Set(model2, messages, response2)
+	if err := c.Set(model1, messages, response1); err != nil {
+		t.Fatalf("Failed to set cache for model1: %v", err)
+	}
+	if err := c.Set(model2, messages, response2); err != nil {
+		t.Fatalf("Failed to set cache for model2: %v", err)
+	}
 
 	// Check model1
 	cached1, found1 := c.Get(model1, messages)
@@ -77,8 +81,12 @@ func TestCache_DifferentMessages(t *testing.T) {
 	response1 := []byte(`{"response": "Response 1"}`)
 	response2 := []byte(`{"response": "Response 2"}`)
 
-	c.Set(model, messages1, response1)
-	c.Set(model, messages2, response2)
+	if err := c.Set(model, messages1, response1); err != nil {
+		t.Fatalf("Failed to set cache for messages1: %v", err)
+	}
+	if err := c.Set(model, messages2, response2); err != nil {
+		t.Fatalf("Failed to set cache for messages2: %v", err)
+	}
 
 	// Check messages1
 	cached1, found1 := c.Get(model, messages1)
@@ -102,7 +110,9 @@ func TestCache_Clear(t *testing.T) {
 	}
 
 	response := []byte(`{"response": "Hello"}`)
-	c.Set(model, messages, response)
+	if err := c.Set(model, messages, response); err != nil {
+		t.Fatalf("Failed to set cache: %v", err)
+	}
 
 	// Verify it's cached
 	_, found := c.Get(model, messages)
@@ -119,4 +129,3 @@ func TestCache_Clear(t *testing.T) {
 		t.Error("Expected cache miss after clear")
 	}
 }
-
