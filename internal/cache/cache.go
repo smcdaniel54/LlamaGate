@@ -146,20 +146,25 @@ func (c *Cache) Set(model string, messages interface{}, response []byte) error {
 		Timestamp: time.Now(),
 	}
 
-	// Hold lock for entire operation to prevent race conditions
-	c.mu.Lock()
-	defer c.mu.Unlock()
-
-	// Check if key already exists first
-	_, exists := c.store.Load(key)
-	if exists {
-		// Key already exists - just update it (no eviction needed for updates)
+	// Use LoadOrStore atomically to handle race conditions with cleanupExpired
+	// and concurrent Set() calls. This prevents counter corruption when cleanupExpired
+	// deletes an entry between our existence check and store operation.
+	_, loaded := c.store.LoadOrStore(key, entry)
+	if loaded {
+		// Entry already exists - update it atomically
+		// This handles the case where another thread stored it, or where
+		// cleanupExpired deleted it and we're restoring it
 		c.store.Store(key, entry)
 		return nil
 	}
 
-	// Key doesn't exist - need to add new entry
-	// Check if we need to evict BEFORE storing to maintain accurate count
+	// Entry didn't exist - we successfully stored a new entry
+	// Now we need to increment the counter, but we must check for eviction first
+	// Hold lock for counter operations and eviction
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	// Check if we need to evict BEFORE incrementing counter to maintain accurate count
 	if c.maxSize > 0 && c.entryCount >= c.maxSize {
 		// Evict oldest entry (simple FIFO eviction)
 		// evictOldest() may fail if Get() concurrently deleted the entry
@@ -186,22 +191,16 @@ func (c *Cache) Set(model string, messages interface{}, response []byte) error {
 			c.evictOldest()
 			if c.entryCount >= oldCount {
 				// All eviction attempts failed - cache is full and can't make room
+				// We already stored the entry, so we need to remove it to maintain consistency
+				c.store.Delete(key)
 				// Return an explicit error so callers know caching failed
 				return errors.New("cache is full and cannot evict entries to make room")
 			}
 		}
 	}
 
-	// Now store the new entry and increment counter
-	// Use LoadOrStore to handle race condition where another thread might have
-	// stored the same key between our Load check and this Store
-	_, loaded := c.store.LoadOrStore(key, entry)
-	if !loaded {
-		// We successfully stored a new entry - increment counter
-		c.entryCount++
-	}
-	// If loaded is true, another thread stored it between our check and LoadOrStore
-	// In that case, we just update it (no counter increment needed)
+	// Increment counter for the new entry we stored
+	c.entryCount++
 	return nil
 }
 
