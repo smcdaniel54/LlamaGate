@@ -25,9 +25,62 @@ LlamaGate is a production-ready, OpenAI-compatible HTTP proxy/gateway for local 
 
 ## Installation
 
-### Automated Installer (Recommended)
+### ⚡ One-Click Install (Easiest - Recommended!)
 
-The easiest way to install LlamaGate:
+**Automatically downloads the correct binary for your platform - no Go required!**
+
+**Windows:**
+```cmd
+install\windows\install-binary.cmd
+```
+
+**Unix/Linux/macOS:**
+```bash
+chmod +x install/unix/install-binary.sh
+./install/unix/install-binary.sh
+```
+
+This will:
+- ✅ Automatically detect your platform
+- ✅ Download the correct binary
+- ✅ Set up the executable
+- ✅ Create a default `.env` configuration file
+
+**That's it!** You're ready to run LlamaGate.
+
+### 🚀 Manual Download (Also Easy - No Go Required!)
+
+**Prefer to download manually?** Get pre-built binaries from [Releases](https://github.com/llamagate/llamagate/releases/latest):
+
+**Windows:**
+1. Download [llamagate-windows-amd64.exe](https://github.com/llamagate/llamagate/releases/latest/download/llamagate-windows-amd64.exe)
+2. Run: `.\llamagate-windows-amd64.exe`
+
+**Linux:**
+```bash
+curl -LO https://github.com/llamagate/llamagate/releases/latest/download/llamagate-linux-amd64
+chmod +x llamagate-linux-amd64
+./llamagate-linux-amd64
+```
+
+**macOS:**
+```bash
+# Apple Silicon (M1/M2/M3)
+curl -LO https://github.com/llamagate/llamagate/releases/latest/download/llamagate-darwin-arm64
+chmod +x llamagate-darwin-arm64
+./llamagate-darwin-arm64
+
+# Intel Mac
+curl -LO https://github.com/llamagate/llamagate/releases/latest/download/llamagate-darwin-amd64
+chmod +x llamagate-darwin-amd64
+./llamagate-darwin-amd64
+```
+
+**All platforms:** See [Releases](https://github.com/llamagate/llamagate/releases) for all available binaries (amd64, arm64, etc.).
+
+### Build from Source (For Developers)
+
+If you prefer to build from source or need custom builds:
 
 **Windows:**
 
@@ -49,7 +102,6 @@ chmod +x install/unix/install.sh
 - Install all Go dependencies
 - Build the LlamaGate binary
 - Create a `.env` configuration file
-- Optionally create shortcuts/services
 
 **Follow the prompts** to configure your installation
 
