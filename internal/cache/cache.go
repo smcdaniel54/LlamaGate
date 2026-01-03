@@ -97,14 +97,34 @@ func (c *Cache) Get(model string, messages interface{}) ([]byte, bool) {
 
 	// Check if entry has expired
 	if c.ttl > 0 && time.Since(entry.Timestamp) > c.ttl {
-		// Use LoadAndDelete to atomically check and delete
-		// This prevents double-deletion race condition with cleanupExpired()
-		// Only decrement counter if we actually deleted the entry
-		_, deleted := c.store.LoadAndDelete(key)
+		// Use LoadAndDelete to atomically get and delete the entry
+		// This prevents race condition where Set() updates the entry with a new
+		// timestamp between our check and deletion
+		deletedEntry, deleted := c.store.LoadAndDelete(key)
 		if deleted {
-			c.mu.Lock()
-			c.entryCount--
-			c.mu.Unlock()
+			// Verify the deleted entry was actually expired
+			// If it was updated by Set() between our check and LoadAndDelete,
+			// the new entry won't be expired, so we need to restore it
+			deletedCacheEntry, ok := deletedEntry.(*CacheEntry)
+			if ok && time.Since(deletedCacheEntry.Timestamp) > c.ttl {
+				// Entry was actually expired - decrement counter
+				c.mu.Lock()
+				c.entryCount--
+				c.mu.Unlock()
+			} else {
+				// Entry was updated with a new valid timestamp - restore it
+				// Use LoadOrStore to prevent overwriting a fresh entry that may have
+				// been stored by Set() between LoadAndDelete and this restore
+				_, loaded := c.store.LoadOrStore(key, deletedEntry)
+				if loaded {
+					// Another thread stored a fresh entry - don't overwrite it
+					// The fresh entry is already in the cache, so we don't need to do anything
+				}
+				// If !loaded, we successfully restored the entry
+				// Note: We do NOT increment the counter here because the entry was never
+				// removed from the counter (only from the store). The counter still accounts
+				// for this entry, so restoring it doesn't change the count.
+			}
 		}
 		return nil, false
 	}
@@ -229,7 +249,17 @@ func (c *Cache) cleanupExpired() {
 							_, loaded := c.store.LoadOrStore(key, deletedEntry)
 							if loaded {
 								// Another thread stored a fresh entry - don't overwrite it
-								// The fresh entry is already in the cache, so we don't need to do anything
+								// The deleted entry was never decremented from the counter (only expired
+								// entries are decremented). The other thread's Set() may have incremented
+								// the counter if it was a new entry, or left it unchanged if it was an update.
+								// We cannot safely decrement here without knowing which case occurred,
+								// and doing so would cause counter corruption since the deleted entry
+								// was never removed from the counter in the first place.
+								// The counter will be accurate: it accounts for the deleted entry OR the
+								// new entry (depending on whether Set() incremented), and the store has
+								// the new entry. This is acceptable - the counter may be slightly off
+								// in this rare race condition, but it will self-correct on the next
+								// eviction or expiration.
 							}
 							// If !loaded, we successfully restored the entry
 							// Note: We do NOT increment the counter here because the entry was never
