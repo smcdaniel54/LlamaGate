@@ -5,21 +5,27 @@ This guide explains how to test LlamaGate to ensure everything is working correc
 ## Prerequisites
 
 1. **Ollama must be running**
+
    ```cmd
    ollama serve
    ```
+
    Or ensure Ollama is running as a service.
 
 2. **At least one model available**
+
    ```cmd
    ollama pull llama2
    ```
+
    Or any other model you want to test with.
 
 3. **LlamaGate built and ready**
+
    ```cmd
    scripts\windows\build.cmd
    ```
+
    Or use `go run ./cmd/llamagate`
 
 ## Quick Test
@@ -27,15 +33,19 @@ This guide explains how to test LlamaGate to ensure everything is working correc
 ### Windows
 
 1. **Start LlamaGate:**
+
    ```cmd
    scripts\windows\run.cmd
    ```
+
    Or if you have a `.env` file configured:
+
    ```cmd
    llamagate.exe
    ```
 
 2. **Run the test script:**
+
    ```cmd
    scripts\windows\test.cmd
    ```
@@ -51,6 +61,7 @@ curl http://localhost:8080/health
 ```
 
 **Expected response:**
+
 ```json
 {"status":"healthy"}
 ```
@@ -64,6 +75,7 @@ curl http://localhost:8080/v1/models -H "X-API-Key: sk-llamagate"
 ```
 
 **Expected response:**
+
 ```json
 {
   "object": "list",
@@ -90,6 +102,7 @@ curl -X POST http://localhost:8080/v1/chat/completions ^
 ```
 
 **Expected response:**
+
 ```json
 {
   "model": "llama2",
@@ -129,6 +142,7 @@ The second request should complete in milliseconds (cached) vs seconds (from Oll
 If `API_KEY` is set in your `.env`:
 
 **Test with invalid key (should fail):**
+
 ```cmd
 curl -w "\nHTTP Status: %{http_code}\n" http://localhost:8080/v1/models -H "X-API-Key: wrong-key"
 ```
@@ -136,6 +150,7 @@ curl -w "\nHTTP Status: %{http_code}\n" http://localhost:8080/v1/models -H "X-AP
 **Expected:** `401 Unauthorized`
 
 **Test with valid key (should succeed):**
+
 ```cmd
 curl -w "\nHTTP Status: %{http_code}\n" http://localhost:8080/v1/models -H "X-API-Key: sk-llamagate"
 ```
@@ -211,6 +226,7 @@ print(response.choices[0].message.content)
 3. Make requests and check logs for additional debug information
 
 You should see:
+
 - Cache miss/hit messages
 - More detailed request/response logging
 - Gin framework debug output
@@ -218,22 +234,27 @@ You should see:
 ## Common Issues
 
 ### "Connection refused" or "Failed to connect"
+
 - **Issue:** Ollama is not running
 - **Solution:** Start Ollama: `ollama serve`
 
 ### "Model not found"
+
 - **Issue:** Model doesn't exist in Ollama
 - **Solution:** Pull the model: `ollama pull llama2`
 
 ### "401 Unauthorized"
+
 - **Issue:** API key mismatch or missing
 - **Solution:** Check your `.env` file `API_KEY` matches the header value
 
 ### "429 Too Many Requests"
+
 - **Issue:** Rate limit exceeded
 - **Solution:** Wait a moment or increase `RATE_LIMIT_RPS` in `.env`
 
 ### Log file not created
+
 - **Issue:** `LOG_FILE` path might be invalid or permissions issue
 - **Solution:** Check file path is valid and you have write permissions
 
@@ -246,6 +267,7 @@ go test ./...
 ```
 
 This will test:
+
 - Cache functionality
 - Proxy handlers
 - Configuration loading
@@ -253,7 +275,7 @@ This will test:
 ## Performance Testing
 
 For load testing, you can use tools like:
+
 - **Apache Bench (ab)**: `ab -n 100 -c 10 http://localhost:8080/health`
 - **wrk**: `wrk -t4 -c100 -d30s http://localhost:8080/health`
 - **k6**: Write a k6 script for more complex scenarios
-
