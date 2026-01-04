@@ -10,7 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Future features and improvements
 
-## [1.0.0] - 2026-01-05
+## [0.9.0] - 2026-01-05
+
+**Note:** This is a pre-1.0.0 release to gather community feedback. The API may evolve based on user feedback before reaching 1.0.0.
 
 ### Added
 - **OpenAI-Compatible API**: Drop-in replacement for OpenAI API endpoints
@@ -85,5 +87,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Missing request IDs in error responses
 - Cache lookup using incorrect message context (tool injection)
 
-[Unreleased]: https://github.com/llamagate/llamagate/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/llamagate/llamagate/releases/tag/v1.0.0
+[Unreleased]: https://github.com/llamagate/llamagate/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/llamagate/llamagate/releases/tag/v0.9.0

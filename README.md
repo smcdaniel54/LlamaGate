@@ -12,7 +12,7 @@ LlamaGate is a production-ready, OpenAI-compatible HTTP proxy/gateway for local 
 ## Features
 
 - ✅ **OpenAI-Compatible API**: Drop-in replacement for OpenAI API endpoints
-- ✅ **MCP Client Support**: Connect to MCP servers and expose their tools to models (v1.1)
+- ✅ **MCP Client Support**: Connect to MCP servers and expose their tools to models
 - ✅ **Caching**: In-memory caching for identical prompts to reduce Ollama load
 - ✅ **Authentication**: Optional API key authentication via headers
 - ✅ **Rate Limiting**: Configurable rate limiting using leaky bucket algorithm
@@ -500,7 +500,7 @@ go run ./cmd/llamagate
 
 ## MCP Client Support
 
-LlamaGate v1.1 includes support for the Model Context Protocol (MCP) as a client. This allows you to:
+LlamaGate includes support for the Model Context Protocol (MCP) as a client. This allows you to:
 
 - Connect to MCP servers and discover their tools
 - Expose tools to chat completion requests  

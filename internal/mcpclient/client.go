@@ -90,7 +90,7 @@ func (c *Client) initialize(ctx context.Context) error {
 		Capabilities:    ClientCapabilities{},
 		ClientInfo: ClientInfo{
 			Name:    "llamagate",
-			Version: "1.1.0",
+			Version: "0.9.0",
 		},
 	}
 

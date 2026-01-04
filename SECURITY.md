@@ -6,8 +6,8 @@ We release patches for security vulnerabilities. Which versions are eligible for
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 1.0.x   | :white_check_mark: |
-| < 1.0   | :x:                |
+| 0.9.x   | :white_check_mark: |
+| < 0.9   | :x:                |
 
 ## Reporting a Vulnerability
 
@@ -103,7 +103,7 @@ We will:
 
 ## Security Updates
 
-Security updates will be released as patch versions (e.g., 1.0.1, 1.0.2) and will be clearly marked in the CHANGELOG.
+Security updates will be released as patch versions (e.g., 0.9.1, 0.9.2) and will be clearly marked in the CHANGELOG.
 
 ## Acknowledgments
 
