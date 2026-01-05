@@ -52,6 +52,7 @@ jobs:
         GOOS: ${{ matrix.goos }}
         GOARCH: ${{ matrix.goarch }}
         CGO_ENABLED: 0
+      shell: bash
       run: |
         go build -ldflags="-s -w -X main.version=${GITHUB_REF#refs/tags/}" \
           -o ${{ matrix.binary_name }} ./cmd/llamagate
