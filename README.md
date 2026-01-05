@@ -12,7 +12,7 @@ LlamaGate is a production-ready, OpenAI-compatible HTTP proxy/gateway for local 
 ## Features
 
 - ✅ **OpenAI-Compatible API**: Drop-in replacement for OpenAI API endpoints
-- ✅ **MCP Client Support**: Connect to MCP servers and expose their tools to models
+- ✅ **MCP Client Support**: Connect to MCP servers and expose their tools to models ([MCP Guide](docs/MCP.md) | [Quick Start](docs/MCP_QUICKSTART.md))
 - ✅ **Caching**: In-memory caching for identical prompts to reduce Ollama load
 - ✅ **Authentication**: Optional API key authentication via headers
 - ✅ **Rate Limiting**: Configurable rate limiting using leaky bucket algorithm
@@ -22,6 +22,16 @@ LlamaGate is a production-ready, OpenAI-compatible HTTP proxy/gateway for local 
 - ✅ **Graceful Shutdown**: Clean shutdown on SIGINT/SIGTERM
 - ✅ **Single Binary**: Lightweight, easy to deploy
 - ✅ **Docker Support**: Multi-stage Dockerfile for minimal image size
+
+## Documentation
+
+- 📖 **[Quick Start Guide](QUICKSTART.md)** - Get running in 2 minutes
+- 📚 **[Full Documentation Index](docs/README.md)** - Browse all documentation
+- 🔧 **[MCP Integration](docs/MCP.md)** - Model Context Protocol guide
+- 🚀 **[MCP Quick Start](docs/MCP_QUICKSTART.md)** - Get started with MCP in 5 minutes
+- 🎯 **[MCP Demo Guide](docs/MCP_DEMO_QUICKSTART.md)** - Full demo with multiple servers
+- 🧪 **[Testing Guide](docs/TESTING.md)** - Testing your setup
+- 📦 **[Installation Guide](docs/INSTALL.md)** - Detailed installation instructions
 
 ## Installation
 
@@ -218,7 +228,7 @@ Or use the provided batch files (see Windows Quick Start above).
 
 > 💡 **Migrating from OpenAI?** See the [Quick Start Guide](QUICKSTART.md) for step-by-step migration examples.
 
-> 🔧 **Using MCP Tools?** See the [MCP Quick Start Guide](docs/MCP_QUICKSTART.md) to get started with MCP integration.
+> 🔧 **Using MCP Tools?** See the [MCP Quick Start Guide](docs/MCP_QUICKSTART.md) to get started with MCP integration. For complete details, see the [MCP Documentation](docs/MCP.md).
 
 > 🎯 **Want to see MCP in action?** Check out the [MCP Demo QuickStart](docs/MCP_DEMO_QUICKSTART.md) for a complete example with multiple document processing servers.
 
@@ -508,6 +518,59 @@ LlamaGate includes support for the Model Context Protocol (MCP) as a client. Thi
 - Enforce security with allow/deny lists
 
 See [MCP Documentation](docs/MCP.md) for full details and [MCP Quick Start](docs/MCP_QUICKSTART.md) for a getting started guide.
+
+## Project Scope & Paid Tier Boundary
+
+**LlamaGate Core is Open Source**
+
+This repository contains the core LlamaGate functionality:
+- OpenAI-compatible API gateway
+- MCP client support
+- Caching, authentication, rate limiting
+- Basic tool execution
+
+**Advanced Features (Separate Modules)**
+
+The following features are **not included** in this open-source core and are available as separate modules:
+- Advanced workflow automation packs
+- Enterprise connectors and integrations
+- Cloud fallback capabilities
+- Compatibility validation suites
+- Premium support and consulting
+
+These advanced features are maintained separately and are not part of this repository.
+
+## Known Limitations
+
+### Supported Platforms
+- ✅ Windows (amd64)
+- ✅ Linux (amd64, arm64)
+- ✅ macOS (amd64, arm64)
+
+### Model Backends
+- ✅ **Ollama** - Fully supported (primary backend)
+- ❌ Direct OpenAI API - Not included (use OpenAI SDK directly)
+- ❌ Other LLM providers - Not included in core
+
+### MCP Implementation Status
+- ✅ **stdio transport** - Fully implemented
+- ⚠️ **SSE transport** - Interface prepared, implementation pending
+- ✅ **Tool execution** - Multi-round loops supported
+- ✅ **Security guardrails** - Allow/deny lists, timeouts, size limits
+
+### Other Limitations
+- **No built-in HTTPS/TLS** - Use a reverse proxy (nginx, Caddy) for production
+- **In-memory cache only** - Cache is lost on restart (persistent cache not included in core)
+- **Global rate limiting** - Per-IP rate limiting not included in core
+- **No cloud fallback** - Core is designed for local Ollama instances only
+- **Single binary deployment** - No built-in clustering or load balancing
+
+### What's Not Included
+- Database persistence (cache, logs, etc.)
+- Multi-tenant isolation
+- Advanced monitoring/observability dashboards
+- Enterprise SSO/authentication providers
+- High-availability/clustering features
 
 ## Project Structure
 
