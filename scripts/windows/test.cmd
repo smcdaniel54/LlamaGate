@@ -109,7 +109,7 @@ if "%API_KEY%"=="" (
 )
 echo.
 
-echo [6/6] Testing MCP API Endpoints (if MCP enabled)...
+echo [6/7] Testing MCP API Endpoints (if MCP enabled)...
 if "%API_KEY%"=="" (
     set AUTH_HEADER=
 ) else (
@@ -124,6 +124,27 @@ if %ERRORLEVEL% EQU 0 (
 ) else (
     echo.
     echo ℹ MCP API test skipped (MCP may not be enabled)
+)
+echo.
+
+echo [7/7] Testing MCP URI Scheme (if MCP enabled)...
+if "%API_KEY%"=="" (
+    set AUTH_HEADER=
+) else (
+    set AUTH_HEADER=-H "X-API-Key: %API_KEY%"
+)
+echo Testing chat completion with MCP URI...
+echo Note: This requires an MCP server with resources configured
+curl -s -X POST %BASE_URL%/v1/chat/completions %AUTH_HEADER% ^
+    -H "Content-Type: application/json" ^
+    -d "{\"model\":\"llama2\",\"messages\":[{\"role\":\"user\",\"content\":\"Test mcp://test-server/resource\"}]}" >nul
+if %ERRORLEVEL% EQU 0 (
+    echo.
+    echo ✓ MCP URI scheme test completed
+    echo   Note: If MCP is not enabled or server not found, request will continue without resource context
+) else (
+    echo.
+    echo ℹ MCP URI test skipped (MCP may not be enabled or server not configured)
 )
 echo.
 

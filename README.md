@@ -537,12 +537,33 @@ go run ./cmd/llamagate
 
 LlamaGate includes support for the Model Context Protocol (MCP) as a client. This allows you to:
 
-- Connect to MCP servers and discover their tools
+- Connect to MCP servers and discover their tools, resources, and prompts
 - Expose tools to chat completion requests  
 - Execute tool calls in multi-round loops
+- Reference MCP resources directly in chat messages using `mcp://` URIs
 - Enforce security with allow/deny lists
+- Access MCP management via HTTP API
 
 See [MCP Documentation](docs/MCP.md) for full details and [MCP Quick Start](docs/MCP_QUICKSTART.md) for a getting started guide.
+
+### MCP URI Scheme
+
+You can reference MCP resources directly in chat completion messages:
+
+```bash
+curl -X POST http://localhost:8080/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: sk-llamagate" \
+  -d '{
+    "model": "llama3.2",
+    "messages": [{
+      "role": "user",
+      "content": "Summarize mcp://filesystem/file:///docs/readme.txt"
+    }]
+  }'
+```
+
+LlamaGate will automatically fetch the resource content and inject it as context.
 
 ## Project Scope & Paid Tier Boundary
 

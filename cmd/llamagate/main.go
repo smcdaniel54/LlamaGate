@@ -160,6 +160,9 @@ func main() {
 
 		// Set tool manager and guardrails on proxy
 		proxyInstance.SetToolManager(toolManager, guardrails)
+		
+		// Set server manager on proxy for MCP resource context injection
+		proxyInstance.SetServerManager(serverManager)
 
 		toolCount := len(toolManager.GetAllTools())
 		log.Info().

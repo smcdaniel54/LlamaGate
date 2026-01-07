@@ -284,7 +284,66 @@ LlamaGate discovers and caches resources and prompts from MCP servers:
 - **Resources**: Readable data exposed by MCP servers (e.g., files, database results)
 - **Prompts**: Reusable, parameterized prompt templates
 
-These are currently available internally and will be exposed via HTTP API in Phase 2.
+Resources and prompts are available via the HTTP API (see [API Documentation](API.md)) and can be referenced directly in chat completions using the MCP URI scheme.
+
+### MCP URI Scheme
+
+LlamaGate supports the `mcp://` URI scheme for directly referencing MCP resources in chat completion messages. When you include an MCP URI in a message, LlamaGate automatically fetches the resource content and injects it as context.
+
+**URI Format:**
+```
+mcp://<server-name>/<resource-uri>
+```
+
+**Examples:**
+- `mcp://filesystem/file:///path/to/file.txt`
+- `mcp://database/query://users`
+- `mcp://github/repo://owner/repo/README.md`
+
+**Usage in Chat Completions:**
+
+```json
+{
+  "model": "llama3.2",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Summarize the content from mcp://filesystem/file:///docs/readme.txt"
+    }
+  ]
+}
+```
+
+When LlamaGate processes this request, it will:
+1. Parse the `mcp://filesystem/file:///docs/readme.txt` URI
+2. Fetch the resource content from the `filesystem` MCP server
+3. Inject the resource content as a system message with context
+4. Send the enhanced conversation to Ollama
+
+**Multiple URIs:**
+
+You can reference multiple resources in a single message:
+
+```json
+{
+  "model": "llama3.2",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Compare mcp://filesystem/file1.txt and mcp://filesystem/file2.txt"
+    }
+  ]
+}
+```
+
+**Error Handling:**
+
+If a resource cannot be fetched (server unavailable, resource not found, etc.), LlamaGate will:
+- Log a warning
+- Continue processing the request without that resource
+- Return the original message without the resource context
+
+This ensures that requests with invalid URIs don't fail completely.
 
 ## Limitations
 
@@ -292,6 +351,5 @@ These are currently available internally and will be exposed via HTTP API in Pha
 - SSE transport is not yet implemented (use stdio or http)
 - Tool execution is limited to non-streaming requests
 - Ollama model must support function/tool calling for best results
-- Resources and prompts are discovered but not yet exposed via HTTP API (planned for Phase 2)
-- HTTP API endpoints for MCP management are planned for Phase 2
+- MCP URI scheme only supports text resources (binary resources are not yet supported in chat context)
 

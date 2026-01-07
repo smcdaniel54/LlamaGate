@@ -189,7 +189,28 @@ curl -X POST -H "X-API-Key: sk-llamagate" -H "Content-Type: application/json" ^
 
 **Note:** If MCP is not enabled, these endpoints will return `503 Service Unavailable`. See [MCP Documentation](MCP.md) for configuration details.
 
-### 7. Test File Logging
+### 7. Test MCP URI Scheme (Optional)
+
+If MCP is enabled and you have servers with resources configured, you can test the MCP URI scheme:
+
+**Test with MCP URI in message:**
+
+```cmd
+curl -X POST http://localhost:8080/v1/chat/completions ^
+  -H "Content-Type: application/json" ^
+  -H "X-API-Key: sk-llamagate" ^
+  -d "{\"model\":\"llama2\",\"messages\":[{\"role\":\"user\",\"content\":\"Summarize mcp://filesystem/file:///docs/readme.txt\"}]}"
+```
+
+**Expected behavior:**
+- LlamaGate will parse the `mcp://filesystem/file:///docs/readme.txt` URI
+- Fetch the resource content from the filesystem MCP server
+- Inject the resource content as context
+- Send the enhanced conversation to Ollama
+
+**Note:** If the MCP server is not available or the resource doesn't exist, LlamaGate will log a warning and continue processing the request without the resource context.
+
+### 8. Test File Logging
 
 1. Set `LOG_FILE=llamagate.log` in your `.env` file
 2. Start LlamaGate
@@ -202,7 +223,7 @@ type llamagate.log
 
 You should see structured JSON logs with request information.
 
-### 8. Test Rate Limiting
+### 9. Test Rate Limiting
 
 Make rapid requests to test rate limiting:
 
@@ -212,7 +233,7 @@ for /L %i in (1,1,15) do @curl -s -X POST http://localhost:8080/v1/chat/completi
 
 After 10 requests (default `RATE_LIMIT_RPS=10`), you should start getting `429 Too Many Requests` responses.
 
-### 9. Test Streaming
+### 10. Test Streaming
 
 Test streaming chat completions:
 

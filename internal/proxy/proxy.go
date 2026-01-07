@@ -23,6 +23,7 @@ type Proxy struct {
 	client      *http.Client
 	toolManager *tools.Manager    // Optional tool manager for MCP
 	guardrails  *tools.Guardrails // Optional guardrails for tool execution
+	serverManager interface{}     // Optional server manager for MCP resource access (to avoid circular import)
 }
 
 // New creates a new proxy instance with default timeout (5 minutes)
@@ -45,6 +46,12 @@ func NewWithTimeout(ollamaHost string, cache *cache.Cache, timeout time.Duration
 func (p *Proxy) SetToolManager(toolManager *tools.Manager, guardrails *tools.Guardrails) {
 	p.toolManager = toolManager
 	p.guardrails = guardrails
+}
+
+// SetServerManager sets the server manager for MCP resource access
+// serverManager should be *mcpclient.ServerManager (using interface{} to avoid circular import)
+func (p *Proxy) SetServerManager(serverManager interface{}) {
+	p.serverManager = serverManager
 }
 
 // ChatCompletionRequest represents an OpenAI-compatible chat completion request
@@ -172,9 +179,19 @@ func (p *Proxy) HandleChatCompletions(c *gin.Context) {
 		}
 	}
 
+	// Inject MCP resource context if MCP URIs are found in messages
+	finalMessages, err := p.injectMCPResourceContext(c.Request.Context(), requestID, req.Messages)
+	if err != nil {
+		log.Warn().
+			Str("request_id", requestID).
+			Err(err).
+			Msg("Failed to inject MCP resource context, continuing without it")
+		// Continue with original messages if resource injection fails
+		finalMessages = req.Messages
+	}
+
 	// Build final messages - check if tools will be injected before checking cache
 	// This ensures cache keys match the actual query sent to Ollama
-	finalMessages := req.Messages
 	if p.toolManager != nil && (len(req.Tools) > 0 || len(req.Functions) > 0) {
 		availableTools := p.toolManager.GetAllTools()
 		if len(availableTools) > 0 {

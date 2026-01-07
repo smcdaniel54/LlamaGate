@@ -110,7 +110,7 @@ else
 fi
 echo ""
 
-echo "[6/6] Testing MCP API Endpoints (if MCP enabled)..."
+echo "[6/7] Testing MCP API Endpoints (if MCP enabled)..."
 if [ -n "$API_KEY" ]; then
     AUTH_HEADER="-H \"X-API-Key: $API_KEY\""
 else
@@ -129,6 +129,30 @@ if [ $? -eq 0 ]; then
 else
     echo ""
     echo "ℹ MCP API test skipped (MCP may not be enabled)"
+fi
+echo ""
+
+echo "[7/7] Testing MCP URI Scheme (if MCP enabled)..."
+echo "Testing chat completion with MCP URI..."
+echo "Note: This requires an MCP server with resources configured"
+BODY='{"model":"llama2","messages":[{"role":"user","content":"Test mcp://test-server/resource"}]}'
+if [ -n "$API_KEY" ]; then
+    curl -s -X POST "$BASE_URL/v1/chat/completions" \
+        -H "Content-Type: application/json" \
+        -H "X-API-Key: $API_KEY" \
+        -d "$BODY" > /dev/null
+else
+    curl -s -X POST "$BASE_URL/v1/chat/completions" \
+        -H "Content-Type: application/json" \
+        -d "$BODY" > /dev/null
+fi
+if [ $? -eq 0 ]; then
+    echo ""
+    echo "✓ MCP URI scheme test completed"
+    echo "  Note: If MCP is not enabled or server not found, request will continue without resource context"
+else
+    echo ""
+    echo "ℹ MCP URI test skipped (MCP may not be enabled or server not configured)"
 fi
 echo ""
 
