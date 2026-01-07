@@ -10,6 +10,7 @@ Welcome to the LlamaGate documentation! This directory contains detailed guides 
 - [MCP Client Documentation](MCP.md) - Complete MCP integration guide
 - [MCP Quick Start](MCP_QUICKSTART.md) - Get started with MCP in 5 minutes
 - [MCP Demo Guide](MCP_DEMO_QUICKSTART.md) - Full demo with multiple servers
+- [MCP HTTP API](API.md) - Complete API reference for MCP management endpoints
 
 ## Development
 - [Testing Guide](TESTING.md) - How to test your setup

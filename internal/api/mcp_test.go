@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -30,6 +31,8 @@ func setupTestRouter(handler *MCPHandler) *gin.Engine {
 		mcp.GET("/servers/:name/resources/*uri", handler.ReadServerResource)
 		mcp.GET("/servers/:name/prompts", handler.ListServerPrompts)
 		mcp.POST("/servers/:name/prompts/:promptName", handler.GetServerPrompt)
+		mcp.POST("/execute", handler.ExecuteTool)
+		mcp.POST("/servers/:name/refresh", handler.RefreshServerMetadata)
 	}
 	return router
 }
@@ -63,8 +66,19 @@ func createMockMCPServer() *httptest.Server {
 			resp.Result = json.RawMessage(`{"resources":[]}`)
 		case "prompts/list":
 			resp.Result = json.RawMessage(`{"prompts":[]}`)
-		case "tools/execute":
-			resp.Result = json.RawMessage(`{"content":[]}`)
+		case "tools/call":
+			// Return a proper tool execution result (MCP uses "tools/call" not "tools/execute")
+			result := map[string]interface{}{
+				"content": []map[string]interface{}{
+					{
+						"type": "text",
+						"text": "Tool execution result",
+					},
+				},
+				"isError": false,
+			}
+			resultJSON, _ := json.Marshal(result)
+			resp.Result = resultJSON
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -305,4 +319,95 @@ func TestMCPHandler_ListServerPrompts(t *testing.T) {
 	assert.Contains(t, response, "server")
 	assert.Contains(t, response, "prompts")
 	assert.Contains(t, response, "count")
+}
+
+func TestMCPHandler_ExecuteTool(t *testing.T) {
+	managerConfig := mcpclient.ManagerConfig{
+		PoolSize:       5,
+		PoolIdleTime:   1 * time.Minute,
+		HealthInterval: 30 * time.Second,
+		HealthTimeout:  3 * time.Second,
+		CacheTTL:       2 * time.Minute,
+	}
+	serverManager := mcpclient.NewServerManager(managerConfig)
+	defer serverManager.Close()
+
+	toolManager := tools.NewManager()
+
+	mcpServer := createMockMCPServer()
+	defer mcpServer.Close()
+
+	client, err := mcpclient.NewClientWithHTTP("test-server", mcpServer.URL, nil, 30*time.Second)
+	require.NoError(t, err)
+	defer client.Close()
+
+	toolManager.AddClient(client)
+	serverManager.AddServer("test-server", client, "http")
+
+	handler := NewMCPHandler(toolManager, serverManager)
+	router := setupTestRouter(handler)
+
+	// Create execute request
+	executeReq := map[string]interface{}{
+		"server":    "test-server",
+		"tool":      "test_tool",
+		"arguments": map[string]interface{}{"arg1": "value1"},
+	}
+	reqBody, _ := json.Marshal(executeReq)
+
+	req := httptest.NewRequest("POST", "/v1/mcp/execute", bytes.NewBuffer(reqBody))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	// Should succeed with proper mock response
+	assert.Equal(t, http.StatusOK, w.Code)
+	var response map[string]interface{}
+	err = json.Unmarshal(w.Body.Bytes(), &response)
+	require.NoError(t, err)
+	assert.Contains(t, response, "server")
+	assert.Contains(t, response, "tool")
+	assert.Contains(t, response, "result")
+	assert.Contains(t, response, "duration")
+	assert.Equal(t, false, response["is_error"])
+	assert.Equal(t, "test-server", response["server"])
+	assert.Equal(t, "test_tool", response["tool"])
+}
+
+func TestMCPHandler_RefreshServerMetadata(t *testing.T) {
+	managerConfig := mcpclient.ManagerConfig{
+		PoolSize:       5,
+		PoolIdleTime:   1 * time.Minute,
+		HealthInterval: 30 * time.Second,
+		HealthTimeout:  3 * time.Second,
+		CacheTTL:       2 * time.Minute,
+	}
+	serverManager := mcpclient.NewServerManager(managerConfig)
+	defer serverManager.Close()
+
+	toolManager := tools.NewManager()
+
+	mcpServer := createMockMCPServer()
+	defer mcpServer.Close()
+
+	client, err := mcpclient.NewClientWithHTTP("test-server", mcpServer.URL, nil, 30*time.Second)
+	require.NoError(t, err)
+	defer client.Close()
+
+	toolManager.AddClient(client)
+	serverManager.AddServer("test-server", client, "http")
+
+	handler := NewMCPHandler(toolManager, serverManager)
+	router := setupTestRouter(handler)
+
+	req := httptest.NewRequest("POST", "/v1/mcp/servers/test-server/refresh", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	var response map[string]interface{}
+	err = json.Unmarshal(w.Body.Bytes(), &response)
+	require.NoError(t, err)
+	assert.Contains(t, response, "server")
+	assert.Contains(t, response, "status")
 }

@@ -157,7 +157,39 @@ curl -w "\nHTTP Status: %{http_code}\n" http://localhost:8080/v1/models -H "X-AP
 
 **Expected:** `200 OK`
 
-### 6. Test File Logging
+### 6. Test MCP API Endpoints (Optional)
+
+If MCP is enabled in your configuration, you can test the MCP API endpoints:
+
+**List MCP Servers:**
+
+```cmd
+curl -H "X-API-Key: sk-llamagate" http://localhost:8080/v1/mcp/servers
+```
+
+**Get Server Health:**
+
+```cmd
+curl -H "X-API-Key: sk-llamagate" http://localhost:8080/v1/mcp/servers/filesystem/health
+```
+
+**List Server Tools:**
+
+```cmd
+curl -H "X-API-Key: sk-llamagate" http://localhost:8080/v1/mcp/servers/filesystem/tools
+```
+
+**Execute a Tool:**
+
+```cmd
+curl -X POST -H "X-API-Key: sk-llamagate" -H "Content-Type: application/json" ^
+  -d "{\"server\":\"filesystem\",\"tool\":\"read_file\",\"arguments\":{\"path\":\"/tmp/test.txt\"}}" ^
+  http://localhost:8080/v1/mcp/execute
+```
+
+**Note:** If MCP is not enabled, these endpoints will return `503 Service Unavailable`. See [MCP Documentation](MCP.md) for configuration details.
+
+### 7. Test File Logging
 
 1. Set `LOG_FILE=llamagate.log` in your `.env` file
 2. Start LlamaGate
@@ -170,7 +202,7 @@ type llamagate.log
 
 You should see structured JSON logs with request information.
 
-### 7. Test Rate Limiting
+### 8. Test Rate Limiting
 
 Make rapid requests to test rate limiting:
 
@@ -180,7 +212,7 @@ for /L %i in (1,1,15) do @curl -s -X POST http://localhost:8080/v1/chat/completi
 
 After 10 requests (default `RATE_LIMIT_RPS=10`), you should start getting `429 Too Many Requests` responses.
 
-### 8. Test Streaming
+### 9. Test Streaming
 
 Test streaming chat completions:
 

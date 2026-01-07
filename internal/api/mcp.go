@@ -1,7 +1,10 @@
 package api
 
 import (
+	"context"
+	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/llamagate/llamagate/internal/mcpclient"
@@ -497,5 +500,165 @@ func (h *MCPHandler) GetServerPrompt(c *gin.Context) {
 		"server":   name,
 		"prompt":   promptName,
 		"messages": result.Messages,
+	})
+}
+
+// ExecuteToolRequest represents a request to execute a tool
+type ExecuteToolRequest struct {
+	Server    string                 `json:"server" binding:"required"`
+	Tool      string                 `json:"tool" binding:"required"`
+	Arguments map[string]interface{} `json:"arguments,omitempty"`
+}
+
+// ExecuteToolResponse represents the result of tool execution
+type ExecuteToolResponse struct {
+	Server   string      `json:"server"`
+	Tool     string      `json:"tool"`
+	Result   interface{} `json:"result,omitempty"`
+	Error    string      `json:"error,omitempty"`
+	IsError  bool        `json:"is_error"`
+	Duration string      `json:"duration,omitempty"`
+}
+
+// ExecuteTool executes a tool on a specific server
+// POST /v1/mcp/execute
+func (h *MCPHandler) ExecuteTool(c *gin.Context) {
+	if h.serverManager == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"error": gin.H{
+				"message": "MCP is not enabled",
+				"type":    "service_unavailable",
+			},
+		})
+		return
+	}
+
+	var req ExecuteToolRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": gin.H{
+				"message": "Invalid request body",
+				"type":    "invalid_request_error",
+			},
+		})
+		return
+	}
+
+	// Get server
+	serverInfo, err := h.serverManager.GetServer(req.Server)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": gin.H{
+				"message": "Server not found",
+				"type":    "not_found",
+			},
+		})
+		return
+	}
+
+	client := serverInfo.Client
+
+	// Execute tool with timeout
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 30*time.Second)
+	defer cancel()
+
+	startTime := time.Now()
+	result, err := client.CallTool(ctx, req.Tool, req.Arguments)
+	duration := time.Since(startTime)
+
+	response := ExecuteToolResponse{
+		Server:   req.Server,
+		Tool:     req.Tool,
+		Duration: duration.String(),
+	}
+
+	if err != nil {
+		response.Error = err.Error()
+		response.IsError = true
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+
+	// Convert result to interface
+	var resultData interface{}
+	if len(result.Content) > 0 {
+		if result.Content[0].Type == "text" {
+			resultData = result.Content[0].Text
+		} else {
+			resultData = result.Content
+		}
+	}
+
+	response.Result = resultData
+	response.IsError = result.IsError
+
+	statusCode := http.StatusOK
+	if result.IsError {
+		statusCode = http.StatusInternalServerError
+	}
+
+	c.JSON(statusCode, response)
+}
+
+// RefreshServerMetadata refreshes tools, resources, and prompts for a server
+// POST /v1/mcp/servers/:name/refresh
+func (h *MCPHandler) RefreshServerMetadata(c *gin.Context) {
+	if h.serverManager == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"error": gin.H{
+				"message": "MCP is not enabled",
+				"type":    "service_unavailable",
+			},
+		})
+		return
+	}
+
+	name := c.Param("name")
+	serverInfo, err := h.serverManager.GetServer(name)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": gin.H{
+				"message": "Server not found",
+				"type":    "not_found",
+			},
+		})
+		return
+	}
+
+	client := serverInfo.Client
+	ctx := c.Request.Context()
+
+	// Refresh all metadata
+	var errors []string
+
+	if err := client.RefreshTools(ctx); err != nil {
+		errors = append(errors, fmt.Sprintf("tools: %v", err))
+	}
+
+	if err := client.RefreshResources(ctx); err != nil {
+		errors = append(errors, fmt.Sprintf("resources: %v", err))
+	}
+
+	if err := client.RefreshPrompts(ctx); err != nil {
+		errors = append(errors, fmt.Sprintf("prompts: %v", err))
+	}
+
+	// Invalidate cache
+	if h.serverManager.GetCache() != nil {
+		h.serverManager.GetCache().InvalidateAll(name)
+	}
+
+	if len(errors) > 0 {
+		c.JSON(http.StatusPartialContent, gin.H{
+			"server": name,
+			"status": "partial",
+			"errors": errors,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"server": name,
+		"status": "refreshed",
 	})
 }

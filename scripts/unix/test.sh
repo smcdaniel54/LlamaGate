@@ -110,6 +110,28 @@ else
 fi
 echo ""
 
+echo "[6/6] Testing MCP API Endpoints (if MCP enabled)..."
+if [ -n "$API_KEY" ]; then
+    AUTH_HEADER="-H \"X-API-Key: $API_KEY\""
+else
+    AUTH_HEADER=""
+fi
+echo "Testing MCP servers list..."
+if [ -n "$API_KEY" ]; then
+    curl -s -H "X-API-Key: $API_KEY" "$BASE_URL/v1/mcp/servers" | jq '.' 2>/dev/null || curl -s -H "X-API-Key: $API_KEY" "$BASE_URL/v1/mcp/servers"
+else
+    curl -s "$BASE_URL/v1/mcp/servers" | jq '.' 2>/dev/null || curl -s "$BASE_URL/v1/mcp/servers"
+fi
+if [ $? -eq 0 ]; then
+    echo ""
+    echo "✓ MCP API endpoints are accessible"
+    echo "  Note: If you see \"MCP is not enabled\", configure MCP in your config file"
+else
+    echo ""
+    echo "ℹ MCP API test skipped (MCP may not be enabled)"
+fi
+echo ""
+
 echo "========================================"
 echo "Testing Complete!"
 echo "========================================"

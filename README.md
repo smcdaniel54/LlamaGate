@@ -30,6 +30,7 @@ LlamaGate is a production-ready, OpenAI-compatible HTTP proxy/gateway for local 
 - 🔧 **[MCP Integration](docs/MCP.md)** - Model Context Protocol guide
 - 🚀 **[MCP Quick Start](docs/MCP_QUICKSTART.md)** - Get started with MCP in 5 minutes
 - 🎯 **[MCP Demo Guide](docs/MCP_DEMO_QUICKSTART.md)** - Full demo with multiple servers
+- 🌐 **[MCP HTTP API](docs/API.md)** - Complete API reference for MCP management
 - 🧪 **[Testing Guide](docs/TESTING.md)** - Testing your setup
 - 📦 **[Installation Guide](docs/INSTALL.md)** - Detailed installation instructions
 

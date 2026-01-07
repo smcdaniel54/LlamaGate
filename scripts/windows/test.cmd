@@ -109,6 +109,24 @@ if "%API_KEY%"=="" (
 )
 echo.
 
+echo [6/6] Testing MCP API Endpoints (if MCP enabled)...
+if "%API_KEY%"=="" (
+    set AUTH_HEADER=
+) else (
+    set AUTH_HEADER=-H "X-API-Key: %API_KEY%"
+)
+echo Testing MCP servers list...
+curl -s %AUTH_HEADER% %BASE_URL%/v1/mcp/servers
+if %ERRORLEVEL% EQU 0 (
+    echo.
+    echo ✓ MCP API endpoints are accessible
+    echo   Note: If you see "MCP is not enabled", configure MCP in your config file
+) else (
+    echo.
+    echo ℹ MCP API test skipped (MCP may not be enabled)
+)
+echo.
+
 :end
 echo ========================================
 echo Testing Complete!

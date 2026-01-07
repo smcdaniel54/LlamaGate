@@ -286,26 +286,32 @@ func main() {
 		v1.POST("/chat/completions", proxyInstance.HandleChatCompletions)
 		v1.GET("/models", proxyInstance.HandleModels)
 
-			// MCP management endpoints
-			if serverManager != nil {
-				mcpHandler := api.NewMCPHandler(toolManager, serverManager)
-				mcp := v1.Group("/mcp")
-				{
-					// Server management
-					mcp.GET("/servers", mcpHandler.ListServers)
-					mcp.GET("/servers/health", mcpHandler.GetAllHealth)
-					mcp.GET("/servers/:name", mcpHandler.GetServer)
-					mcp.GET("/servers/:name/health", mcpHandler.GetServerHealth)
-					mcp.GET("/servers/:name/stats", mcpHandler.GetServerStats)
-					
-					// Tools, Resources, Prompts
-					mcp.GET("/servers/:name/tools", mcpHandler.ListServerTools)
-					mcp.GET("/servers/:name/resources", mcpHandler.ListServerResources)
-					mcp.GET("/servers/:name/resources/*uri", mcpHandler.ReadServerResource)
-					mcp.GET("/servers/:name/prompts", mcpHandler.ListServerPrompts)
-					mcp.POST("/servers/:name/prompts/:promptName", mcpHandler.GetServerPrompt)
-				}
+		// MCP management endpoints
+		if serverManager != nil {
+			mcpHandler := api.NewMCPHandler(toolManager, serverManager)
+			mcp := v1.Group("/mcp")
+			{
+				// Server management
+				mcp.GET("/servers", mcpHandler.ListServers)
+				mcp.GET("/servers/health", mcpHandler.GetAllHealth)
+				mcp.GET("/servers/:name", mcpHandler.GetServer)
+				mcp.GET("/servers/:name/health", mcpHandler.GetServerHealth)
+				mcp.GET("/servers/:name/stats", mcpHandler.GetServerStats)
+
+				// Tools, Resources, Prompts
+				mcp.GET("/servers/:name/tools", mcpHandler.ListServerTools)
+				mcp.GET("/servers/:name/resources", mcpHandler.ListServerResources)
+				mcp.GET("/servers/:name/resources/*uri", mcpHandler.ReadServerResource)
+				mcp.GET("/servers/:name/prompts", mcpHandler.ListServerPrompts)
+				mcp.POST("/servers/:name/prompts/:promptName", mcpHandler.GetServerPrompt)
+
+				// Unified execute endpoint
+				mcp.POST("/execute", mcpHandler.ExecuteTool)
+
+				// Refresh and management
+				mcp.POST("/servers/:name/refresh", mcpHandler.RefreshServerMetadata)
 			}
+		}
 	}
 
 	// Create HTTP server
