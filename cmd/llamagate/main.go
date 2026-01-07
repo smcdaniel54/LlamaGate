@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/llamagate/llamagate/internal/api"
 	"github.com/llamagate/llamagate/internal/cache"
 	"github.com/llamagate/llamagate/internal/config"
 	"github.com/llamagate/llamagate/internal/logger"
@@ -46,11 +47,22 @@ func main() {
 
 	// Initialize MCP clients if enabled
 	var toolManager *tools.Manager
+	var serverManager *mcpclient.ServerManager
 	var guardrails *tools.Guardrails
 	if cfg.MCP != nil && cfg.MCP.Enabled {
 		log.Info().Msg("Initializing MCP clients...")
 
 		toolManager = tools.NewManager()
+
+		// Create server manager with configuration
+		managerConfig := mcpclient.ManagerConfig{
+			PoolSize:       cfg.MCP.ConnectionPoolSize,
+			PoolIdleTime:   cfg.MCP.ConnectionIdleTime,
+			HealthInterval: cfg.MCP.HealthCheckInterval,
+			HealthTimeout:  cfg.MCP.HealthCheckTimeout,
+			CacheTTL:       cfg.MCP.CacheTTL,
+		}
+		serverManager = mcpclient.NewServerManager(managerConfig)
 
 		// Create guardrails
 		guardrails, err = tools.NewGuardrails(
@@ -129,6 +141,15 @@ func main() {
 					Msg("Failed to add MCP client to tool manager")
 				client.Close()
 				continue
+			}
+
+			// Add server to server manager
+			if err := serverManager.AddServer(serverCfg.Name, client, serverCfg.Transport); err != nil {
+				log.Error().
+					Str("server", serverCfg.Name).
+					Err(err).
+					Msg("Failed to add server to server manager")
+				// Continue anyway - tool manager has the client
 			}
 
 			log.Info().
@@ -264,6 +285,27 @@ func main() {
 	{
 		v1.POST("/chat/completions", proxyInstance.HandleChatCompletions)
 		v1.GET("/models", proxyInstance.HandleModels)
+
+			// MCP management endpoints
+			if serverManager != nil {
+				mcpHandler := api.NewMCPHandler(toolManager, serverManager)
+				mcp := v1.Group("/mcp")
+				{
+					// Server management
+					mcp.GET("/servers", mcpHandler.ListServers)
+					mcp.GET("/servers/health", mcpHandler.GetAllHealth)
+					mcp.GET("/servers/:name", mcpHandler.GetServer)
+					mcp.GET("/servers/:name/health", mcpHandler.GetServerHealth)
+					mcp.GET("/servers/:name/stats", mcpHandler.GetServerStats)
+					
+					// Tools, Resources, Prompts
+					mcp.GET("/servers/:name/tools", mcpHandler.ListServerTools)
+					mcp.GET("/servers/:name/resources", mcpHandler.ListServerResources)
+					mcp.GET("/servers/:name/resources/*uri", mcpHandler.ReadServerResource)
+					mcp.GET("/servers/:name/prompts", mcpHandler.ListServerPrompts)
+					mcp.POST("/servers/:name/prompts/:promptName", mcpHandler.GetServerPrompt)
+				}
+			}
 	}
 
 	// Create HTTP server
@@ -291,6 +333,13 @@ func main() {
 	cacheInstance.StopCleanup()
 
 	// Close MCP clients
+	if serverManager != nil {
+		if err := serverManager.Close(); err != nil {
+			log.Warn().Err(err).Msg("Error closing server manager")
+		} else {
+			log.Info().Msg("Server manager closed")
+		}
+	}
 	if toolManager != nil {
 		if err := toolManager.CloseAll(); err != nil {
 			log.Warn().Err(err).Msg("Error closing MCP clients")
