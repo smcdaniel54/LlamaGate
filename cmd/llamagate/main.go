@@ -173,19 +173,8 @@ func main() {
 			Msg("HTTP request")
 	})
 
-	// Auth middleware (if API key is configured)
-	if cfg.APIKey != "" {
-		router.Use(middleware.AuthMiddleware(cfg.APIKey))
-		log.Info().Msg("API key authentication enabled")
-	} else {
-		log.Warn().Msg("API key authentication disabled (API_KEY not set)")
-	}
-
-	// Rate limiting middleware
-	rateLimitMiddleware := middleware.NewRateLimitMiddleware(cfg.RateLimitRPS)
-	router.Use(rateLimitMiddleware.Handler())
-
-	// Health check endpoint - verifies both server and Ollama connectivity
+	// Health check endpoint - register BEFORE auth middleware
+	// This allows monitoring tools to check health without API key
 	router.GET("/health", func(c *gin.Context) {
 		// Check Ollama connectivity with a timeout
 		healthClient := &http.Client{
@@ -241,6 +230,20 @@ func main() {
 		})
 	})
 
+	// Auth middleware (if API key is configured)
+	// Applied to all routes registered AFTER this point
+	if cfg.APIKey != "" {
+		router.Use(middleware.AuthMiddleware(cfg.APIKey))
+		log.Info().Msg("API key authentication enabled")
+	} else {
+		log.Warn().Msg("API key authentication disabled (API_KEY not set)")
+	}
+
+	// Rate limiting middleware
+	rateLimitMiddleware := middleware.NewRateLimitMiddleware(cfg.RateLimitRPS)
+	router.Use(rateLimitMiddleware.Handler())
+
+	// All routes below will require authentication when API_KEY is set
 	// OpenAI-compatible endpoints
 	v1 := router.Group("/v1")
 	{

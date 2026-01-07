@@ -87,7 +87,7 @@ func Load() (*Config, error) {
 
 	cfg := &Config{
 		OllamaHost:   viper.GetString("OLLAMA_HOST"),
-		APIKey:       viper.GetString("API_KEY"),
+		APIKey:       strings.TrimSpace(viper.GetString("API_KEY")), // Trim whitespace
 		RateLimitRPS: viper.GetFloat64("RATE_LIMIT_RPS"),
 		Debug:        viper.GetBool("DEBUG"),
 		Port:         viper.GetString("PORT"),

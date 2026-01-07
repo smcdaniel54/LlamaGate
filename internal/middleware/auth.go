@@ -13,6 +13,12 @@ import (
 // AuthMiddleware validates API key from X-API-Key header or Authorization Bearer token
 func AuthMiddleware(apiKey string) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// Skip auth for health check endpoint
+		if isHealthEndpoint(c.Request.URL.Path) {
+			c.Next()
+			return
+		}
+
 		// Skip auth if API key is not configured
 		if apiKey == "" {
 			c.Next()

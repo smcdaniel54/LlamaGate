@@ -196,6 +196,26 @@ TIMEOUT=5m
 
 The `.env` file is automatically loaded when the application starts. Environment variables set directly will override `.env` file values, making it easy to override settings for specific runs.
 
+## Authentication
+
+When `API_KEY` is configured, all API endpoints (except `/health`) require authentication.
+
+LlamaGate supports two authentication header formats:
+
+### X-API-Key Header (Recommended)
+```bash
+curl -H "X-API-Key: sk-llamagate" http://localhost:8080/v1/models
+```
+
+### Authorization Bearer Header (Alternative)
+```bash
+curl -H "Authorization: Bearer sk-llamagate" http://localhost:8080/v1/models
+```
+
+The `X-API-Key` header is checked first. If not present, `Authorization: Bearer` is checked.
+
+**Note:** The `/health` endpoint does not require authentication and can be used for monitoring and load balancer health checks.
+
 ### Example (Linux/Mac)
 
 ```bash
@@ -366,19 +386,23 @@ Returns `200 OK` when healthy, `503 Service Unavailable` when Ollama is unreacha
 
 ## Authentication
 
-If `API_KEY` is set, all requests must include the API key in one of these ways:
+When `API_KEY` is configured, all API endpoints (except `/health`) require authentication.
 
-1. **X-API-Key header:**
+LlamaGate supports two authentication header formats:
 
-   ```bash
-   curl -H "X-API-Key: sk-llamagate" ...
-   ```
+### X-API-Key Header (Recommended)
+```bash
+curl -H "X-API-Key: sk-llamagate" http://localhost:8080/v1/models
+```
 
-2. **Authorization Bearer header:**
+### Authorization Bearer Header (Alternative)
+```bash
+curl -H "Authorization: Bearer sk-llamagate" http://localhost:8080/v1/models
+```
 
-   ```bash
-   curl -H "Authorization: Bearer sk-llamagate" ...
-   ```
+The `X-API-Key` header is checked first. If not present, `Authorization: Bearer` is checked.
+
+**Note:** The `/health` endpoint does not require authentication and can be used for monitoring and load balancer health checks.
 
 If `API_KEY` is not set, authentication is disabled and all requests are allowed.
 

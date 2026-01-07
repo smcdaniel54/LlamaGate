@@ -31,6 +31,12 @@ func NewRateLimitMiddleware(rps float64) *RateLimitMiddleware {
 // Handler returns a Gin middleware handler for rate limiting
 func (rl *RateLimitMiddleware) Handler() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// Skip rate limiting for health check endpoint
+		if isHealthEndpoint(c.Request.URL.Path) {
+			c.Next()
+			return
+		}
+
 		// Check if request is allowed
 		if !rl.limiter.Allow() {
 			c.JSON(http.StatusTooManyRequests, gin.H{
