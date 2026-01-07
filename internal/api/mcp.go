@@ -43,7 +43,7 @@ type ServerInfo struct {
 // ListServers lists all MCP servers
 // GET /v1/mcp/servers
 func (h *MCPHandler) ListServers(c *gin.Context) {
-	if h.serverManager == nil {
+	if h.serverManager == nil || h.toolManager == nil {
 		response.ServiceUnavailable(c, "MCP is not enabled", "")
 		return
 	}
@@ -65,12 +65,20 @@ func (h *MCPHandler) ListServers(c *gin.Context) {
 		health, _ := h.serverManager.GetHealth(name)
 
 		// Get client to count tools/resources/prompts
-		client, err := h.toolManager.GetClient(name)
+		// Use serverInfo.Client directly for safety, fallback to toolManager if needed
 		var toolCount, resourceCount, promptCount int
-		if err == nil {
-			toolCount = len(client.GetTools())
-			resourceCount = len(client.GetResources())
-			promptCount = len(client.GetPrompts())
+		if serverInfo.Client != nil {
+			toolCount = len(serverInfo.Client.GetTools())
+			resourceCount = len(serverInfo.Client.GetResources())
+			promptCount = len(serverInfo.Client.GetPrompts())
+		} else {
+			// Fallback to toolManager if client not available in serverInfo
+			client, err := h.toolManager.GetClient(name)
+			if err == nil {
+				toolCount = len(client.GetTools())
+				resourceCount = len(client.GetResources())
+				promptCount = len(client.GetPrompts())
+			}
 		}
 
 		status := "unknown"

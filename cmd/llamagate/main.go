@@ -179,7 +179,7 @@ func main() {
 		v1.GET("/models", proxyInstance.HandleModels)
 
 		// MCP management endpoints
-		if mcpComponents != nil && mcpComponents.ServerManager != nil {
+		if mcpComponents != nil && mcpComponents.ServerManager != nil && mcpComponents.ToolManager != nil {
 			toolExecTimeout := 30 * time.Second // Default
 			if cfg.MCP != nil && cfg.MCP.ToolExecutionTimeout > 0 {
 				toolExecTimeout = cfg.MCP.ToolExecutionTimeout
