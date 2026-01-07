@@ -29,6 +29,17 @@ MCP_MAX_TOOL_CALLS_PER_ROUND=10
 MCP_DEFAULT_TOOL_TIMEOUT=30s
 MCP_MAX_TOOL_RESULT_SIZE=1048576  # 1MB in bytes
 
+# Connection pooling (for HTTP transport)
+MCP_CONNECTION_POOL_SIZE=10
+MCP_CONNECTION_IDLE_TIME=5m
+
+# Health monitoring
+MCP_HEALTH_CHECK_INTERVAL=60s
+MCP_HEALTH_CHECK_TIMEOUT=5s
+
+# Caching
+MCP_CACHE_TTL=5m
+
 # Allow/deny lists (comma-separated glob patterns)
 MCP_ALLOW_TOOLS="mcp.filesystem.*,mcp.fetch.*"
 MCP_DENY_TOOLS="mcp.dangerous.*"
@@ -45,6 +56,14 @@ mcp:
   max_tool_calls_per_round: 10
   default_tool_timeout: 30s
   max_tool_result_size: 1048576
+  # Connection pooling (for HTTP transport)
+  connection_pool_size: 10
+  connection_idle_time: 5m
+  # Health monitoring
+  health_check_interval: 60s
+  health_check_timeout: 5s
+  # Caching
+  cache_ttl: 5m
   allow_tools:
     - "mcp.filesystem.*"
     - "mcp.fetch.*"
@@ -225,6 +244,47 @@ print(response.choices[0].message.content)
 - Limit tool result sizes to prevent memory issues
 - Review tool permissions before enabling servers
 - Use environment variables for sensitive configuration
+
+## Connection Pooling
+
+For HTTP transport, LlamaGate uses connection pooling to improve performance and handle concurrent requests efficiently.
+
+**Configuration:**
+- `connection_pool_size`: Maximum number of connections per server pool (default: 10)
+- `connection_idle_time`: Maximum time a connection can be idle before being closed (default: 5m)
+
+Connection pooling is automatically enabled for HTTP transport. stdio transport doesn't use pooling as each connection is a separate process.
+
+## Health Monitoring
+
+LlamaGate automatically monitors the health of all MCP servers, performing periodic health checks to detect connection issues.
+
+**Configuration:**
+- `health_check_interval`: Interval between health checks (default: 60s)
+- `health_check_timeout`: Timeout for individual health checks (default: 5s)
+
+Health checks verify that servers are responsive by attempting to list tools. Unhealthy servers are logged and can be monitored via logs.
+
+## Caching
+
+LlamaGate caches tool definitions, resources, and prompts to reduce server load and improve response times.
+
+**Configuration:**
+- `cache_ttl`: Time-to-live for cached metadata (default: 5m)
+
+Cached data is automatically refreshed when:
+- Cache TTL expires
+- Server connection is lost and re-established
+- Manual refresh is triggered (via future API endpoints)
+
+## Resources and Prompts
+
+LlamaGate discovers and caches resources and prompts from MCP servers:
+
+- **Resources**: Readable data exposed by MCP servers (e.g., files, database results)
+- **Prompts**: Reusable, parameterized prompt templates
+
+These are currently available internally and will be exposed via HTTP API in Phase 2.
 
 ## Limitations
 

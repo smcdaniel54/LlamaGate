@@ -17,6 +17,17 @@ mcp:
   # Maximum size of tool result before truncation (in bytes)
   max_tool_result_size: 1048576  # 1MB
 
+  # Connection pooling (for HTTP transport)
+  connection_pool_size: 10
+  connection_idle_time: 5m
+
+  # Health monitoring
+  health_check_interval: 60s
+  health_check_timeout: 5s
+
+  # Caching
+  cache_ttl: 5m
+
   # Allow list: glob patterns for tools that are allowed
   # Empty list means all tools are allowed (except denied ones)
   allow_tools:

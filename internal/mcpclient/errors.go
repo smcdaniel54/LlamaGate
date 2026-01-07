@@ -11,6 +11,7 @@ var (
 	ErrToolExecutionFailed = fmt.Errorf("tool execution failed")
 	ErrTimeout             = fmt.Errorf("operation timed out")
 	ErrInvalidTransport    = fmt.Errorf("invalid transport type")
+	ErrClientNotFound      = fmt.Errorf("client not found")
 )
 
 // ConnectionError represents a connection-related error

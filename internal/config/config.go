@@ -34,6 +34,14 @@ type MCPConfig struct {
 	AllowTools           []string
 	DenyTools            []string
 	Servers              []MCPServerConfig
+	// Connection pooling
+	ConnectionPoolSize int           // Maximum connections per server pool
+	ConnectionIdleTime time.Duration // Maximum idle time before closing connection
+	// Health monitoring
+	HealthCheckInterval time.Duration // Interval between health checks
+	HealthCheckTimeout  time.Duration // Timeout for individual health checks
+	// Caching
+	CacheTTL time.Duration // TTL for cached metadata (tools, resources, prompts)
 }
 
 // MCPServerConfig holds configuration for a single MCP server
@@ -137,7 +145,52 @@ func loadMCPConfig() (*MCPConfig, error) {
 		MaxToolRounds:        viper.GetInt("MCP_MAX_TOOL_ROUNDS"),
 		MaxToolCallsPerRound: viper.GetInt("MCP_MAX_TOOL_CALLS_PER_ROUND"),
 		MaxToolResultSize:    viper.GetInt64("MCP_MAX_TOOL_RESULT_SIZE"),
+		ConnectionPoolSize:   viper.GetInt("MCP_CONNECTION_POOL_SIZE"),
 	}
+
+	// Parse connection idle time
+	idleTimeStr := viper.GetString("MCP_CONNECTION_IDLE_TIME")
+	if idleTimeStr == "" {
+		idleTimeStr = "5m"
+	}
+	idleTime, err := time.ParseDuration(idleTimeStr)
+	if err != nil {
+		return nil, fmt.Errorf("invalid MCP_CONNECTION_IDLE_TIME format: %w", err)
+	}
+	mcp.ConnectionIdleTime = idleTime
+
+	// Parse health check interval
+	healthIntervalStr := viper.GetString("MCP_HEALTH_CHECK_INTERVAL")
+	if healthIntervalStr == "" {
+		healthIntervalStr = "60s"
+	}
+	healthInterval, err := time.ParseDuration(healthIntervalStr)
+	if err != nil {
+		return nil, fmt.Errorf("invalid MCP_HEALTH_CHECK_INTERVAL format: %w", err)
+	}
+	mcp.HealthCheckInterval = healthInterval
+
+	// Parse health check timeout
+	healthTimeoutStr := viper.GetString("MCP_HEALTH_CHECK_TIMEOUT")
+	if healthTimeoutStr == "" {
+		healthTimeoutStr = "5s"
+	}
+	healthTimeout, err := time.ParseDuration(healthTimeoutStr)
+	if err != nil {
+		return nil, fmt.Errorf("invalid MCP_HEALTH_CHECK_TIMEOUT format: %w", err)
+	}
+	mcp.HealthCheckTimeout = healthTimeout
+
+	// Parse cache TTL
+	cacheTTLStr := viper.GetString("MCP_CACHE_TTL")
+	if cacheTTLStr == "" {
+		cacheTTLStr = "5m"
+	}
+	cacheTTL, err := time.ParseDuration(cacheTTLStr)
+	if err != nil {
+		return nil, fmt.Errorf("invalid MCP_CACHE_TTL format: %w", err)
+	}
+	mcp.CacheTTL = cacheTTL
 
 	// Parse default tool timeout
 	timeoutStr := viper.GetString("MCP_DEFAULT_TOOL_TIMEOUT")
