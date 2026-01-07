@@ -18,13 +18,6 @@ func (p *Proxy) injectMCPResourceContext(ctx context.Context, requestID string, 
 		return messages, nil
 	}
 
-	// Type assert server manager (we know it's *mcpclient.ServerManager)
-	serverManager, ok := p.serverManager.(*mcpclient.ServerManager)
-	if !ok {
-		// Not the right type, skip resource injection
-		return messages, nil
-	}
-
 	var enhancedMessages []Message
 	var resourceContexts []string
 
@@ -50,11 +43,11 @@ func (p *Proxy) injectMCPResourceContext(ctx context.Context, requestID string, 
 
 		// Extract MCP URIs from content
 		mcpURIs := mcpclient.ExtractMCPURIs(contentStr)
-		
+
 		if len(mcpURIs) > 0 {
 			// Fetch resources for each URI
 			for _, mcpURI := range mcpURIs {
-				resourceContent, err := p.fetchMCPResource(ctx, requestID, serverManager, mcpURI)
+				resourceContent, err := p.fetchMCPResource(ctx, requestID, mcpURI)
 				if err != nil {
 					log.Warn().
 						Str("request_id", requestID).
@@ -87,9 +80,9 @@ func (p *Proxy) injectMCPResourceContext(ctx context.Context, requestID string, 
 }
 
 // fetchMCPResource fetches a resource from an MCP server
-func (p *Proxy) fetchMCPResource(ctx context.Context, requestID string, serverManager *mcpclient.ServerManager, mcpURI *mcpclient.MCPURI) (string, error) {
+func (p *Proxy) fetchMCPResource(ctx context.Context, requestID string, mcpURI *mcpclient.MCPURI) (string, error) {
 	// Get server from server manager
-	serverInfo, err := serverManager.GetServer(mcpURI.Server)
+	serverInfo, err := p.serverManager.GetServer(mcpURI.Server)
 	if err != nil {
 		return "", fmt.Errorf("server not found: %w", err)
 	}
@@ -100,7 +93,11 @@ func (p *Proxy) fetchMCPResource(ctx context.Context, requestID string, serverMa
 	}
 
 	// Read resource with timeout
-	resourceCtx, cancel := context.WithTimeout(ctx, 30*time.Second) // TODO: Make configurable
+	timeout := p.resourceFetchTimeout
+	if timeout == 0 {
+		timeout = 30 * time.Second // Default fallback
+	}
+	resourceCtx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
 	result, err := client.ReadResource(resourceCtx, mcpURI.Resource)
@@ -127,4 +124,3 @@ func (p *Proxy) fetchMCPResource(ctx context.Context, requestID string, serverMa
 
 	return content.String(), nil
 }
-

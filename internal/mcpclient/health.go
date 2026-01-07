@@ -18,6 +18,20 @@ const (
 	HealthStatusUnknown   HealthStatus = "unknown"
 )
 
+// String returns the string representation of the health status
+func (hs HealthStatus) String() string {
+	switch hs {
+	case HealthStatusHealthy:
+		return "healthy"
+	case HealthStatusUnhealthy:
+		return "unhealthy"
+	case HealthStatusUnknown:
+		return "unknown"
+	default:
+		return "unknown"
+	}
+}
+
 // HealthCheckResult represents the result of a health check
 type HealthCheckResult struct {
 	Status      HealthStatus
@@ -29,13 +43,13 @@ type HealthCheckResult struct {
 
 // HealthMonitor monitors the health of MCP clients
 type HealthMonitor struct {
-	clients     map[string]*Client
-	results     map[string]*HealthCheckResult
-	mu          sync.RWMutex
-	interval    time.Duration
-	timeout     time.Duration
-	stopChan    chan struct{}
-	stopped     bool
+	clients  map[string]*Client
+	results  map[string]*HealthCheckResult
+	mu       sync.RWMutex
+	interval time.Duration
+	timeout  time.Duration
+	stopChan chan struct{}
+	stopped  bool
 }
 
 // NewHealthMonitor creates a new health monitor
@@ -234,5 +248,3 @@ func (hm *HealthMonitor) performHealthChecks() {
 		}
 	}
 }
-
-

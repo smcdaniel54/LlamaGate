@@ -2,9 +2,8 @@
 package middleware
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
+	"github.com/llamagate/llamagate/internal/response"
 	"golang.org/x/time/rate"
 )
 
@@ -39,12 +38,8 @@ func (rl *RateLimitMiddleware) Handler() gin.HandlerFunc {
 
 		// Check if request is allowed
 		if !rl.limiter.Allow() {
-			c.JSON(http.StatusTooManyRequests, gin.H{
-				"error": gin.H{
-					"message": "Rate limit exceeded",
-					"type":    "rate_limit_error",
-				},
-			})
+			requestID := c.GetString("request_id")
+			response.RateLimitExceeded(c, "Rate limit exceeded", requestID)
 			c.Abort()
 			return
 		}

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/llamagate/llamagate/internal/response"
 	"github.com/rs/zerolog/log"
 )
 
@@ -44,12 +45,8 @@ func AuthMiddleware(apiKey string) gin.HandlerFunc {
 				Str("request_id", c.GetString("request_id")).
 				Str("ip", c.ClientIP()).
 				Msg("Authentication failed")
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"error": gin.H{
-					"message": "Invalid API key",
-					"type":    "invalid_request_error",
-				},
-			})
+			requestID := c.GetString("request_id")
+			response.ErrorResponse(c, http.StatusUnauthorized, response.ErrorTypeInvalidRequest, "Invalid API key", requestID)
 			c.Abort()
 			return
 		}

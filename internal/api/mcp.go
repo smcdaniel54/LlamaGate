@@ -8,21 +8,24 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/llamagate/llamagate/internal/mcpclient"
+	"github.com/llamagate/llamagate/internal/response"
 	"github.com/llamagate/llamagate/internal/tools"
 	"github.com/rs/zerolog/log"
 )
 
 // MCPHandler handles MCP-related HTTP API endpoints
 type MCPHandler struct {
-	toolManager   *tools.Manager
-	serverManager *mcpclient.ServerManager
+	toolManager          *tools.Manager
+	serverManager        *mcpclient.ServerManager
+	toolExecutionTimeout time.Duration
 }
 
 // NewMCPHandler creates a new MCP API handler
-func NewMCPHandler(toolManager *tools.Manager, serverManager *mcpclient.ServerManager) *MCPHandler {
+func NewMCPHandler(toolManager *tools.Manager, serverManager *mcpclient.ServerManager, toolExecutionTimeout time.Duration) *MCPHandler {
 	return &MCPHandler{
-		toolManager:   toolManager,
-		serverManager: serverManager,
+		toolManager:          toolManager,
+		serverManager:        serverManager,
+		toolExecutionTimeout: toolExecutionTimeout,
 	}
 }
 
@@ -41,12 +44,7 @@ type ServerInfo struct {
 // GET /v1/mcp/servers
 func (h *MCPHandler) ListServers(c *gin.Context) {
 	if h.serverManager == nil {
-		c.JSON(http.StatusServiceUnavailable, gin.H{
-			"error": gin.H{
-				"message": "MCP is not enabled",
-				"type":    "service_unavailable",
-			},
-		})
+		response.ServiceUnavailable(c, "MCP is not enabled", "")
 		return
 	}
 
@@ -77,11 +75,7 @@ func (h *MCPHandler) ListServers(c *gin.Context) {
 
 		status := "unknown"
 		if health != nil {
-			if health.Status == mcpclient.HealthStatusHealthy {
-				status = "healthy"
-			} else if health.Status == mcpclient.HealthStatusUnhealthy {
-				status = "unhealthy"
-			}
+			status = health.Status.String()
 		}
 
 		servers = append(servers, ServerInfo{
@@ -105,24 +99,14 @@ func (h *MCPHandler) ListServers(c *gin.Context) {
 // GET /v1/mcp/servers/:name
 func (h *MCPHandler) GetServer(c *gin.Context) {
 	if h.serverManager == nil {
-		c.JSON(http.StatusServiceUnavailable, gin.H{
-			"error": gin.H{
-				"message": "MCP is not enabled",
-				"type":    "service_unavailable",
-			},
-		})
+		response.ServiceUnavailable(c, "MCP is not enabled", "")
 		return
 	}
 
 	name := c.Param("name")
 	serverInfo, err := h.serverManager.GetServer(name)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": gin.H{
-				"message": "Server not found",
-				"type":    "not_found",
-			},
-		})
+		response.NotFound(c, "Server not found", "")
 		return
 	}
 
@@ -137,11 +121,7 @@ func (h *MCPHandler) GetServer(c *gin.Context) {
 
 	status := "unknown"
 	if health != nil {
-		if health.Status == mcpclient.HealthStatusHealthy {
-			status = "healthy"
-		} else if health.Status == mcpclient.HealthStatusUnhealthy {
-			status = "unhealthy"
-		}
+		status = health.Status.String()
 	}
 
 	c.JSON(http.StatusOK, ServerInfo{
@@ -159,12 +139,7 @@ func (h *MCPHandler) GetServer(c *gin.Context) {
 // GET /v1/mcp/servers/:name/health
 func (h *MCPHandler) GetServerHealth(c *gin.Context) {
 	if h.serverManager == nil {
-		c.JSON(http.StatusServiceUnavailable, gin.H{
-			"error": gin.H{
-				"message": "MCP is not enabled",
-				"type":    "service_unavailable",
-			},
-		})
+		response.ServiceUnavailable(c, "MCP is not enabled", "")
 		return
 	}
 
@@ -173,21 +148,11 @@ func (h *MCPHandler) GetServerHealth(c *gin.Context) {
 	// Perform immediate health check
 	health, err := h.serverManager.CheckHealth(c.Request.Context(), name)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": gin.H{
-				"message": "Server not found",
-				"type":    "not_found",
-			},
-		})
+		response.NotFound(c, "Server not found", "")
 		return
 	}
 
-	status := "unknown"
-	if health.Status == mcpclient.HealthStatusHealthy {
-		status = "healthy"
-	} else if health.Status == mcpclient.HealthStatusUnhealthy {
-		status = "unhealthy"
-	}
+	status := health.Status.String()
 
 	c.JSON(http.StatusOK, gin.H{
 		"server": name,
@@ -200,12 +165,7 @@ func (h *MCPHandler) GetServerHealth(c *gin.Context) {
 // GET /v1/mcp/servers/health
 func (h *MCPHandler) GetAllHealth(c *gin.Context) {
 	if h.serverManager == nil {
-		c.JSON(http.StatusServiceUnavailable, gin.H{
-			"error": gin.H{
-				"message": "MCP is not enabled",
-				"type":    "service_unavailable",
-			},
-		})
+		response.ServiceUnavailable(c, "MCP is not enabled", "")
 		return
 	}
 
@@ -214,12 +174,7 @@ func (h *MCPHandler) GetAllHealth(c *gin.Context) {
 	// Convert to response format
 	healthMap := make(map[string]interface{})
 	for name, health := range allHealth {
-		status := "unknown"
-		if health.Status == mcpclient.HealthStatusHealthy {
-			status = "healthy"
-		} else if health.Status == mcpclient.HealthStatusUnhealthy {
-			status = "unhealthy"
-		}
+		status := health.Status.String()
 
 		healthMap[name] = gin.H{
 			"status": status,
@@ -242,24 +197,14 @@ type ServerStats struct {
 // GET /v1/mcp/servers/:name/stats
 func (h *MCPHandler) GetServerStats(c *gin.Context) {
 	if h.serverManager == nil {
-		c.JSON(http.StatusServiceUnavailable, gin.H{
-			"error": gin.H{
-				"message": "MCP is not enabled",
-				"type":    "service_unavailable",
-			},
-		})
+		response.ServiceUnavailable(c, "MCP is not enabled", "")
 		return
 	}
 
 	name := c.Param("name")
 	serverInfo, err := h.serverManager.GetServer(name)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": gin.H{
-				"message": "Server not found",
-				"type":    "not_found",
-			},
-		})
+		response.NotFound(c, "Server not found", "")
 		return
 	}
 
@@ -279,24 +224,14 @@ func (h *MCPHandler) GetServerStats(c *gin.Context) {
 // GET /v1/mcp/servers/:name/tools
 func (h *MCPHandler) ListServerTools(c *gin.Context) {
 	if h.serverManager == nil {
-		c.JSON(http.StatusServiceUnavailable, gin.H{
-			"error": gin.H{
-				"message": "MCP is not enabled",
-				"type":    "service_unavailable",
-			},
-		})
+		response.ServiceUnavailable(c, "MCP is not enabled", "")
 		return
 	}
 
 	name := c.Param("name")
 	serverInfo, err := h.serverManager.GetServer(name)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": gin.H{
-				"message": "Server not found",
-				"type":    "not_found",
-			},
-		})
+		response.NotFound(c, "Server not found", "")
 		return
 	}
 
@@ -314,24 +249,14 @@ func (h *MCPHandler) ListServerTools(c *gin.Context) {
 // GET /v1/mcp/servers/:name/resources
 func (h *MCPHandler) ListServerResources(c *gin.Context) {
 	if h.serverManager == nil {
-		c.JSON(http.StatusServiceUnavailable, gin.H{
-			"error": gin.H{
-				"message": "MCP is not enabled",
-				"type":    "service_unavailable",
-			},
-		})
+		response.ServiceUnavailable(c, "MCP is not enabled", "")
 		return
 	}
 
 	name := c.Param("name")
 	serverInfo, err := h.serverManager.GetServer(name)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": gin.H{
-				"message": "Server not found",
-				"type":    "not_found",
-			},
-		})
+		response.NotFound(c, "Server not found", "")
 		return
 	}
 
@@ -349,12 +274,7 @@ func (h *MCPHandler) ListServerResources(c *gin.Context) {
 // GET /v1/mcp/servers/:name/resources/*uri
 func (h *MCPHandler) ReadServerResource(c *gin.Context) {
 	if h.serverManager == nil {
-		c.JSON(http.StatusServiceUnavailable, gin.H{
-			"error": gin.H{
-				"message": "MCP is not enabled",
-				"type":    "service_unavailable",
-			},
-		})
+		response.ServiceUnavailable(c, "MCP is not enabled", "")
 		return
 	}
 
@@ -383,12 +303,7 @@ func (h *MCPHandler) ReadServerResource(c *gin.Context) {
 
 	serverInfo, err := h.serverManager.GetServer(name)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": gin.H{
-				"message": "Server not found",
-				"type":    "not_found",
-			},
-		})
+		response.NotFound(c, "Server not found", "")
 		return
 	}
 
@@ -396,12 +311,7 @@ func (h *MCPHandler) ReadServerResource(c *gin.Context) {
 
 	result, err := client.ReadResource(c.Request.Context(), uri)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": gin.H{
-				"message": err.Error(),
-				"type":    "internal_error",
-			},
-		})
+		response.InternalError(c, err.Error(), "")
 		return
 	}
 
@@ -416,24 +326,14 @@ func (h *MCPHandler) ReadServerResource(c *gin.Context) {
 // GET /v1/mcp/servers/:name/prompts
 func (h *MCPHandler) ListServerPrompts(c *gin.Context) {
 	if h.serverManager == nil {
-		c.JSON(http.StatusServiceUnavailable, gin.H{
-			"error": gin.H{
-				"message": "MCP is not enabled",
-				"type":    "service_unavailable",
-			},
-		})
+		response.ServiceUnavailable(c, "MCP is not enabled", "")
 		return
 	}
 
 	name := c.Param("name")
 	serverInfo, err := h.serverManager.GetServer(name)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": gin.H{
-				"message": "Server not found",
-				"type":    "not_found",
-			},
-		})
+		response.NotFound(c, "Server not found", "")
 		return
 	}
 
@@ -451,12 +351,7 @@ func (h *MCPHandler) ListServerPrompts(c *gin.Context) {
 // POST /v1/mcp/servers/:name/prompts/:promptName
 func (h *MCPHandler) GetServerPrompt(c *gin.Context) {
 	if h.serverManager == nil {
-		c.JSON(http.StatusServiceUnavailable, gin.H{
-			"error": gin.H{
-				"message": "MCP is not enabled",
-				"type":    "service_unavailable",
-			},
-		})
+		response.ServiceUnavailable(c, "MCP is not enabled", "")
 		return
 	}
 
@@ -465,12 +360,7 @@ func (h *MCPHandler) GetServerPrompt(c *gin.Context) {
 
 	serverInfo, err := h.serverManager.GetServer(name)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": gin.H{
-				"message": "Server not found",
-				"type":    "not_found",
-			},
-		})
+		response.NotFound(c, "Server not found", "")
 		return
 	}
 
@@ -487,12 +377,7 @@ func (h *MCPHandler) GetServerPrompt(c *gin.Context) {
 
 	result, err := client.GetPromptTemplate(c.Request.Context(), promptName, requestBody.Arguments)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": gin.H{
-				"message": err.Error(),
-				"type":    "internal_error",
-			},
-		})
+		response.InternalError(c, err.Error(), "")
 		return
 	}
 
@@ -524,42 +409,31 @@ type ExecuteToolResponse struct {
 // POST /v1/mcp/execute
 func (h *MCPHandler) ExecuteTool(c *gin.Context) {
 	if h.serverManager == nil {
-		c.JSON(http.StatusServiceUnavailable, gin.H{
-			"error": gin.H{
-				"message": "MCP is not enabled",
-				"type":    "service_unavailable",
-			},
-		})
+		response.ServiceUnavailable(c, "MCP is not enabled", "")
 		return
 	}
 
 	var req ExecuteToolRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": gin.H{
-				"message": "Invalid request body",
-				"type":    "invalid_request_error",
-			},
-		})
+		response.BadRequest(c, "Invalid request body", "")
 		return
 	}
 
 	// Get server
 	serverInfo, err := h.serverManager.GetServer(req.Server)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": gin.H{
-				"message": "Server not found",
-				"type":    "not_found",
-			},
-		})
+		response.NotFound(c, "Server not found", "")
 		return
 	}
 
 	client := serverInfo.Client
 
 	// Execute tool with timeout
-	ctx, cancel := context.WithTimeout(c.Request.Context(), 30*time.Second)
+	timeout := h.toolExecutionTimeout
+	if timeout == 0 {
+		timeout = 30 * time.Second // Default fallback
+	}
+	ctx, cancel := context.WithTimeout(c.Request.Context(), timeout)
 	defer cancel()
 
 	startTime := time.Now()
@@ -604,24 +478,14 @@ func (h *MCPHandler) ExecuteTool(c *gin.Context) {
 // POST /v1/mcp/servers/:name/refresh
 func (h *MCPHandler) RefreshServerMetadata(c *gin.Context) {
 	if h.serverManager == nil {
-		c.JSON(http.StatusServiceUnavailable, gin.H{
-			"error": gin.H{
-				"message": "MCP is not enabled",
-				"type":    "service_unavailable",
-			},
-		})
+		response.ServiceUnavailable(c, "MCP is not enabled", "")
 		return
 	}
 
 	name := c.Param("name")
 	serverInfo, err := h.serverManager.GetServer(name)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": gin.H{
-				"message": "Server not found",
-				"type":    "not_found",
-			},
-		})
+		response.NotFound(c, "Server not found", "")
 		return
 	}
 

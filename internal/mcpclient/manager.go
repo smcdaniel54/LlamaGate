@@ -11,12 +11,13 @@ import (
 
 // ServerManager manages MCP server connections with pooling, health monitoring, and caching
 type ServerManager struct {
-	servers       map[string]*ManagedServer
-	pools         map[string]*ConnectionPool
-	healthMonitor *HealthMonitor
-	cache         *Cache
-	mu            sync.RWMutex
-	config        ManagerConfig
+	servers          map[string]*ManagedServer
+	pools            map[string]*ConnectionPool
+	activeConnections map[*Client]*PooledConnection // Track active pooled connections
+	healthMonitor    *HealthMonitor
+	cache            *Cache
+	mu               sync.RWMutex
+	config           ManagerConfig
 }
 
 // ManagerConfig holds configuration for the server manager
@@ -55,11 +56,12 @@ func NewServerManager(config ManagerConfig) *ServerManager {
 	}
 
 	manager := &ServerManager{
-		servers:       make(map[string]*ManagedServer),
-		pools:         make(map[string]*ConnectionPool),
-		healthMonitor: NewHealthMonitor(config.HealthInterval, config.HealthTimeout),
-		cache:         NewCache(config.CacheTTL),
-		config:        config,
+		servers:          make(map[string]*ManagedServer),
+		pools:            make(map[string]*ConnectionPool),
+		activeConnections: make(map[*Client]*PooledConnection),
+		healthMonitor:    NewHealthMonitor(config.HealthInterval, config.HealthTimeout),
+		cache:            NewCache(config.CacheTTL),
+		config:           config,
 	}
 
 	// Start health monitoring
@@ -197,7 +199,14 @@ func (sm *ServerManager) GetClient(ctx context.Context, name string) (*Client, e
 		if err != nil {
 			return nil, fmt.Errorf("failed to acquire connection from pool: %w", err)
 		}
-		return pooledConn.GetClient(), nil
+		client := pooledConn.GetClient()
+		
+		// Track the active connection so we can release it later
+		sm.mu.Lock()
+		sm.activeConnections[client] = pooledConn
+		sm.mu.Unlock()
+		
+		return client, nil
 	}
 
 	// For stdio transport, return the client directly
@@ -206,18 +215,26 @@ func (sm *ServerManager) GetClient(ctx context.Context, name string) (*Client, e
 
 // ReleaseClient releases a pooled connection
 func (sm *ServerManager) ReleaseClient(name string, client *Client) {
-	sm.mu.RLock()
-	serverInfo, exists := sm.servers[name]
-	sm.mu.RUnlock()
+	if client == nil {
+		return
+	}
 
+	sm.mu.Lock()
+	defer sm.mu.Unlock()
+
+	serverInfo, exists := sm.servers[name]
 	if !exists || serverInfo.Pool == nil {
 		return
 	}
 
-	// Find the pooled connection and release it
-	// This is a simplified version - in practice, you'd track the connection
-	// For now, we'll just return the client to the pool conceptually
-	// The actual implementation would need to track which connection was acquired
+	// Find and release the pooled connection
+	if pooledConn, ok := sm.activeConnections[client]; ok {
+		serverInfo.Pool.Release(pooledConn)
+		delete(sm.activeConnections, client)
+		log.Debug().
+			Str("server", name).
+			Msg("Released pooled connection")
+	}
 }
 
 // GetHealth returns health status for a server
@@ -272,6 +289,8 @@ func (sm *ServerManager) Close() error {
 		}
 	}
 
+	// Clear active connections map
+	sm.activeConnections = nil
 	sm.servers = nil
 	sm.pools = nil
 

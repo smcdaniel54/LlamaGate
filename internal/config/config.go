@@ -14,14 +14,15 @@ import (
 
 // Config holds all configuration for the application
 type Config struct {
-	OllamaHost   string
-	APIKey       string
-	RateLimitRPS float64
-	Debug        bool
-	Port         string
-	LogFile      string
-	Timeout      time.Duration // HTTP client timeout
-	MCP          *MCPConfig    // MCP configuration (optional)
+	OllamaHost         string
+	APIKey             string
+	RateLimitRPS       float64
+	Debug              bool
+	Port               string
+	LogFile            string
+	Timeout            time.Duration // HTTP client timeout
+	HealthCheckTimeout time.Duration // Timeout for /health endpoint
+	MCP                *MCPConfig    // MCP configuration (optional)
 }
 
 // MCPConfig holds MCP client configuration
@@ -42,6 +43,9 @@ type MCPConfig struct {
 	HealthCheckTimeout  time.Duration // Timeout for individual health checks
 	// Caching
 	CacheTTL time.Duration // TTL for cached metadata (tools, resources, prompts)
+	// Resource and tool operation timeouts
+	ResourceFetchTimeout time.Duration // Timeout for fetching MCP resources
+	ToolExecutionTimeout time.Duration // Timeout for tool execution via API
 }
 
 // MCPServerConfig holds configuration for a single MCP server
@@ -84,7 +88,8 @@ func Load() (*Config, error) {
 	viper.SetDefault("DEBUG", false)
 	viper.SetDefault("PORT", "8080")
 	viper.SetDefault("LOG_FILE", "")
-	viper.SetDefault("TIMEOUT", "5m") // 5 minutes default
+	viper.SetDefault("TIMEOUT", "5m")              // 5 minutes default
+	viper.SetDefault("HEALTH_CHECK_TIMEOUT", "5s") // 5 seconds for health checks
 
 	// MCP defaults
 	viper.SetDefault("MCP_ENABLED", false)
@@ -103,15 +108,18 @@ func Load() (*Config, error) {
 	}
 
 	// Parse timeout duration
-	timeoutStr := viper.GetString("TIMEOUT")
-	if timeoutStr == "" {
-		timeoutStr = "5m" // Default to 5 minutes
-	}
-	timeout, err := time.ParseDuration(timeoutStr)
+	timeout, err := parseDurationWithDefault("TIMEOUT", "5m")
 	if err != nil {
-		return nil, fmt.Errorf("invalid TIMEOUT format: %w (expected duration like '5m', '30s', '1h')", err)
+		return nil, err
 	}
 	cfg.Timeout = timeout
+
+	// Parse health check timeout
+	healthTimeout, err := parseDurationWithDefault("HEALTH_CHECK_TIMEOUT", "5s")
+	if err != nil {
+		return nil, err
+	}
+	cfg.HealthCheckTimeout = healthTimeout
 
 	// Load MCP configuration
 	mcpConfig, err := loadMCPConfig()
@@ -149,59 +157,53 @@ func loadMCPConfig() (*MCPConfig, error) {
 	}
 
 	// Parse connection idle time
-	idleTimeStr := viper.GetString("MCP_CONNECTION_IDLE_TIME")
-	if idleTimeStr == "" {
-		idleTimeStr = "5m"
-	}
-	idleTime, err := time.ParseDuration(idleTimeStr)
+	idleTime, err := parseDurationWithDefault("MCP_CONNECTION_IDLE_TIME", "5m")
 	if err != nil {
-		return nil, fmt.Errorf("invalid MCP_CONNECTION_IDLE_TIME format: %w", err)
+		return nil, err
 	}
 	mcp.ConnectionIdleTime = idleTime
 
 	// Parse health check interval
-	healthIntervalStr := viper.GetString("MCP_HEALTH_CHECK_INTERVAL")
-	if healthIntervalStr == "" {
-		healthIntervalStr = "60s"
-	}
-	healthInterval, err := time.ParseDuration(healthIntervalStr)
+	healthInterval, err := parseDurationWithDefault("MCP_HEALTH_CHECK_INTERVAL", "60s")
 	if err != nil {
-		return nil, fmt.Errorf("invalid MCP_HEALTH_CHECK_INTERVAL format: %w", err)
+		return nil, err
 	}
 	mcp.HealthCheckInterval = healthInterval
 
 	// Parse health check timeout
-	healthTimeoutStr := viper.GetString("MCP_HEALTH_CHECK_TIMEOUT")
-	if healthTimeoutStr == "" {
-		healthTimeoutStr = "5s"
-	}
-	healthTimeout, err := time.ParseDuration(healthTimeoutStr)
+	healthTimeout, err := parseDurationWithDefault("MCP_HEALTH_CHECK_TIMEOUT", "5s")
 	if err != nil {
-		return nil, fmt.Errorf("invalid MCP_HEALTH_CHECK_TIMEOUT format: %w", err)
+		return nil, err
 	}
 	mcp.HealthCheckTimeout = healthTimeout
 
 	// Parse cache TTL
-	cacheTTLStr := viper.GetString("MCP_CACHE_TTL")
-	if cacheTTLStr == "" {
-		cacheTTLStr = "5m"
-	}
-	cacheTTL, err := time.ParseDuration(cacheTTLStr)
+	cacheTTL, err := parseDurationWithDefault("MCP_CACHE_TTL", "5m")
 	if err != nil {
-		return nil, fmt.Errorf("invalid MCP_CACHE_TTL format: %w", err)
+		return nil, err
 	}
 	mcp.CacheTTL = cacheTTL
 
 	// Parse default tool timeout
-	timeoutStr := viper.GetString("MCP_DEFAULT_TOOL_TIMEOUT")
-	if timeoutStr == "" {
-		timeoutStr = "30s"
-	}
-	timeout, err := time.ParseDuration(timeoutStr)
+	defaultToolTimeout, err := parseDurationWithDefault("MCP_DEFAULT_TOOL_TIMEOUT", "30s")
 	if err != nil {
-		return nil, fmt.Errorf("invalid MCP_DEFAULT_TOOL_TIMEOUT format: %w", err)
+		return nil, err
 	}
-	mcp.DefaultToolTimeout = timeout
+	mcp.DefaultToolTimeout = defaultToolTimeout
+
+	// Parse resource fetch timeout
+	resourceTimeout, err := parseDurationWithDefault("MCP_RESOURCE_FETCH_TIMEOUT", "30s")
+	if err != nil {
+		return nil, err
+	}
+	mcp.ResourceFetchTimeout = resourceTimeout
+
+	// Parse tool execution timeout (for API endpoints)
+	toolExecTimeout, err := parseDurationWithDefault("MCP_TOOL_EXECUTION_TIMEOUT", "30s")
+	if err != nil {
+		return nil, err
+	}
+	mcp.ToolExecutionTimeout = toolExecTimeout
 
 	// Load allow/deny tools from env vars (comma-separated)
 	if allowStr := viper.GetString("MCP_ALLOW_TOOLS"); allowStr != "" {

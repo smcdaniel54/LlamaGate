@@ -15,10 +15,9 @@ import (
 	"github.com/llamagate/llamagate/internal/cache"
 	"github.com/llamagate/llamagate/internal/config"
 	"github.com/llamagate/llamagate/internal/logger"
-	"github.com/llamagate/llamagate/internal/mcpclient"
 	"github.com/llamagate/llamagate/internal/middleware"
 	"github.com/llamagate/llamagate/internal/proxy"
-	"github.com/llamagate/llamagate/internal/tools"
+	"github.com/llamagate/llamagate/internal/setup"
 	"github.com/rs/zerolog/log"
 )
 
@@ -46,128 +45,18 @@ func main() {
 	proxyInstance := proxy.NewWithTimeout(cfg.OllamaHost, cacheInstance, cfg.Timeout)
 
 	// Initialize MCP clients if enabled
-	var toolManager *tools.Manager
-	var serverManager *mcpclient.ServerManager
-	var guardrails *tools.Guardrails
+	var mcpComponents *setup.MCPComponents
 	if cfg.MCP != nil && cfg.MCP.Enabled {
-		log.Info().Msg("Initializing MCP clients...")
-
-		toolManager = tools.NewManager()
-
-		// Create server manager with configuration
-		managerConfig := mcpclient.ManagerConfig{
-			PoolSize:       cfg.MCP.ConnectionPoolSize,
-			PoolIdleTime:   cfg.MCP.ConnectionIdleTime,
-			HealthInterval: cfg.MCP.HealthCheckInterval,
-			HealthTimeout:  cfg.MCP.HealthCheckTimeout,
-			CacheTTL:       cfg.MCP.CacheTTL,
-		}
-		serverManager = mcpclient.NewServerManager(managerConfig)
-
-		// Create guardrails
-		guardrails, err = tools.NewGuardrails(
-			cfg.MCP.AllowTools,
-			cfg.MCP.DenyTools,
-			cfg.MCP.MaxToolRounds,
-			cfg.MCP.MaxToolCallsPerRound,
-			cfg.MCP.DefaultToolTimeout,
-			cfg.MCP.MaxToolResultSize,
-		)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to create MCP guardrails")
+		var initErr error
+		mcpComponents, initErr = setup.InitializeMCP(cfg.MCP)
+		if initErr != nil {
+			log.Fatal().Err(initErr).Msg("Failed to initialize MCP")
 		}
 
-		// Initialize MCP clients for each configured server
-		for _, serverCfg := range cfg.MCP.Servers {
-			if !serverCfg.Enabled {
-				log.Debug().
-					Str("server", serverCfg.Name).
-					Msg("MCP server disabled, skipping")
-				continue
-			}
-
-			var client *mcpclient.Client
-			var initErr error
-
-			switch serverCfg.Transport {
-			case "stdio":
-				// Use server timeout or default
-				timeout := serverCfg.Timeout
-				if timeout == 0 {
-					timeout = 30 * time.Second // Default timeout
-				}
-
-				client, initErr = mcpclient.NewClientWithTimeout(serverCfg.Name, serverCfg.Command, serverCfg.Args, serverCfg.Env, timeout)
-				if initErr != nil {
-					log.Error().
-						Str("server", serverCfg.Name).
-						Err(initErr).
-						Msg("Failed to initialize MCP client")
-					continue
-				}
-			case "http":
-				// Use server timeout or default
-				timeout := serverCfg.Timeout
-				if timeout == 0 {
-					timeout = 30 * time.Second // Default timeout
-				}
-
-				client, initErr = mcpclient.NewClientWithHTTP(serverCfg.Name, serverCfg.URL, serverCfg.Headers, timeout)
-				if initErr != nil {
-					log.Error().
-						Str("server", serverCfg.Name).
-						Err(initErr).
-						Msg("Failed to initialize MCP client")
-					continue
-				}
-			case "sse":
-				log.Warn().
-					Str("server", serverCfg.Name).
-					Msg("SSE transport not yet implemented, skipping")
-				continue
-			default:
-				log.Error().
-					Str("server", serverCfg.Name).
-					Str("transport", serverCfg.Transport).
-					Msg("Unknown transport type")
-				continue
-			}
-
-			// Add client to tool manager
-			if err := toolManager.AddClient(client); err != nil {
-				log.Error().
-					Str("server", serverCfg.Name).
-					Err(err).
-					Msg("Failed to add MCP client to tool manager")
-				client.Close()
-				continue
-			}
-
-			// Add server to server manager
-			if err := serverManager.AddServer(serverCfg.Name, client, serverCfg.Transport); err != nil {
-				log.Error().
-					Str("server", serverCfg.Name).
-					Err(err).
-					Msg("Failed to add server to server manager")
-				// Continue anyway - tool manager has the client
-			}
-
-			log.Info().
-				Str("server", serverCfg.Name).
-				Str("transport", serverCfg.Transport).
-				Msg("MCP client initialized successfully")
+		// Configure proxy with MCP components
+		if mcpComponents != nil {
+			setup.ConfigureProxy(proxyInstance, mcpComponents, cfg.MCP)
 		}
-
-		// Set tool manager and guardrails on proxy
-		proxyInstance.SetToolManager(toolManager, guardrails)
-		
-		// Set server manager on proxy for MCP resource context injection
-		proxyInstance.SetServerManager(serverManager)
-
-		toolCount := len(toolManager.GetAllTools())
-		log.Info().
-			Int("total_tools", toolCount).
-			Msg("MCP initialization complete")
 	} else {
 		log.Debug().Msg("MCP not enabled")
 	}
@@ -217,7 +106,7 @@ func main() {
 	router.GET("/health", func(c *gin.Context) {
 		// Check Ollama connectivity with a timeout
 		healthClient := &http.Client{
-			Timeout: 5 * time.Second, // Short timeout for health check
+			Timeout: cfg.HealthCheckTimeout,
 		}
 
 		ollamaHealthURL := fmt.Sprintf("%s/api/tags", cfg.OllamaHost)
@@ -290,8 +179,12 @@ func main() {
 		v1.GET("/models", proxyInstance.HandleModels)
 
 		// MCP management endpoints
-		if serverManager != nil {
-			mcpHandler := api.NewMCPHandler(toolManager, serverManager)
+		if mcpComponents != nil && mcpComponents.ServerManager != nil {
+			toolExecTimeout := 30 * time.Second // Default
+			if cfg.MCP != nil && cfg.MCP.ToolExecutionTimeout > 0 {
+				toolExecTimeout = cfg.MCP.ToolExecutionTimeout
+			}
+			mcpHandler := api.NewMCPHandler(mcpComponents.ToolManager, mcpComponents.ServerManager, toolExecTimeout)
 			mcp := v1.Group("/mcp")
 			{
 				// Server management
@@ -342,18 +235,20 @@ func main() {
 	cacheInstance.StopCleanup()
 
 	// Close MCP clients
-	if serverManager != nil {
-		if err := serverManager.Close(); err != nil {
-			log.Warn().Err(err).Msg("Error closing server manager")
-		} else {
-			log.Info().Msg("Server manager closed")
+	if mcpComponents != nil {
+		if mcpComponents.ServerManager != nil {
+			if err := mcpComponents.ServerManager.Close(); err != nil {
+				log.Warn().Err(err).Msg("Error closing server manager")
+			} else {
+				log.Info().Msg("Server manager closed")
+			}
 		}
-	}
-	if toolManager != nil {
-		if err := toolManager.CloseAll(); err != nil {
-			log.Warn().Err(err).Msg("Error closing MCP clients")
-		} else {
-			log.Info().Msg("MCP clients closed")
+		if mcpComponents.ToolManager != nil {
+			if err := mcpComponents.ToolManager.CloseAll(); err != nil {
+				log.Warn().Err(err).Msg("Error closing MCP clients")
+			} else {
+				log.Info().Msg("MCP clients closed")
+			}
 		}
 	}
 

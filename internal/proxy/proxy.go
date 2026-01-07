@@ -12,18 +12,20 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/llamagate/llamagate/internal/cache"
+	"github.com/llamagate/llamagate/internal/response"
 	"github.com/llamagate/llamagate/internal/tools"
 	"github.com/rs/zerolog/log"
 )
 
 // Proxy handles forwarding requests to Ollama
 type Proxy struct {
-	ollamaHost  string
-	cache       *cache.Cache
-	client      *http.Client
-	toolManager *tools.Manager    // Optional tool manager for MCP
-	guardrails  *tools.Guardrails // Optional guardrails for tool execution
-	serverManager interface{}     // Optional server manager for MCP resource access (to avoid circular import)
+	ollamaHost           string
+	cache                *cache.Cache
+	client               *http.Client
+	toolManager          *tools.Manager         // Optional tool manager for MCP
+	guardrails           *tools.Guardrails      // Optional guardrails for tool execution
+	serverManager        ServerManagerInterface // Optional server manager for MCP resource access
+	resourceFetchTimeout time.Duration          // Timeout for fetching MCP resources
 }
 
 // New creates a new proxy instance with default timeout (5 minutes)
@@ -49,9 +51,13 @@ func (p *Proxy) SetToolManager(toolManager *tools.Manager, guardrails *tools.Gua
 }
 
 // SetServerManager sets the server manager for MCP resource access
-// serverManager should be *mcpclient.ServerManager (using interface{} to avoid circular import)
-func (p *Proxy) SetServerManager(serverManager interface{}) {
+func (p *Proxy) SetServerManager(serverManager ServerManagerInterface) {
 	p.serverManager = serverManager
+}
+
+// SetResourceFetchTimeout sets the timeout for fetching MCP resources
+func (p *Proxy) SetResourceFetchTimeout(timeout time.Duration) {
+	p.resourceFetchTimeout = timeout
 }
 
 // ChatCompletionRequest represents an OpenAI-compatible chat completion request
@@ -113,36 +119,18 @@ func (p *Proxy) HandleChatCompletions(c *gin.Context) {
 			Str("request_id", requestID).
 			Err(err).
 			Msg("Failed to parse request body")
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": gin.H{
-				"message":    "Invalid request body",
-				"type":       "invalid_request_error",
-				"request_id": requestID,
-			},
-		})
+		response.BadRequest(c, "Invalid request body", requestID)
 		return
 	}
 
 	// Validate required fields
 	if req.Model == "" {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": gin.H{
-				"message":    "Model is required",
-				"type":       "invalid_request_error",
-				"request_id": requestID,
-			},
-		})
+		response.BadRequest(c, "Model is required", requestID)
 		return
 	}
 
 	if len(req.Messages) == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": gin.H{
-				"message":    "Messages are required",
-				"type":       "invalid_request_error",
-				"request_id": requestID,
-			},
-		})
+		response.BadRequest(c, "Messages are required", requestID)
 		return
 	}
 
@@ -160,13 +148,7 @@ func (p *Proxy) HandleChatCompletions(c *gin.Context) {
 					Str("request_id", requestID).
 					Err(err).
 					Msg("Tool execution loop failed")
-				c.JSON(http.StatusInternalServerError, gin.H{
-					"error": gin.H{
-						"message":    "Tool execution failed",
-						"type":       "internal_error",
-						"request_id": requestID,
-					},
-				})
+				response.InternalError(c, "Tool execution failed", requestID)
 				return
 			}
 
@@ -246,13 +228,7 @@ func (p *Proxy) HandleChatCompletions(c *gin.Context) {
 			Str("request_id", requestID).
 			Err(err).
 			Msg("Failed to marshal request")
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": gin.H{
-				"message":    "Internal server error",
-				"type":       "internal_error",
-				"request_id": requestID,
-			},
-		})
+		response.InternalError(c, "Internal server error", requestID)
 		return
 	}
 
@@ -264,13 +240,7 @@ func (p *Proxy) HandleChatCompletions(c *gin.Context) {
 			Str("request_id", requestID).
 			Err(err).
 			Msg("Failed to create request")
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": gin.H{
-				"message":    "Internal server error",
-				"type":       "internal_error",
-				"request_id": requestID,
-			},
-		})
+		response.InternalError(c, "Internal server error", requestID)
 		return
 	}
 
@@ -292,13 +262,7 @@ func (p *Proxy) handleStreamingResponse(c *gin.Context, httpReq *http.Request, r
 			Str("request_id", requestID).
 			Err(err).
 			Msg("Failed to forward request to Ollama")
-		c.JSON(http.StatusBadGateway, gin.H{
-			"error": gin.H{
-				"message":    "Failed to connect to Ollama",
-				"type":       "server_error",
-				"request_id": requestID,
-			},
-		})
+		response.ServerError(c, "Failed to connect to Ollama", requestID)
 		return
 	}
 	defer func() {
@@ -341,13 +305,7 @@ func (p *Proxy) handleNonStreamingResponse(c *gin.Context, httpReq *http.Request
 			Str("request_id", requestID).
 			Err(err).
 			Msg("Failed to forward request to Ollama")
-		c.JSON(http.StatusBadGateway, gin.H{
-			"error": gin.H{
-				"message":    "Failed to connect to Ollama",
-				"type":       "server_error",
-				"request_id": requestID,
-			},
-		})
+		response.ServerError(c, "Failed to connect to Ollama", requestID)
 		return
 	}
 	defer func() {
@@ -366,13 +324,7 @@ func (p *Proxy) handleNonStreamingResponse(c *gin.Context, httpReq *http.Request
 			Str("request_id", requestID).
 			Err(err).
 			Msg("Failed to read response from Ollama")
-		c.JSON(http.StatusBadGateway, gin.H{
-			"error": gin.H{
-				"message":    "Failed to read response from Ollama",
-				"type":       "server_error",
-				"request_id": requestID,
-			},
-		})
+		response.ServerError(c, "Failed to read response from Ollama", requestID)
 		return
 	}
 
@@ -409,13 +361,7 @@ func (p *Proxy) HandleModels(c *gin.Context) {
 			Str("request_id", requestID).
 			Err(err).
 			Msg("Failed to create request")
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": gin.H{
-				"message":    "Internal server error",
-				"type":       "internal_error",
-				"request_id": requestID,
-			},
-		})
+		response.InternalError(c, "Internal server error", requestID)
 		return
 	}
 
@@ -425,13 +371,7 @@ func (p *Proxy) HandleModels(c *gin.Context) {
 			Str("request_id", requestID).
 			Err(err).
 			Msg("Failed to forward request to Ollama")
-		c.JSON(http.StatusBadGateway, gin.H{
-			"error": gin.H{
-				"message":    "Failed to connect to Ollama",
-				"type":       "server_error",
-				"request_id": requestID,
-			},
-		})
+		response.ServerError(c, "Failed to connect to Ollama", requestID)
 		return
 	}
 	defer func() {
@@ -450,13 +390,7 @@ func (p *Proxy) HandleModels(c *gin.Context) {
 			Str("request_id", requestID).
 			Err(err).
 			Msg("Failed to decode Ollama response")
-		c.JSON(http.StatusBadGateway, gin.H{
-			"error": gin.H{
-				"message":    "Failed to parse response from Ollama",
-				"type":       "server_error",
-				"request_id": requestID,
-			},
-		})
+		response.ServerError(c, "Failed to parse response from Ollama", requestID)
 		return
 	}
 

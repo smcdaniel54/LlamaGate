@@ -87,7 +87,7 @@ func createMockMCPServer() *httptest.Server {
 }
 
 func TestMCPHandler_ListServers_NotEnabled(t *testing.T) {
-	handler := NewMCPHandler(nil, nil)
+	handler := NewMCPHandler(nil, nil, 30*time.Second)
 	router := setupTestRouter(handler)
 
 	req := httptest.NewRequest("GET", "/v1/mcp/servers", nil)
@@ -125,7 +125,7 @@ func TestMCPHandler_ListServers(t *testing.T) {
 	toolManager.AddClient(client)
 	serverManager.AddServer("test-server", client, "http")
 
-	handler := NewMCPHandler(toolManager, serverManager)
+	handler := NewMCPHandler(toolManager, serverManager, 30*time.Second)
 	router := setupTestRouter(handler)
 
 	req := httptest.NewRequest("GET", "/v1/mcp/servers", nil)
@@ -152,7 +152,7 @@ func TestMCPHandler_GetServer_NotFound(t *testing.T) {
 	defer serverManager.Close()
 
 	toolManager := tools.NewManager()
-	handler := NewMCPHandler(toolManager, serverManager)
+	handler := NewMCPHandler(toolManager, serverManager, 30*time.Second)
 	router := setupTestRouter(handler)
 
 	req := httptest.NewRequest("GET", "/v1/mcp/servers/nonexistent", nil)
@@ -185,7 +185,7 @@ func TestMCPHandler_GetServerHealth(t *testing.T) {
 	toolManager.AddClient(client)
 	serverManager.AddServer("test-server", client, "http")
 
-	handler := NewMCPHandler(toolManager, serverManager)
+	handler := NewMCPHandler(toolManager, serverManager, 30*time.Second)
 	router := setupTestRouter(handler)
 
 	req := httptest.NewRequest("GET", "/v1/mcp/servers/test-server/health", nil)
@@ -227,7 +227,7 @@ func TestMCPHandler_ListServerTools(t *testing.T) {
 
 	serverManager.AddServer("test-server", client, "http")
 
-	handler := NewMCPHandler(toolManager, serverManager)
+	handler := NewMCPHandler(toolManager, serverManager, 30*time.Second)
 	router := setupTestRouter(handler)
 
 	req := httptest.NewRequest("GET", "/v1/mcp/servers/test-server/tools", nil)
@@ -266,7 +266,7 @@ func TestMCPHandler_ListServerResources(t *testing.T) {
 	toolManager.AddClient(client)
 	serverManager.AddServer("test-server", client, "http")
 
-	handler := NewMCPHandler(toolManager, serverManager)
+	handler := NewMCPHandler(toolManager, serverManager, 30*time.Second)
 	router := setupTestRouter(handler)
 
 	req := httptest.NewRequest("GET", "/v1/mcp/servers/test-server/resources", nil)
@@ -305,7 +305,7 @@ func TestMCPHandler_ListServerPrompts(t *testing.T) {
 	toolManager.AddClient(client)
 	serverManager.AddServer("test-server", client, "http")
 
-	handler := NewMCPHandler(toolManager, serverManager)
+	handler := NewMCPHandler(toolManager, serverManager, 30*time.Second)
 	router := setupTestRouter(handler)
 
 	req := httptest.NewRequest("GET", "/v1/mcp/servers/test-server/prompts", nil)
@@ -344,7 +344,7 @@ func TestMCPHandler_ExecuteTool(t *testing.T) {
 	toolManager.AddClient(client)
 	serverManager.AddServer("test-server", client, "http")
 
-	handler := NewMCPHandler(toolManager, serverManager)
+	handler := NewMCPHandler(toolManager, serverManager, 30*time.Second)
 	router := setupTestRouter(handler)
 
 	// Create execute request
@@ -397,7 +397,7 @@ func TestMCPHandler_RefreshServerMetadata(t *testing.T) {
 	toolManager.AddClient(client)
 	serverManager.AddServer("test-server", client, "http")
 
-	handler := NewMCPHandler(toolManager, serverManager)
+	handler := NewMCPHandler(toolManager, serverManager, 30*time.Second)
 	router := setupTestRouter(handler)
 
 	req := httptest.NewRequest("POST", "/v1/mcp/servers/test-server/refresh", nil)
