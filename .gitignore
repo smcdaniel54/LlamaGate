@@ -12,6 +12,7 @@ llamagate.log
 
 # Test binary, built with `go test -c`
 *.test
+*.test.exe
 
 # Output of the go coverage tool
 *.out

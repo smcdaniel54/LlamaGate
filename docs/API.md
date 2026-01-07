@@ -149,13 +149,31 @@ Refresh tools, resources, and prompts for a server.
 **Parameters:**
 - `name` (path) - Server name
 
-**Response:**
+**Response (Success):**
 ```json
 {
   "server": "filesystem",
   "status": "refreshed"
 }
 ```
+
+**Response (Partial Failure):**
+```json
+{
+  "server": "filesystem",
+  "status": "partial",
+  "errors": [
+    "tools: connection timeout",
+    "resources: server error"
+  ]
+}
+```
+
+**Status Codes:**
+- `200 OK` - All metadata refreshed successfully
+- `206 Partial Content` - Some refresh operations failed (check `errors` array)
+- `404 Not Found` - Server not found
+- `503 Service Unavailable` - MCP not enabled
 
 ### Tools
 
@@ -355,30 +373,117 @@ Execute a tool on a specific server.
 
 ## Error Responses
 
-All endpoints return standard error responses:
+All endpoints return standard error responses when an error occurs:
 
 ```json
 {
   "error": {
     "message": "Error description",
-    "type": "error_type"
+    "type": "error_type",
+    "details": "Additional error details (optional)"
   }
 }
 ```
 
-**Error Types:**
-- `service_unavailable` - MCP is not enabled
-- `not_found` - Server or resource not found
-- `invalid_request_error` - Invalid request parameters
-- `internal_error` - Server error
+### Error Types
 
-**HTTP Status Codes:**
+- `service_unavailable` - MCP is not enabled or service is unavailable
+- `not_found` - Server, resource, tool, or prompt not found
+- `invalid_request_error` - Invalid request parameters or body
+- `internal_error` - Internal server error
+- `rate_limit_error` - Rate limit exceeded
+
+### HTTP Status Codes
+
 - `200 OK` - Success
-- `400 Bad Request` - Invalid request
-- `401 Unauthorized` - Authentication required
+- `400 Bad Request` - Invalid request parameters or body
+- `401 Unauthorized` - Authentication required or invalid API key
 - `404 Not Found` - Resource not found
+- `429 Too Many Requests` - Rate limit exceeded
 - `500 Internal Server Error` - Server error
 - `503 Service Unavailable` - MCP not enabled
+
+### Error Response Examples
+
+#### MCP Not Enabled
+
+**Status:** `503 Service Unavailable`
+
+```json
+{
+  "error": {
+    "message": "MCP is not enabled",
+    "type": "service_unavailable"
+  }
+}
+```
+
+#### Server Not Found
+
+**Status:** `404 Not Found`
+
+```json
+{
+  "error": {
+    "message": "Server not found",
+    "type": "not_found"
+  }
+}
+```
+
+#### Invalid Request Body
+
+**Status:** `400 Bad Request`
+
+```json
+{
+  "error": {
+    "message": "Invalid request body for prompt arguments",
+    "type": "invalid_request_error",
+    "details": "json: cannot unmarshal string into Go value of type map[string]interface {}"
+  }
+}
+```
+
+#### Resource Not Found
+
+**Status:** `500 Internal Server Error`
+
+```json
+{
+  "error": {
+    "message": "Failed to read resource",
+    "type": "internal_error",
+    "details": "Resource not found"
+  }
+}
+```
+
+#### Authentication Required
+
+**Status:** `401 Unauthorized`
+
+```json
+{
+  "error": {
+    "message": "Invalid API key",
+    "type": "invalid_request_error"
+  }
+}
+```
+
+#### Rate Limit Exceeded
+
+**Status:** `429 Too Many Requests`
+
+```json
+{
+  "error": {
+    "message": "Rate limit exceeded",
+    "type": "rate_limit_error"
+  }
+}
+```
 
 ## Examples
 

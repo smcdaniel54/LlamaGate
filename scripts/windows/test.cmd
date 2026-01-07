@@ -18,7 +18,7 @@ echo.
 set BASE_URL=http://localhost:8080
 set API_KEY=sk-llamagate
 
-echo [1/5] Testing Health Check...
+echo [1/7] Testing Health Check...
 curl -s %BASE_URL%/health
 if %ERRORLEVEL% EQU 0 (
     echo.
@@ -30,7 +30,7 @@ if %ERRORLEVEL% EQU 0 (
 )
 echo.
 
-echo [2/5] Testing Models Endpoint...
+echo [2/7] Testing Models Endpoint...
 if "%API_KEY%"=="" (
     curl -s %BASE_URL%/v1/models
 ) else (
@@ -45,7 +45,7 @@ if %ERRORLEVEL% EQU 0 (
 )
 echo.
 
-echo [3/5] Testing Chat Completions (Non-Streaming)...
+echo [3/7] Testing Chat Completions (Non-Streaming)...
 if "%API_KEY%"=="" (
     curl -s -X POST %BASE_URL%/v1/chat/completions ^
         -H "Content-Type: application/json" ^
@@ -65,7 +65,7 @@ if %ERRORLEVEL% EQU 0 (
 )
 echo.
 
-echo [4/5] Testing Caching (Same Request Twice)...
+echo [4/7] Testing Caching (Same Request Twice)...
 echo First request (should be slow):
 if "%API_KEY%"=="" (
     curl -s -w "\nTime: %%{time_total}s\n" -X POST %BASE_URL%/v1/chat/completions ^
@@ -93,7 +93,7 @@ echo.
 echo ✓ Cache test completed (check times above - second should be much faster)
 echo.
 
-echo [5/5] Testing Authentication (if enabled)...
+echo [5/7] Testing Authentication (if enabled)...
 if "%API_KEY%"=="" (
     echo Authentication is disabled, skipping auth test
 ) else (

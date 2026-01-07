@@ -246,6 +246,60 @@ curl -X POST http://localhost:8080/v1/chat/completions ^
 
 **Expected:** Stream of data chunks (Server-Sent Events format)
 
+## Unit Test Coverage
+
+LlamaGate includes comprehensive unit tests for all major components:
+
+### Running Unit Tests
+
+**Windows:**
+```cmd
+go test ./...
+```
+
+**Unix/Linux/macOS:**
+```bash
+go test ./...
+```
+
+### Test Coverage
+
+Current test coverage:
+- `internal/config`: 81.8% - Configuration loading and validation
+- `internal/middleware`: 83.7% - Authentication and rate limiting
+- `internal/logger`: 94.7% - Logger initialization and file handling
+- `internal/proxy`: 34.5% - Chat completions, models, streaming, caching
+- `internal/mcpclient`: 62.5% - MCP client, transports, pooling, health
+- `internal/api`: 41.7% - MCP API endpoints
+- `internal/tools`: 38.0% - Tool management and guardrails
+- `internal/cache`: 31.8% - Caching implementation
+
+### Running Tests with Coverage
+
+**Windows:**
+```cmd
+go test ./... -cover
+```
+
+**Unix/Linux/macOS:**
+```bash
+go test ./... -cover
+```
+
+### Running Specific Test Packages
+
+```bash
+# Test only proxy package
+go test ./internal/proxy -v
+
+# Test only config package
+go test ./internal/config -v
+
+# Test with coverage report
+go test ./internal/proxy -cover -coverprofile=coverage.out
+go tool cover -html=coverage.out
+```
+
 ## Testing with Python
 
 You can also test using the OpenAI Python SDK:
@@ -313,17 +367,74 @@ You should see:
 
 ## Automated Testing
 
-Run the unit tests:
+### Unit Tests
 
+Run all unit tests:
+
+**Windows:**
 ```cmd
 go test ./...
 ```
 
-This will test:
+**Unix/Linux/macOS:**
+```bash
+go test ./...
+```
 
-- Cache functionality
-- Proxy handlers
-- Configuration loading
+### Test Coverage
+
+Current test coverage includes:
+
+- **Configuration** (81.8%): Loading, validation, environment variables, MCP config
+- **Middleware** (83.7%): Authentication (X-API-Key, Bearer token), rate limiting, health endpoint bypass
+- **Logger** (94.7%): Initialization, file handling, debug/info modes
+- **Proxy** (34.5%): Chat completions, models endpoint, streaming, caching, error handling
+- **MCP Client** (62.5%): Client initialization, transports, connection pooling, health monitoring
+- **API Handlers** (41.7%): MCP API endpoints, error handling
+- **Tools** (38.0%): Tool management, guardrails, mapper
+- **Cache** (31.8%): Cache operations, TTL, size limits
+
+### Running Tests with Coverage
+
+**Windows:**
+```cmd
+go test ./... -cover
+```
+
+**Unix/Linux/macOS:**
+```bash
+go test ./... -cover
+```
+
+### Running Specific Test Packages
+
+```bash
+# Test only proxy package
+go test ./internal/proxy -v
+
+# Test only config package
+go test ./internal/config -v
+
+# Test only middleware
+go test ./internal/middleware -v
+
+# Test with coverage report
+go test ./internal/proxy -cover -coverprofile=coverage.out
+go tool cover -html=coverage.out
+```
+
+### What's Tested
+
+The unit tests cover:
+
+- **Cache functionality**: Get, Set, TTL expiration, size limits
+- **Proxy handlers**: Chat completions, models endpoint, streaming, error handling
+- **Configuration loading**: Environment variables, YAML/JSON configs, validation
+- **Authentication middleware**: API key validation, Bearer token support, health endpoint bypass
+- **Rate limiting**: Leaky bucket algorithm, health endpoint bypass
+- **Logger**: Initialization, file handling, debug/info modes
+- **MCP client**: Initialization, tool/resource/prompt discovery, HTTP transport
+- **MCP API**: All endpoints, error handling, authentication
 
 ## Performance Testing
 

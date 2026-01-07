@@ -27,7 +27,7 @@ echo ""
 read -p "Press Enter to start testing..."
 
 echo ""
-echo "[1/5] Testing Health Check..."
+echo "[1/7] Testing Health Check..."
 if [ -n "$API_KEY" ]; then
     curl -s -H "X-API-Key: $API_KEY" "$BASE_URL/health"
 else
@@ -37,7 +37,7 @@ echo ""
 echo "✓ Health check passed"
 echo ""
 
-echo "[2/5] Testing Models Endpoint..."
+echo "[2/7] Testing Models Endpoint..."
 if [ -n "$API_KEY" ]; then
     curl -s -H "X-API-Key: $API_KEY" "$BASE_URL/v1/models" | jq '.' 2>/dev/null || curl -s -H "X-API-Key: $API_KEY" "$BASE_URL/v1/models"
 else
@@ -47,7 +47,7 @@ echo ""
 echo "✓ Models endpoint passed"
 echo ""
 
-echo "[3/5] Testing Chat Completions (Non-Streaming)..."
+echo "[3/7] Testing Chat Completions (Non-Streaming)..."
 BODY='{"model":"llama2","messages":[{"role":"user","content":"Say hello in one word"}]}'
 if [ -n "$API_KEY" ]; then
     RESPONSE=$(curl -s -X POST "$BASE_URL/v1/chat/completions" \
@@ -65,7 +65,7 @@ echo ""
 echo "✓ Chat completions (non-streaming) passed"
 echo ""
 
-echo "[4/5] Testing Caching (Same Request Twice)..."
+echo "[4/7] Testing Caching (Same Request Twice)..."
 BODY='{"model":"llama2","messages":[{"role":"user","content":"What is 2+2?"}]}'
 echo "First request (should be slow):"
 if [ -n "$API_KEY" ]; then
@@ -94,7 +94,7 @@ echo ""
 echo "✓ Cache test completed (check times above - second should be much faster)"
 echo ""
 
-echo "[5/5] Testing Authentication (if enabled)..."
+echo "[5/7] Testing Authentication (if enabled)..."
 if [ -z "$API_KEY" ]; then
     echo "Authentication is disabled, skipping auth test"
 else
