@@ -38,7 +38,7 @@ func (rl *RateLimitMiddleware) Handler() gin.HandlerFunc {
 
 		// Check if request is allowed
 		if !rl.limiter.Allow() {
-			requestID := c.GetString("request_id")
+			requestID := GetRequestID(c)
 			response.RateLimitExceeded(c, "Rate limit exceeded", requestID)
 			c.Abort()
 			return

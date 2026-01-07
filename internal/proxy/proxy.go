@@ -12,6 +12,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/llamagate/llamagate/internal/cache"
+	"github.com/llamagate/llamagate/internal/middleware"
 	"github.com/llamagate/llamagate/internal/response"
 	"github.com/llamagate/llamagate/internal/tools"
 	"github.com/rs/zerolog/log"
@@ -109,7 +110,7 @@ type OpenAIFunction struct {
 
 // HandleChatCompletions handles /v1/chat/completions endpoint
 func (p *Proxy) HandleChatCompletions(c *gin.Context) {
-	requestID := c.GetString("request_id")
+	requestID := middleware.GetRequestID(c)
 	startTime := time.Now()
 
 	// Parse request body
@@ -124,13 +125,14 @@ func (p *Proxy) HandleChatCompletions(c *gin.Context) {
 	}
 
 	// Validate required fields
-	if req.Model == "" {
-		response.BadRequest(c, "Model is required", requestID)
-		return
-	}
-
-	if len(req.Messages) == 0 {
-		response.BadRequest(c, "Messages are required", requestID)
+	if err := ValidateChatRequest(&req); err != nil {
+		var msg string
+		if valErr, ok := err.(*ValidationError); ok {
+			msg = valErr.Message
+		} else {
+			msg = err.Error()
+		}
+		response.BadRequest(c, msg, requestID)
 		return
 	}
 
@@ -350,7 +352,7 @@ func (p *Proxy) handleNonStreamingResponse(c *gin.Context, httpReq *http.Request
 
 // HandleModels handles /v1/models endpoint
 func (p *Proxy) HandleModels(c *gin.Context) {
-	requestID := c.GetString("request_id")
+	requestID := middleware.GetRequestID(c)
 	startTime := time.Now()
 
 	// Forward to Ollama /api/tags

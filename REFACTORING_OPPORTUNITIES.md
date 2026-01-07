@@ -232,7 +232,7 @@ resourceCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
 
 ---
 
-### 4.2 Inconsistent Request ID Handling
+### 4.2 Inconsistent Request ID Handling ✅
 **Location:** Multiple files
 
 **Issue:** Request ID is extracted differently in different places:
@@ -249,9 +249,11 @@ resourceCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
 
 **Benefit:** Consistent behavior, easier debugging
 
+**Status:** ✅ Completed - Created `GetRequestID()` helper in `internal/middleware/request_id_helper.go` and updated all usages
+
 ---
 
-### 4.3 Health Check Logic in main.go
+### 4.3 Health Check Logic in main.go ✅
 **Location:** `cmd/llamagate/main.go:217-270`
 
 **Issue:** Health check endpoint handler is 50+ lines inline in main.go
@@ -265,9 +267,11 @@ resourceCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
 
 **Benefit:** Cleaner main, testable health checks
 
+**Status:** ✅ Completed - Extracted to `internal/api/health.go` with `HealthHandler` struct and tests
+
 ---
 
-### 4.4 Missing Request Validation Helpers
+### 4.4 Missing Request Validation Helpers ✅
 **Location:** `internal/proxy/proxy.go:126-147`
 
 **Issue:** Request validation is inline with error responses, making it verbose
@@ -280,6 +284,8 @@ resourceCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
 - Reduce boilerplate
 
 **Benefit:** Cleaner code, easier to add new validations
+
+**Status:** ✅ Completed - Created `ValidateChatRequest()` in `internal/proxy/validation.go` with structured `ValidationError` type and tests
 
 ---
 

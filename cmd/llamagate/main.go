@@ -85,7 +85,7 @@ func main() {
 
 		latency := time.Since(start)
 		status := c.Writer.Status()
-		requestID := c.GetString("request_id")
+		requestID := middleware.GetRequestID(c)
 
 		if raw != "" {
 			path = fmt.Sprintf("%s?%s", path, raw)
@@ -103,60 +103,8 @@ func main() {
 
 	// Health check endpoint - register BEFORE auth middleware
 	// This allows monitoring tools to check health without API key
-	router.GET("/health", func(c *gin.Context) {
-		// Check Ollama connectivity with a timeout
-		healthClient := &http.Client{
-			Timeout: cfg.HealthCheckTimeout,
-		}
-
-		ollamaHealthURL := fmt.Sprintf("%s/api/tags", cfg.OllamaHost)
-		resp, err := healthClient.Get(ollamaHealthURL)
-		// Register defer immediately after request to ensure body is always closed
-		// This handles both success and error cases where resp might be non-nil
-		if resp != nil {
-			defer func() {
-				if closeErr := resp.Body.Close(); closeErr != nil {
-					log.Warn().
-						Str("request_id", c.GetString("request_id")).
-						Err(closeErr).
-						Msg("Failed to close health check response body")
-				}
-			}()
-		}
-		if err != nil {
-			log.Warn().
-				Str("request_id", c.GetString("request_id")).
-				Err(err).
-				Str("ollama_host", cfg.OllamaHost).
-				Msg("Health check: Ollama unreachable")
-			c.JSON(http.StatusServiceUnavailable, gin.H{
-				"status":      "unhealthy",
-				"error":       "Ollama unreachable",
-				"ollama_host": cfg.OllamaHost,
-			})
-			return
-		}
-
-		if resp.StatusCode != http.StatusOK {
-			log.Warn().
-				Str("request_id", c.GetString("request_id")).
-				Int("status", resp.StatusCode).
-				Str("ollama_host", cfg.OllamaHost).
-				Msg("Health check: Ollama returned non-OK status")
-			c.JSON(http.StatusServiceUnavailable, gin.H{
-				"status":      "unhealthy",
-				"error":       fmt.Sprintf("Ollama returned status %d", resp.StatusCode),
-				"ollama_host": cfg.OllamaHost,
-			})
-			return
-		}
-
-		c.JSON(http.StatusOK, gin.H{
-			"status":      "healthy",
-			"ollama":      "connected",
-			"ollama_host": cfg.OllamaHost,
-		})
-	})
+	healthHandler := api.NewHealthHandler(cfg)
+	router.GET("/health", healthHandler.CheckHealth)
 
 	// Auth middleware (if API key is configured)
 	// Applied to all routes registered AFTER this point

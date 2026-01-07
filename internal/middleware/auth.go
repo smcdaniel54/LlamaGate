@@ -41,11 +41,11 @@ func AuthMiddleware(apiKey string) gin.HandlerFunc {
 
 		// Validate the key using constant-time comparison to prevent timing attacks
 		if subtle.ConstantTimeCompare([]byte(providedKey), []byte(apiKey)) != 1 {
+			requestID := GetRequestID(c)
 			log.Warn().
-				Str("request_id", c.GetString("request_id")).
+				Str("request_id", requestID).
 				Str("ip", c.ClientIP()).
 				Msg("Authentication failed")
-			requestID := c.GetString("request_id")
 			response.ErrorResponse(c, http.StatusUnauthorized, response.ErrorTypeInvalidRequest, "Invalid API key", requestID)
 			c.Abort()
 			return
