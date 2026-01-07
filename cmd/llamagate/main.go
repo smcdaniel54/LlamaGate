@@ -93,6 +93,21 @@ func main() {
 						Msg("Failed to initialize MCP client")
 					continue
 				}
+			case "http":
+				// Use server timeout or default
+				timeout := serverCfg.Timeout
+				if timeout == 0 {
+					timeout = 30 * time.Second // Default timeout
+				}
+
+				client, initErr = mcpclient.NewClientWithHTTP(serverCfg.Name, serverCfg.URL, serverCfg.Headers, timeout)
+				if initErr != nil {
+					log.Error().
+						Str("server", serverCfg.Name).
+						Err(initErr).
+						Msg("Failed to initialize MCP client")
+					continue
+				}
 			case "sse":
 				log.Warn().
 					Str("server", serverCfg.Name).

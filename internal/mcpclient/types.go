@@ -102,6 +102,77 @@ type ToolContent struct {
 	// For resource type, additional fields may be present
 }
 
+// MCP Resource types
+
+// Resource represents an MCP resource definition
+type Resource struct {
+	URI         string `json:"uri"`
+	Name        string `json:"name,omitempty"`
+	Description string `json:"description,omitempty"`
+	MimeType    string `json:"mimeType,omitempty"`
+}
+
+// ResourcesListResult represents the result of resources/list
+type ResourcesListResult struct {
+	Resources []Resource `json:"resources"`
+}
+
+// ResourceReadParams represents parameters for resources/read
+type ResourceReadParams struct {
+	URI string `json:"uri"`
+}
+
+// ResourceReadResult represents the result of resources/read
+type ResourceReadResult struct {
+	Contents []ResourceContent `json:"contents"`
+}
+
+// ResourceContent represents content in a resource read result
+type ResourceContent struct {
+	URI      string `json:"uri"`
+	MimeType string `json:"mimeType,omitempty"`
+	Text     string `json:"text,omitempty"`
+	Blob     string `json:"blob,omitempty"` // Base64 encoded binary data
+}
+
+// MCP Prompt types
+
+// Prompt represents an MCP prompt definition
+type Prompt struct {
+	Name        string         `json:"name"`
+	Description string         `json:"description,omitempty"`
+	Arguments   []PromptArgument `json:"arguments,omitempty"`
+}
+
+// PromptArgument represents a prompt argument
+type PromptArgument struct {
+	Name        string `json:"name"`
+	Description string `json:"description,omitempty"`
+	Required    bool   `json:"required,omitempty"`
+}
+
+// PromptsListResult represents the result of prompts/list
+type PromptsListResult struct {
+	Prompts []Prompt `json:"prompts"`
+}
+
+// PromptGetParams represents parameters for prompts/get
+type PromptGetParams struct {
+	Name      string                 `json:"name"`
+	Arguments map[string]interface{} `json:"arguments,omitempty"`
+}
+
+// PromptGetResult represents the result of prompts/get
+type PromptGetResult struct {
+	Messages []PromptMessage `json:"messages"`
+}
+
+// PromptMessage represents a message in a prompt result
+type PromptMessage struct {
+	Role    string      `json:"role"`
+	Content interface{} `json:"content"` // Can be string or structured content
+}
+
 // Error codes from JSON-RPC 2.0 and MCP
 const (
 	ErrCodeParseError     = -32700

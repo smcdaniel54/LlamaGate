@@ -78,7 +78,7 @@ Each MCP server requires:
 
 - **name**: Unique identifier for the server (used in tool namespacing)
 - **enabled**: Whether to connect to this server
-- **transport**: `stdio` (required) or `sse` (optional, not yet implemented)
+- **transport**: `stdio`, `http`, or `sse` (SSE not yet implemented)
 - **timeout**: Per-server timeout for operations
 
 ### stdio Transport
@@ -100,11 +100,31 @@ Example:
     - /path/to/directory
   env:
     NODE_ENV: production
+  timeout: 30s
+```
+
+### HTTP Transport
+
+For HTTP transport, specify:
+
+- **url**: HTTP endpoint URL for the MCP server
+- **headers**: HTTP headers (optional, e.g., for authentication)
+- **timeout**: Request timeout
+
+Example:
+```yaml
+- name: remote-server
+  transport: http
+  url: http://remote-server:3000/mcp
+  headers:
+    Authorization: Bearer token123
+    X-API-Key: secret-key
+  timeout: 30s
 ```
 
 ### SSE Transport
 
-SSE transport is planned for a future release. For now, use stdio transport.
+SSE transport is planned for a future release. For now, use stdio or http transport.
 
 ## Tool Namespacing
 
@@ -209,7 +229,9 @@ print(response.choices[0].message.content)
 ## Limitations
 
 - Streaming tool calls are not yet supported (planned for 1.1.x)
-- SSE transport is not yet implemented
+- SSE transport is not yet implemented (use stdio or http)
 - Tool execution is limited to non-streaming requests
 - Ollama model must support function/tool calling for best results
+- Resources and prompts are discovered but not yet exposed via HTTP API (planned for Phase 2)
+- HTTP API endpoints for MCP management are planned for Phase 2
 

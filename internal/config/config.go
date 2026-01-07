@@ -40,12 +40,12 @@ type MCPConfig struct {
 type MCPServerConfig struct {
 	Name      string
 	Enabled   bool
-	Transport string // "stdio" or "sse"
+	Transport string // "stdio", "http", or "sse"
 	// stdio fields
 	Command string
 	Args    []string
 	Env     map[string]string
-	// SSE fields
+	// HTTP/SSE fields
 	URL     string
 	Headers map[string]string
 	// common
@@ -257,19 +257,19 @@ func (s *MCPServerConfig) Validate() error {
 		return fmt.Errorf("server name is required")
 	}
 	if s.Transport == "" {
-		return fmt.Errorf("transport is required (stdio or sse)")
+		return fmt.Errorf("transport is required (stdio, http, or sse)")
 	}
-	if s.Transport != "stdio" && s.Transport != "sse" {
-		return fmt.Errorf("invalid transport: %s (must be stdio or sse)", s.Transport)
+	if s.Transport != "stdio" && s.Transport != "http" && s.Transport != "sse" {
+		return fmt.Errorf("invalid transport: %s (must be stdio, http, or sse)", s.Transport)
 	}
 
 	if s.Transport == "stdio" {
 		if s.Command == "" {
 			return fmt.Errorf("command is required for stdio transport")
 		}
-	} else if s.Transport == "sse" {
+	} else if s.Transport == "http" || s.Transport == "sse" {
 		if s.URL == "" {
-			return fmt.Errorf("URL is required for SSE transport")
+			return fmt.Errorf("URL is required for %s transport", s.Transport)
 		}
 	}
 
