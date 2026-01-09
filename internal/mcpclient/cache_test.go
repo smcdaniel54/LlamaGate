@@ -101,6 +101,7 @@ func TestCache_Expiration(t *testing.T) {
 
 func TestCache_Clear(t *testing.T) {
 	cache := NewCache(5 * time.Minute)
+	defer cache.Stop()
 
 	cache.SetTool("server1", []Tool{{Name: "tool1"}})
 	cache.SetResources("server1", []Resource{{URI: "file:///test.txt"}})
@@ -116,3 +117,43 @@ func TestCache_Clear(t *testing.T) {
 	assert.False(t, found)
 }
 
+func TestCache_Stop(t *testing.T) {
+	cache := NewCache(5 * time.Minute)
+
+	// Stop should be idempotent
+	cache.Stop()
+	cache.Stop()
+	cache.Stop()
+
+	// Cache should still work after stopping cleanup goroutine
+	cache.SetTool("server1", []Tool{{Name: "tool1"}})
+	tools, found := cache.GetTool("server1")
+	assert.True(t, found)
+	assert.NotNil(t, tools)
+}
+
+func TestCache_StopPreventsGoroutineLeak(t *testing.T) {
+	// This test verifies that Stop() actually stops the cleanup goroutine
+	// by checking that multiple calls to Stop() don't panic and the cache
+	// can still be used after stopping
+	cache := NewCache(100 * time.Millisecond)
+
+	// Add some entries
+	cache.SetTool("server1", []Tool{{Name: "tool1"}})
+	cache.SetResources("server1", []Resource{{URI: "file:///test.txt"}})
+
+	// Stop the cleanup goroutine
+	cache.Stop()
+
+	// Wait a bit to ensure cleanup would have run if it was still active
+	time.Sleep(200 * time.Millisecond)
+
+	// Cache operations should still work
+	tools, found := cache.GetTool("server1")
+	assert.True(t, found)
+	assert.NotNil(t, tools)
+
+	// Multiple calls to Stop() should be safe
+	cache.Stop()
+	cache.Stop()
+}

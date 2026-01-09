@@ -161,6 +161,14 @@ func main() {
 		// Plugin system endpoints
 		pluginRegistry := plugins.NewRegistry()
 		
+		// Create LLM handler for plugins
+		llmHandler := proxyInstance.CreatePluginLLMHandler()
+		
+		// Register Alexa Skill plugin with context
+		if err := setup.RegisterAlexaPlugin(pluginRegistry, proxyInstance, llmHandler, cfg); err != nil {
+			log.Warn().Err(err).Msg("Failed to register Alexa Skill plugin")
+		}
+		
 		// Register test plugins if explicitly enabled
 		// In production, plugins would be registered via configuration or discovery
 		if os.Getenv("ENABLE_TEST_PLUGINS") == "true" {

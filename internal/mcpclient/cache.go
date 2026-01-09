@@ -23,6 +23,9 @@ type Cache struct {
 	prompts   map[string]*CacheEntry
 	mu        sync.RWMutex
 	ttl       time.Duration
+	stopChan  chan struct{}
+	stopped   bool
+	stopOnce  sync.Once // Ensures Stop() only runs once
 }
 
 // NewCache creates a new cache with the specified TTL
@@ -36,6 +39,7 @@ func NewCache(ttl time.Duration) *Cache {
 		resources: make(map[string]*CacheEntry),
 		prompts:   make(map[string]*CacheEntry),
 		ttl:       ttl,
+		stopChan:  make(chan struct{}),
 	}
 
 	// Start cleanup goroutine
@@ -191,38 +195,56 @@ func (c *Cache) Clear() {
 	c.prompts = make(map[string]*CacheEntry)
 }
 
+// Stop stops the cleanup goroutine
+func (c *Cache) Stop() {
+	c.stopOnce.Do(func() {
+		c.mu.Lock()
+		defer c.mu.Unlock()
+
+		if c.stopped {
+			return
+		}
+
+		c.stopped = true
+		close(c.stopChan)
+	})
+}
+
 // cleanup periodically removes expired entries
 func (c *Cache) cleanup() {
 	ticker := time.NewTicker(1 * time.Minute)
 	defer ticker.Stop()
 
-	for range ticker.C {
-		c.mu.Lock()
-		now := time.Now()
+	for {
+		select {
+		case <-c.stopChan:
+			return
+		case <-ticker.C:
+			c.mu.Lock()
 
-		// Clean up expired tools
-		for key, entry := range c.tools {
-			if entry.IsExpired() {
-				delete(c.tools, key)
+			// Clean up expired tools
+			for key, entry := range c.tools {
+				if entry.IsExpired() {
+					delete(c.tools, key)
+				}
 			}
-		}
 
-		// Clean up expired resources
-		for key, entry := range c.resources {
-			if entry.IsExpired() {
-				delete(c.resources, key)
+			// Clean up expired resources
+			for key, entry := range c.resources {
+				if entry.IsExpired() {
+					delete(c.resources, key)
+				}
 			}
-		}
 
-		// Clean up expired prompts
-		for key, entry := range c.prompts {
-			if entry.IsExpired() {
-				delete(c.prompts, key)
+			// Clean up expired prompts
+			for key, entry := range c.prompts {
+				if entry.IsExpired() {
+					delete(c.prompts, key)
+				}
 			}
-		}
 
-		c.mu.Unlock()
-		_ = now // Avoid unused variable warning
+			c.mu.Unlock()
+		}
 	}
 }
 

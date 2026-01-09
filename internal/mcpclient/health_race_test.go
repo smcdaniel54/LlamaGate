@@ -58,3 +58,41 @@ func TestHealthMonitor_Start_AfterStop(t *testing.T) {
 	// Should be safe to stop again (no panic)
 	hm.Stop()
 }
+
+// TestHealthMonitor_Stop_MultipleCalls tests that Stop() can be called multiple times
+// without panicking (close of closed channel)
+func TestHealthMonitor_Stop_MultipleCalls(t *testing.T) {
+	hm := NewHealthMonitor(100*time.Millisecond, 5*time.Second)
+
+	// Start the monitor
+	hm.Start()
+	time.Sleep(50 * time.Millisecond)
+
+	// Call Stop() multiple times concurrently - should not panic
+	var wg sync.WaitGroup
+	numGoroutines := 10
+	wg.Add(numGoroutines)
+
+	for i := 0; i < numGoroutines; i++ {
+		go func() {
+			defer wg.Done()
+			// Multiple calls to Stop() should be safe
+			hm.Stop()
+			hm.Stop()
+			hm.Stop()
+		}()
+	}
+
+	wg.Wait()
+
+	// If we get here without panicking, the fix works
+	// Verify that Stop() is idempotent
+	hm2 := NewHealthMonitor(100*time.Millisecond, 5*time.Second)
+	hm2.Start()
+	time.Sleep(50 * time.Millisecond)
+	
+	// Multiple sequential calls should be safe
+	hm2.Stop()
+	hm2.Stop()
+	hm2.Stop()
+}

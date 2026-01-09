@@ -265,6 +265,9 @@ func (sm *ServerManager) Close() error {
 	// Stop health monitoring
 	sm.healthMonitor.Stop()
 
+	// Stop cache cleanup goroutine
+	sm.cache.Stop()
+
 	// Close all pools
 	for name, pool := range sm.pools {
 		if err := pool.Close(); err != nil {

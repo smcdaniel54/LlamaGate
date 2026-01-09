@@ -51,6 +51,7 @@ type HealthMonitor struct {
 	stopChan chan struct{}
 	stopped  bool
 	startOnce sync.Once // Ensures Start() only runs once
+	stopOnce  sync.Once // Ensures Stop() only runs once
 }
 
 // NewHealthMonitor creates a new health monitor
@@ -110,15 +111,17 @@ func (hm *HealthMonitor) Start() {
 
 // Stop stops the health monitoring
 func (hm *HealthMonitor) Stop() {
-	hm.mu.Lock()
-	defer hm.mu.Unlock()
+	hm.stopOnce.Do(func() {
+		hm.mu.Lock()
+		defer hm.mu.Unlock()
 
-	if hm.stopped {
-		return
-	}
+		if hm.stopped {
+			return
+		}
 
-	hm.stopped = true
-	close(hm.stopChan)
+		hm.stopped = true
+		close(hm.stopChan)
+	})
 }
 
 // CheckHealth performs a health check on a specific client

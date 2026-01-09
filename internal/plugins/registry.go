@@ -9,17 +9,24 @@ import (
 type Registry struct {
 	mu      sync.RWMutex
 	plugins map[string]Plugin
+	contexts map[string]*PluginContext // Plugin-specific contexts
 }
 
 // NewRegistry creates a new plugin registry
 func NewRegistry() *Registry {
 	return &Registry{
-		plugins: make(map[string]Plugin),
+		plugins:  make(map[string]Plugin),
+		contexts: make(map[string]*PluginContext),
 	}
 }
 
 // Register registers a plugin with the registry
 func (r *Registry) Register(plugin Plugin) error {
+	return r.RegisterWithContext(plugin, nil)
+}
+
+// RegisterWithContext registers a plugin with the registry and optional context
+func (r *Registry) RegisterWithContext(plugin Plugin, ctx *PluginContext) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -33,7 +40,27 @@ func (r *Registry) Register(plugin Plugin) error {
 	}
 
 	r.plugins[metadata.Name] = plugin
+	if ctx != nil {
+		r.contexts[metadata.Name] = ctx
+	}
+
 	return nil
+}
+
+// GetContext retrieves the context for a plugin
+func (r *Registry) GetContext(pluginName string) *PluginContext {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	return r.contexts[pluginName]
+}
+
+// SetContext sets the context for a plugin
+func (r *Registry) SetContext(pluginName string, ctx *PluginContext) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	r.contexts[pluginName] = ctx
 }
 
 // Get retrieves a plugin by name
