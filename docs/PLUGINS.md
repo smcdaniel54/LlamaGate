@@ -1,27 +1,57 @@
 # LlamaGate Plugin System
 
-The LlamaGate plugin system allows you to create reusable, agentic workflows that integrate with local LLM models and MCP tools. This guide will help you understand how to create, use, and extend plugins.
+The LlamaGate plugin system allows you to create reusable, agentic workflows that integrate with local LLM models and MCP tools. This comprehensive guide covers everything you need to know.
 
 ## Table of Contents
 
+- [Quick Start](#quick-start)
 - [Overview](#overview)
-- [Plugin Architecture](#plugin-architecture)
 - [Creating a Plugin](#creating-a-plugin)
-- [Plugin Template](#plugin-template)
-- [Example Plugins](#example-plugins)
 - [Agentic Workflows](#agentic-workflows)
+- [Custom API Endpoints](#custom-api-endpoints)
+- [JSON/YAML Definitions](#jsonyaml-definitions)
+- [Dynamic Configuration Examples](#dynamic-configuration-examples)
 - [Best Practices](#best-practices)
 - [API Reference](#api-reference)
+
+## Quick Start
+
+**Get started in 5 minutes:**
+
+1. **Use the simple template** (~50 lines):
+   ```bash
+   cat plugins/templates/simple_plugin.go
+   ```
+
+2. **Copy and customize**:
+   ```bash
+   cp plugins/templates/simple_plugin.go plugins/my_plugin.go
+   ```
+
+3. **Implement 3 methods**:
+   - `Metadata()` - Describe your plugin
+   - `ValidateInput()` - Validate inputs
+   - `Execute()` - Do the work
+
+4. **Register your plugin**:
+   ```go
+   registry := plugins.NewRegistry()
+   registry.Register(NewMyPlugin())
+   ```
+
+See [Plugin Quick Start](PLUGIN_QUICKSTART.md) for detailed step-by-step instructions.
 
 ## Overview
 
 Plugins in LlamaGate are self-contained modules that:
 
-- Define clear input/output schemas
-- Implement validation logic
-- Execute agentic workflows
-- Integrate with LLM models and MCP tools
-- Return structured results
+- ✅ Define clear input/output schemas
+- ✅ Implement validation logic
+- ✅ Execute agentic workflows
+- ✅ Integrate with LLM models and MCP tools
+- ✅ Return structured results
+- ✅ Can expose custom API endpoints
+- ✅ Support JSON/YAML definitions (model-friendly)
 
 ### Key Concepts
 
@@ -35,37 +65,30 @@ Plugins in LlamaGate are self-contained modules that:
 
 **Agentic**: The workflow can make decisions, call tools, and iterate based on results.
 
-## Plugin Architecture
+### Why Plugins?
 
-### Core Components
-
-1. **Plugin Interface**: Defines the contract all plugins must implement
-2. **Plugin Registry**: Manages plugin registration and lookup
-3. **Workflow Executor**: Executes multi-step agentic workflows
-4. **Type System**: Defines input/output schemas and validation
-
-### Plugin Lifecycle
-
-```
-1. Registration → Plugin is registered with the registry
-2. Validation → Input parameters are validated
-3. Execution → Workflow is executed
-4. Result → Structured output is returned
-```
+- **Simple**: Only 3 methods required (~50 lines for basic plugin)
+- **Flexible**: Progressive complexity - start simple, add features as needed
+- **Model-Friendly**: Can be defined in JSON/YAML for AI models
+- **Powerful**: Support complex multi-step workflows with LLMs and tools
 
 ## Creating a Plugin
 
 ### Step 1: Use the Template
 
-Start by copying the plugin template:
+Start with the simple template (recommended) or full template:
 
 ```bash
+# Simple template (~50 lines)
+cp plugins/templates/simple_plugin.go plugins/my_plugin.go
+
+# Full template (more features)
 cp plugins/templates/plugin_template.go plugins/my_plugin.go
 ```
 
 ### Step 2: Define Metadata
 
-Update the `Metadata()` method with your plugin information:
+Update the `Metadata()` method:
 
 ```go
 func (p *MyPlugin) Metadata() plugins.PluginMetadata {
@@ -76,14 +99,26 @@ func (p *MyPlugin) Metadata() plugins.PluginMetadata {
         Author:      "Your Name",
         
         InputSchema: map[string]interface{}{
-            // Define your input schema (JSON Schema)
+            "type": "object",
+            "properties": map[string]interface{}{
+                "input_param": map[string]interface{}{
+                    "type":        "string",
+                    "description": "Your input parameter",
+                },
+            },
+            "required": []string{"input_param"},
         },
         
         OutputSchema: map[string]interface{}{
-            // Define your output schema (JSON Schema)
+            "type": "object",
+            "properties": map[string]interface{}{
+                "result": map[string]interface{}{
+                    "type": "string",
+                },
+            },
         },
         
-        RequiredInputs: []string{"required_param"},
+        RequiredInputs: []string{"input_param"},
         OptionalInputs: map[string]interface{}{
             "optional_param": "default_value",
         },
@@ -93,17 +128,24 @@ func (p *MyPlugin) Metadata() plugins.PluginMetadata {
 
 ### Step 3: Implement Validation
 
-Add validation logic in `ValidateInput()`:
+Add validation logic:
 
 ```go
 func (p *MyPlugin) ValidateInput(input map[string]interface{}) error {
     // Check required inputs
-    if _, exists := input["required_param"]; !exists {
-        return fmt.Errorf("required input 'required_param' is missing")
+    if _, exists := input["input_param"]; !exists {
+        return fmt.Errorf("required input 'input_param' is missing")
     }
     
-    // Add custom validation
-    // ...
+    // Type validation
+    if val, ok := input["input_param"].(string); !ok {
+        return fmt.Errorf("input_param must be a string")
+    }
+    
+    // Custom validation
+    if len(val) == 0 {
+        return fmt.Errorf("input_param cannot be empty")
+    }
     
     return nil
 }
@@ -111,24 +153,25 @@ func (p *MyPlugin) ValidateInput(input map[string]interface{}) error {
 
 ### Step 4: Implement Execution
 
-Add your workflow logic in `Execute()`:
+Add your workflow logic:
 
 ```go
 func (p *MyPlugin) Execute(ctx context.Context, input map[string]interface{}) (*plugins.PluginResult, error) {
     startTime := time.Now()
     
     // Your workflow logic here
-    // ...
+    inputParam := input["input_param"].(string)
+    result := processInput(inputParam)
     
     return &plugins.PluginResult{
         Success: true,
         Data: map[string]interface{}{
-            "result": "your result",
+            "result": result,
         },
         Metadata: plugins.ExecutionMetadata{
             ExecutionTime: time.Since(startTime),
             StepsExecuted: 1,
-            Timestamp: time.Now(),
+            Timestamp:     time.Now(),
         },
     }, nil
 }
@@ -136,99 +179,24 @@ func (p *MyPlugin) Execute(ctx context.Context, input map[string]interface{}) (*
 
 ### Step 5: Register Your Plugin
 
-Register your plugin in your application:
+Register in your application:
 
 ```go
 registry := plugins.NewRegistry()
-registry.Register(NewMyPlugin())
-```
-
-## Plugin Template
-
-The plugin template (`plugins/templates/plugin_template.go`) provides a complete starting point with:
-
-- ✅ Metadata structure
-- ✅ Input/output schema definitions
-- ✅ Validation skeleton
-- ✅ Execution framework
-- ✅ Error handling
-- ✅ Result formatting
-
-### Template Structure
-
-```go
-type TemplatePlugin struct {
-    // Add plugin-specific fields
-}
-
-func (p *TemplatePlugin) Metadata() plugins.PluginMetadata {
-    // Define metadata, schemas, required/optional inputs
-}
-
-func (p *TemplatePlugin) ValidateInput(input map[string]interface{}) error {
-    // Validate inputs
-}
-
-func (p *TemplatePlugin) Execute(ctx context.Context, input map[string]interface{}) (*plugins.PluginResult, error) {
-    // Execute workflow
+if err := registry.Register(NewMyPlugin()); err != nil {
+    log.Error().Err(err).Msg("Failed to register plugin")
 }
 ```
-
-## Example Plugins
-
-### Text Summarizer Plugin
-
-The `TextSummarizerPlugin` (`plugins/examples/text_summarizer.go`) demonstrates:
-
-- ✅ Input validation with type checking
-- ✅ Multi-step workflow (preprocess → extract → format)
-- ✅ Configurable parameters (max_length, style)
-- ✅ Structured output with metrics
-
-**Usage Example:**
-
-```go
-plugin := NewTextSummarizerPlugin()
-result, err := plugin.Execute(ctx, map[string]interface{}{
-    "text": "Long text to summarize...",
-    "max_length": 200,
-    "style": "brief",
-})
-```
-
-### Workflow Example Plugin
-
-The `ExampleWorkflowPlugin` (`plugins/examples/workflow_example.go`) demonstrates:
-
-- ✅ Multi-step agentic workflow
-- ✅ LLM integration
-- ✅ Tool calling
-- ✅ Data transformation
-- ✅ Step dependencies
-- ✅ Error handling strategies
-
-**Workflow Steps:**
-
-1. **Analyze Query**: LLM analyzes the user query
-2. **Extract Information**: Extract key information from analysis
-3. **Execute Tool**: Call MCP tools based on extracted info
-4. **Synthesize Result**: LLM synthesizes final result
 
 ## Agentic Workflows
 
-Agentic workflows allow plugins to:
-
-- Make decisions based on context
-- Call LLM models iteratively
-- Execute tools and process results
-- Transform data between steps
-- Handle errors and retries
+Agentic workflows allow plugins to make decisions, call LLMs iteratively, execute tools, and transform data between steps.
 
 ### Workflow Step Types
 
 #### 1. LLM Call (`llm_call`)
 
-Calls a language model with a prompt:
+Calls a language model:
 
 ```go
 {
@@ -256,7 +224,7 @@ Executes an MCP tool:
         "arguments": map[string]interface{}{
             "path": "/path/to/file",
         },
-        "merge_state": true, // Merge state into arguments
+        "merge_state": true, // Merge workflow state into arguments
     },
 }
 ```
@@ -289,6 +257,43 @@ Evaluates conditional logic:
 }
 ```
 
+### Creating a Workflow
+
+```go
+workflow := &plugins.Workflow{
+    ID:          "my_workflow",
+    Name:        "My Workflow",
+    Description: "Description of what it does",
+    MaxRetries:  2,
+    Timeout:     30 * time.Second,
+    Steps: []plugins.WorkflowStep{
+        {
+            ID:   "step1",
+            Type: "llm_call",
+            Config: map[string]interface{}{
+                "model":  "llama3.2",
+                "prompt": "Analyze this query",
+            },
+        },
+        {
+            ID:   "step2",
+            Type: "tool_call",
+            Config: map[string]interface{}{
+                "tool_name": "mcp.filesystem.read_file",
+                "arguments": map[string]interface{}{
+                    "path": "/path/to/file",
+                },
+            },
+            Dependencies: []string{"step1"},
+            OnError:      "continue", // Continue on error
+        },
+    },
+}
+
+executor := plugins.NewWorkflowExecutor(llmHandler, toolHandler)
+results, err := executor.Execute(ctx, workflow, initialInput)
+```
+
 ### Step Dependencies
 
 Steps can depend on previous steps:
@@ -297,7 +302,7 @@ Steps can depend on previous steps:
 {
     ID: "step2",
     Dependencies: []string{"step1"},
-    // ...
+    // step2 will only run after step1 completes successfully
 }
 ```
 
@@ -316,23 +321,229 @@ Configure error handling per step:
 }
 ```
 
-### Creating a Workflow
+## Custom API Endpoints
+
+Plugins can expose custom HTTP endpoints beyond the standard `/v1/plugins/:name/execute` endpoint.
+
+### Defining Custom Endpoints
+
+Implement the `ExtendedPlugin` interface:
 
 ```go
-workflow := &plugins.Workflow{
-    ID:          "my_workflow",
-    Name:        "My Workflow",
-    Description: "Description of what it does",
-    MaxRetries:  2,
-    Timeout:     30 * time.Second,
-    Steps: []plugins.WorkflowStep{
-        // Define your steps
-    },
+type MyPlugin struct {
+    // ... plugin fields
 }
 
-executor := plugins.NewWorkflowExecutor(llmHandler, toolHandler)
-results, err := executor.Execute(ctx, workflow, initialInput)
+func (p *MyPlugin) GetAPIEndpoints() []plugins.APIEndpoint {
+    return []plugins.APIEndpoint{
+        {
+            Path:        "/custom/action",
+            Method:      "POST",
+            Description: "Perform a custom action",
+            Handler:     p.handleCustomAction,
+            RequestSchema: map[string]interface{}{
+                "type": "object",
+                "properties": map[string]interface{}{
+                    "action": map[string]interface{}{
+                        "type": "string",
+                    },
+                },
+            },
+            RequiresAuth:      true,
+            RequiresRateLimit: true,
+        },
+    }
+}
+
+func (p *MyPlugin) handleCustomAction(c *gin.Context) {
+    var input map[string]interface{}
+    if err := c.ShouldBindJSON(&input); err != nil {
+        c.JSON(400, gin.H{"error": err.Error()})
+        return
+    }
+    
+    result, err := p.Execute(c.Request.Context(), input)
+    if err != nil {
+        c.JSON(500, gin.H{"error": err.Error()})
+        return
+    }
+    
+    c.JSON(200, result)
+}
 ```
+
+Endpoints are automatically registered at `/v1/plugins/{plugin_name}/custom/action`.
+
+## JSON/YAML Definitions
+
+Plugins can be defined in JSON/YAML, making them model-friendly and easy to generate programmatically.
+
+### Defining a Plugin in JSON
+
+```json
+{
+  "name": "text_processor",
+  "version": "1.0.0",
+  "description": "Processes and analyzes text",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "text": {
+        "type": "string",
+        "description": "Text to process"
+      },
+      "operation": {
+        "type": "string",
+        "enum": ["summarize", "analyze", "extract"],
+        "description": "Operation to perform"
+      }
+    },
+    "required": ["text", "operation"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "string",
+        "description": "Processed result"
+      }
+    }
+  },
+  "workflow": {
+    "steps": [
+      {
+        "id": "process",
+        "type": "llm_call",
+        "config": {
+          "model": "llama3.2",
+          "prompt": "Process this text: {{text}} with operation: {{operation}}"
+        }
+      }
+    ]
+  }
+}
+```
+
+### Creating Plugin from Definition
+
+```go
+import "github.com/llamagate/llamagate/internal/plugins"
+
+// Parse JSON definition
+jsonData := []byte(`{...}`)
+def, err := plugins.ParsePluginDefinition(jsonData)
+if err != nil {
+    return err
+}
+
+// Create plugin
+plugin, err := plugins.CreatePluginFromDefinition(def)
+if err != nil {
+    return err
+}
+
+// Register
+registry.Register(plugin)
+```
+
+### Model-Friendly Features
+
+- ✅ **Self-Documenting**: Clear metadata and schemas
+- ✅ **JSON-Serializable**: All structures are JSON-compatible
+- ✅ **Declarative**: Workflows defined declaratively
+- ✅ **Minimal Requirements**: Only name and description required
+
+See example: `plugins/examples/model_generated_example.json`
+
+## Dynamic Configuration Examples
+
+Plugins can adapt their behavior based on runtime parameters, environment variables, and user input.
+
+### Example 1: Environment-Aware Configuration
+
+```go
+func (p *MyPlugin) Execute(ctx context.Context, input map[string]interface{}) (*plugins.PluginResult, error) {
+    env := os.Getenv("ENVIRONMENT")
+    if env == "" {
+        env = "development"
+    }
+    
+    var timeout time.Duration
+    switch env {
+    case "production":
+        timeout = 30 * time.Second
+    case "staging":
+        timeout = 20 * time.Second
+    default:
+        timeout = 10 * time.Second
+    }
+    
+    workflow := &plugins.Workflow{
+        Timeout: timeout,
+        Steps:   []plugins.WorkflowStep{...},
+    }
+    
+    // Execute with dynamic timeout
+    // ...
+}
+```
+
+### Example 2: User-Configurable Workflow
+
+```go
+func (p *MyPlugin) Execute(ctx context.Context, input map[string]interface{}) (*plugins.PluginResult, error) {
+    queryType := input["query_type"].(string)
+    useCache := input["use_cache"].(bool)
+    
+    steps := []plugins.WorkflowStep{
+        {
+            ID:   "analyze",
+            Type: "llm_call",
+            Config: map[string]interface{}{
+                "model":  input["model"].(string),
+                "prompt": fmt.Sprintf("Analyze this %s query", queryType),
+            },
+        },
+    }
+    
+    // Add conditional steps
+    if useCache {
+        steps = append(steps, plugins.WorkflowStep{
+            ID:   "check_cache",
+            Type: "data_transform",
+            // ...
+        })
+    }
+    
+    workflow := &plugins.Workflow{Steps: steps}
+    // ...
+}
+```
+
+### Example 3: Configuration-Driven Tool Selection
+
+```go
+func (p *MyPlugin) Execute(ctx context.Context, input map[string]interface{}) (*plugins.PluginResult, error) {
+    enabledTools := input["enabled_tools"].([]interface{})
+    
+    steps := []plugins.WorkflowStep{}
+    
+    // Add tool steps dynamically
+    for i, toolName := range enabledTools {
+        steps = append(steps, plugins.WorkflowStep{
+            ID:   fmt.Sprintf("tool_%d", i),
+            Type: "tool_call",
+            Config: map[string]interface{}{
+                "tool_name": toolName.(string),
+            },
+        })
+    }
+    
+    // ...
+}
+```
+
+See `plugins/examples/dynamic_config_example.go` for complete examples.
 
 ## Best Practices
 
@@ -438,21 +649,38 @@ plugin, err := registry.Get("plugin_name")
 plugins := registry.List()
 ```
 
+### HTTP API
+
+- `GET /v1/plugins` - List all plugins
+- `GET /v1/plugins/:name` - Get plugin metadata
+- `POST /v1/plugins/:name/execute` - Execute plugin
+
+## Examples
+
+- **Text Summarizer**: `plugins/examples/text_summarizer.go`
+- **Workflow Example**: `plugins/examples/workflow_example.go`
+- **Dynamic Config**: `plugins/examples/dynamic_config_example.go`
+- **Model-Generated**: `plugins/examples/model_generated_example.json`
+
+## Templates
+
+- **Simple Template**: `plugins/templates/simple_plugin.go` (~50 lines)
+- **Full Template**: `plugins/templates/plugin_template.go` (complete features)
+
 ## Next Steps
 
-1. **Explore Examples**: Review `plugins/examples/` for working examples
-2. **Use Template**: Start with `plugins/templates/plugin_template.go`
-3. **Read API Docs**: See `internal/plugins/` for detailed API documentation
-4. **Build Your Plugin**: Create your own plugin following the guide
-5. **Dynamic Configuration**: See [Dynamic Config Use Cases](DYNAMIC_CONFIG_USECASES.md) for advanced patterns
-6. **Deep Dive**: See [Plugin System Explained](PLUGIN_SYSTEM_EXPLAINED.md) for comprehensive explanation of workflows and validations
+1. **Quick Start**: See [Plugin Quick Start](PLUGIN_QUICKSTART.md) for step-by-step guide
+2. **Explore Examples**: Review `plugins/examples/` for working examples
+3. **Use Template**: Start with `plugins/templates/simple_plugin.go`
+4. **Read Code**: See `internal/plugins/` for detailed API documentation
+5. **Build Your Plugin**: Create your own plugin following this guide
 
 ## Support
 
 For questions, issues, or contributions:
 
 - Check existing examples in `plugins/examples/`
-- Review the template in `plugins/templates/`
+- Review templates in `plugins/templates/`
 - See API documentation in `internal/plugins/`
 - Open an issue on GitHub
 
