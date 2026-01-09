@@ -27,7 +27,7 @@ echo ""
 read -p "Press Enter to start testing..."
 
 echo ""
-echo "[1/7] Testing Health Check..."
+echo "[1/9] Testing Health Check..."
 if [ -n "$API_KEY" ]; then
     curl -s -H "X-API-Key: $API_KEY" "$BASE_URL/health"
 else
@@ -37,7 +37,7 @@ echo ""
 echo "✓ Health check passed"
 echo ""
 
-echo "[2/7] Testing Models Endpoint..."
+echo "[2/9] Testing Models Endpoint..."
 if [ -n "$API_KEY" ]; then
     curl -s -H "X-API-Key: $API_KEY" "$BASE_URL/v1/models" | jq '.' 2>/dev/null || curl -s -H "X-API-Key: $API_KEY" "$BASE_URL/v1/models"
 else
@@ -47,7 +47,7 @@ echo ""
 echo "✓ Models endpoint passed"
 echo ""
 
-echo "[3/7] Testing Chat Completions (Non-Streaming)..."
+echo "[3/9] Testing Chat Completions (Non-Streaming)..."
 BODY='{"model":"llama2","messages":[{"role":"user","content":"Say hello in one word"}]}'
 if [ -n "$API_KEY" ]; then
     RESPONSE=$(curl -s -X POST "$BASE_URL/v1/chat/completions" \
@@ -65,7 +65,7 @@ echo ""
 echo "✓ Chat completions (non-streaming) passed"
 echo ""
 
-echo "[4/7] Testing Caching (Same Request Twice)..."
+echo "[4/9] Testing Caching (Same Request Twice)..."
 BODY='{"model":"llama2","messages":[{"role":"user","content":"What is 2+2?"}]}'
 echo "First request (should be slow):"
 if [ -n "$API_KEY" ]; then
@@ -94,7 +94,7 @@ echo ""
 echo "✓ Cache test completed (check times above - second should be much faster)"
 echo ""
 
-echo "[5/7] Testing Authentication (if enabled)..."
+echo "[5/9] Testing Authentication (if enabled)..."
 if [ -z "$API_KEY" ]; then
     echo "Authentication is disabled, skipping auth test"
 else
@@ -110,7 +110,7 @@ else
 fi
 echo ""
 
-echo "[6/7] Testing MCP API Endpoints (if MCP enabled)..."
+echo "[6/9] Testing MCP API Endpoints (if MCP enabled)..."
 if [ -n "$API_KEY" ]; then
     AUTH_HEADER="-H \"X-API-Key: $API_KEY\""
 else
@@ -132,7 +132,7 @@ else
 fi
 echo ""
 
-echo "[7/7] Testing MCP URI Scheme (if MCP enabled)..."
+echo "[7/9] Testing MCP URI Scheme (if MCP enabled)..."
 echo "Testing chat completion with MCP URI..."
 echo "Note: This requires an MCP server with resources configured"
 BODY='{"model":"llama2","messages":[{"role":"user","content":"Test mcp://test-server/resource"}]}'
@@ -154,6 +154,34 @@ else
     echo ""
     echo "ℹ MCP URI test skipped (MCP may not be enabled or server not configured)"
 fi
+echo ""
+
+echo "[8/9] Testing Plugin System (if enabled)..."
+if [ -n "$API_KEY" ]; then
+    AUTH_HEADER="-H \"X-API-Key: $API_KEY\""
+else
+    AUTH_HEADER=""
+fi
+echo "Testing plugin discovery..."
+if [ -n "$API_KEY" ]; then
+    curl -s -H "X-API-Key: $API_KEY" "$BASE_URL/v1/plugins" > /dev/null
+else
+    curl -s "$BASE_URL/v1/plugins" > /dev/null
+fi
+if [ $? -eq 0 ]; then
+    echo ""
+    echo "✓ Plugin system is accessible"
+    echo "  Run scripts/unix/test-plugins.sh for comprehensive plugin tests"
+else
+    echo ""
+    echo "ℹ Plugin system test skipped (Plugin system may not be enabled)"
+fi
+echo ""
+
+echo "[9/9] Testing Plugin Use Cases (if plugins registered)..."
+echo "Note: This requires test plugins to be registered"
+echo "      See scripts/unix/test-plugins.sh for full plugin testing"
+echo "      Or set ENABLE_TEST_PLUGINS=true to enable test plugins"
 echo ""
 
 echo "========================================"

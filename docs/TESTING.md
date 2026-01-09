@@ -50,6 +50,93 @@ This guide explains how to test LlamaGate to ensure everything is working correc
    scripts\windows\test.cmd
    ```
 
+## Plugin System Testing
+
+### Testing All Use Cases
+
+The plugin system includes comprehensive tests for all 8 dynamic configuration use cases.
+
+#### Windows
+
+```cmd
+scripts\windows\test-plugins.cmd
+```
+
+#### Unix/Linux/macOS
+
+```bash
+chmod +x scripts/unix/test-plugins.sh
+./scripts/unix/test-plugins.sh
+```
+
+#### What Gets Tested
+
+1. **Plugin Discovery**
+   - List all registered plugins
+   - Get plugin metadata
+   - Verify plugin system is enabled
+
+2. **Plugin Registration**
+   - All 8 use case plugins registered
+   - Plugin metadata accessible
+   - Custom endpoints (if any) registered
+
+3. **Input Validation**
+   - Required inputs validated
+   - Type validation
+   - Range/enum validation
+   - Error messages clear
+
+4. **Plugin Execution**
+   - Use Case 1: Environment-aware configuration
+   - Use Case 2: User-configurable workflow parameters
+   - Use Case 3: Configuration-driven tool selection
+   - Use Case 4: Adaptive timeout configuration
+   - Use Case 5: Configuration file-based setup
+   - Use Case 6: Runtime configuration updates
+   - Use Case 7: Context-aware configuration
+   - Use Case 8: Multi-tenant configuration
+
+#### Test Plugins
+
+Test plugins are defined in `tests/plugins/test_plugins.go`. To use them:
+
+1. **Enable test plugins** (optional):
+   ```bash
+   # Set in .env file
+   ENABLE_TEST_PLUGINS=true
+   ```
+
+2. **Register in code** (see `cmd/llamagate/main.go`):
+   ```go
+   pluginRegistry := plugins.NewRegistry()
+   // Register test plugins
+   for _, plugin := range testplugins.CreateTestPlugins() {
+       pluginRegistry.Register(plugin)
+   }
+   ```
+
+3. **Run tests**:
+   ```bash
+   scripts/windows/test-plugins.cmd  # Windows
+   scripts/unix/test-plugins.sh      # Unix
+   ```
+
+#### Expected Results
+
+Each use case test should:
+- ✅ Return HTTP 200 on success
+- ✅ Return structured JSON response
+- ✅ Include execution metadata
+- ✅ Handle validation errors gracefully
+
+#### Validation Testing
+
+The test scripts also verify:
+- ✅ Missing required inputs return 400 Bad Request
+- ✅ Invalid input types return 400 Bad Request
+- ✅ Valid inputs return 200 OK with results
+
 ## Manual Testing
 
 ### 1. Health Check

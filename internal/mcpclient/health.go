@@ -50,6 +50,7 @@ type HealthMonitor struct {
 	timeout  time.Duration
 	stopChan chan struct{}
 	stopped  bool
+	startOnce sync.Once // Ensures Start() only runs once
 }
 
 // NewHealthMonitor creates a new health monitor
@@ -92,15 +93,19 @@ func (hm *HealthMonitor) UnregisterClient(name string) {
 }
 
 // Start starts the health monitoring goroutine
+// Uses sync.Once to ensure only one goroutine is started, even if called concurrently
 func (hm *HealthMonitor) Start() {
-	hm.mu.Lock()
-	if hm.stopped {
+	hm.startOnce.Do(func() {
+		hm.mu.Lock()
+		// Check if already stopped before starting
+		if hm.stopped {
+			hm.mu.Unlock()
+			return
+		}
 		hm.mu.Unlock()
-		return
-	}
-	hm.mu.Unlock()
 
-	go hm.monitorLoop()
+		go hm.monitorLoop()
+	})
 }
 
 // Stop stops the health monitoring

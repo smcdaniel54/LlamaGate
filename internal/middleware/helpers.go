@@ -9,10 +9,10 @@ const (
 )
 
 // isHealthEndpoint checks if the request path is the health check endpoint
-// It normalizes the path by removing trailing slashes to handle edge cases
+// It normalizes the path by removing all trailing slashes to handle edge cases
 func isHealthEndpoint(path string) bool {
-	// Normalize path: remove trailing slash and compare
-	normalized := strings.TrimSuffix(path, "/")
+	// Normalize path: remove all trailing slashes and compare
+	normalized := strings.TrimRight(path, "/")
 	return normalized == HealthEndpointPath
 }
 

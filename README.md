@@ -13,6 +13,7 @@ LlamaGate is a production-ready, OpenAI-compatible HTTP proxy/gateway for local 
 
 - ✅ **OpenAI-Compatible API**: Drop-in replacement for OpenAI API endpoints
 - ✅ **MCP Client Support**: Connect to MCP servers and expose their tools to models ([MCP Guide](docs/MCP.md) | [Quick Start](docs/MCP_QUICKSTART.md))
+- ✅ **Plugin System**: Create reusable plugins and agentic workflows ([Plugin Guide](docs/PLUGINS.md) | [Quick Start](docs/PLUGIN_QUICKSTART.md))
 - ✅ **Caching**: In-memory caching for identical prompts to reduce Ollama load
 - ✅ **Authentication**: Optional API key authentication via headers
 - ✅ **Rate Limiting**: Configurable rate limiting using leaky bucket algorithm
@@ -31,6 +32,9 @@ LlamaGate is a production-ready, OpenAI-compatible HTTP proxy/gateway for local 
 - 🚀 **[MCP Quick Start](docs/MCP_QUICKSTART.md)** - Get started with MCP in 5 minutes
 - 🎯 **[MCP Demo Guide](docs/MCP_DEMO_QUICKSTART.md)** - Full demo with multiple servers
 - 🌐 **[MCP HTTP API](docs/API.md)** - Complete API reference for MCP management
+- 🔌 **[Plugin System](docs/PLUGINS.md)** - Create reusable plugins and workflows
+- ⚡ **[Plugin Quick Start](docs/PLUGIN_QUICKSTART.md)** - Get started with plugins in 5 minutes
+- ⚙️ **[Dynamic Config Use Cases](docs/DYNAMIC_CONFIG_USECASES.md)** - Advanced configuration patterns
 - 🧪 **[Testing Guide](docs/TESTING.md)** - Testing your setup
 - 📦 **[Installation Guide](docs/INSTALL.md)** - Detailed installation instructions
 

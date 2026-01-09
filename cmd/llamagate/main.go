@@ -16,6 +16,7 @@ import (
 	"github.com/llamagate/llamagate/internal/config"
 	"github.com/llamagate/llamagate/internal/logger"
 	"github.com/llamagate/llamagate/internal/middleware"
+	"github.com/llamagate/llamagate/internal/plugins"
 	"github.com/llamagate/llamagate/internal/proxy"
 	"github.com/llamagate/llamagate/internal/setup"
 	"github.com/rs/zerolog/log"
@@ -156,6 +157,31 @@ func main() {
 				mcp.POST("/servers/:name/refresh", mcpHandler.RefreshServerMetadata)
 			}
 		}
+
+		// Plugin system endpoints
+		pluginRegistry := plugins.NewRegistry()
+		
+		// Register test plugins if explicitly enabled
+		// In production, plugins would be registered via configuration or discovery
+		if os.Getenv("ENABLE_TEST_PLUGINS") == "true" {
+			if err := setup.RegisterTestPlugins(pluginRegistry); err != nil {
+				log.Warn().Err(err).Msg("Failed to register test plugins")
+			} else {
+				log.Info().Msg("Test plugins registration attempted (see setup/plugins.go)")
+			}
+		}
+		
+		// Register plugin API endpoints
+		pluginHandler := api.NewPluginHandler(pluginRegistry)
+		pluginsGroup := v1.Group("/plugins")
+		{
+			pluginsGroup.GET("", pluginHandler.ListPlugins)
+			pluginsGroup.GET("/:name", pluginHandler.GetPlugin)
+			pluginsGroup.POST("/:name/execute", pluginHandler.ExecutePlugin)
+		}
+		
+		// Register custom plugin routes (for ExtendedPlugin with custom endpoints)
+		api.RegisterPluginRoutes(v1, pluginRegistry)
 	}
 
 	// Create HTTP server
