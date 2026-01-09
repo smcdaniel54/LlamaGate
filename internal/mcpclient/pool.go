@@ -104,7 +104,10 @@ func (p *ConnectionPool) Acquire(ctx context.Context, factory func() (*Client, e
 		}
 
 		// If pool is not full, create a new connection
+		// Check must be done while holding the lock to prevent race conditions
 		if len(p.connections) < p.config.MaxConnections {
+			// Reserve a slot by checking the condition while holding the lock
+			// Unlock only for the expensive factory() call
 			p.mu.Unlock()
 			client, err := factory()
 			if err != nil {
@@ -117,11 +120,19 @@ func (p *ConnectionPool) Acquire(ctx context.Context, factory func() (*Client, e
 				inUse:    true,
 			}
 
+			// Re-acquire lock and verify we can still add the connection
 			p.mu.Lock()
 			if p.closed {
 				p.mu.Unlock()
 				client.Close()
 				return nil, ErrPoolClosed
+			}
+			// Double-check: another goroutine might have filled the pool while we were creating the connection
+			if len(p.connections) >= p.config.MaxConnections {
+				p.mu.Unlock()
+				client.Close()
+				// Retry the loop to wait for an available connection
+				continue
 			}
 			p.connections = append(p.connections, conn)
 			p.mu.Unlock()

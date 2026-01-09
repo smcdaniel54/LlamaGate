@@ -91,7 +91,6 @@ func NewClientWithTimeout(name, command string, args []string, env map[string]st
 }
 
 // NewClientWithSSE creates a new MCP client with SSE transport
-// Note: This is a stub for future implementation
 func NewClientWithSSE(name, url string, headers map[string]string) (*Client, error) {
 	transport, err := NewSSETransport(url, headers)
 	if err != nil {
@@ -105,6 +104,37 @@ func NewClientWithSSE(name, url string, headers map[string]string) (*Client, err
 		resourcesMap: make(map[string]*Resource),
 		promptsMap:   make(map[string]*Prompt),
 	}
+
+	// Initialize the client (MCP handshake)
+	ctx := context.Background()
+	if err := client.initialize(ctx); err != nil {
+		return nil, fmt.Errorf("failed to initialize client: %w", err)
+	}
+
+	// Discover available tools
+	if err := client.discoverTools(ctx); err != nil {
+		log.Warn().
+			Str("server", name).
+			Err(err).
+			Msg("Failed to discover tools, continuing without tools")
+	}
+
+	// Discover available resources
+	if err := client.discoverResources(ctx); err != nil {
+		log.Warn().
+			Str("server", name).
+			Err(err).
+			Msg("Failed to discover resources, continuing without resources")
+	}
+
+	// Discover available prompts
+	if err := client.discoverPrompts(ctx); err != nil {
+		log.Warn().
+			Str("server", name).
+			Err(err).
+			Msg("Failed to discover prompts, continuing without prompts")
+	}
+
 	return client, nil
 }
 

@@ -190,3 +190,72 @@ func TestConnectionPool_Close(t *testing.T) {
 	_ = conn // Avoid unused variable
 }
 
+// TestConnectionPool_Acquire_RaceCondition tests that concurrent Acquire calls
+// don't exceed MaxConnections limit
+func TestConnectionPool_Acquire_RaceCondition(t *testing.T) {
+	config := PoolConfig{
+		MaxConnections: 5,
+		MaxIdleTime:    1 * time.Minute,
+		AcquireTimeout: 5 * time.Second,
+	}
+	pool := NewConnectionPool(config)
+	defer pool.Close()
+
+	callCount := 0
+	var callCountMu sync.Mutex
+	factory := func() (*Client, error) {
+		callCountMu.Lock()
+		callCount++
+		callCountMu.Unlock()
+		// Simulate connection creation delay to increase chance of race condition
+		time.Sleep(10 * time.Millisecond)
+		transport := newMockTransport()
+		client := &Client{
+			name:        "test",
+			transport:   transport,
+			toolsMap:    make(map[string]*Tool),
+			resourcesMap: make(map[string]*Resource),
+			promptsMap:  make(map[string]*Prompt),
+		}
+		return client, nil
+	}
+
+	ctx := context.Background()
+
+	// Launch many goroutines trying to acquire connections concurrently
+	var wg sync.WaitGroup
+	numGoroutines := 20 // More than MaxConnections to test the limit
+	acquired := make([]*PooledConnection, 0)
+	var acquiredMu sync.Mutex
+
+	for i := 0; i < numGoroutines; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			conn, err := pool.Acquire(ctx, factory)
+			if err == nil && conn != nil {
+				acquiredMu.Lock()
+				acquired = append(acquired, conn)
+				acquiredMu.Unlock()
+			}
+		}()
+	}
+
+	wg.Wait()
+
+	// Verify we never exceeded MaxConnections
+	stats := pool.Stats()
+	assert.LessOrEqual(t, stats.Total, config.MaxConnections, "Pool should not exceed MaxConnections")
+	assert.LessOrEqual(t, stats.Total, 5, "Pool should not exceed MaxConnections")
+
+	// Release all acquired connections
+	acquiredMu.Lock()
+	for _, conn := range acquired {
+		pool.Release(conn)
+	}
+	acquiredMu.Unlock()
+
+	// Verify final state
+	stats = pool.Stats()
+	assert.LessOrEqual(t, stats.Total, config.MaxConnections)
+}
