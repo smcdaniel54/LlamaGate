@@ -13,6 +13,7 @@ Welcome to the LlamaGate documentation! This directory contains detailed guides 
 - [MCP HTTP API](API.md) - Complete API reference for MCP management endpoints
 
 ## Development
+- [Architecture](ARCHITECTURE.md) - System architecture and design
 - [Testing Guide](TESTING.md) - How to test your setup
 - [Project Structure](STRUCTURE.md) - Understanding the codebase
 - [Installer Testing](INSTALLER_TESTING.md) - Testing installation scripts
