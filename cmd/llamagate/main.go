@@ -4,6 +4,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -37,6 +38,7 @@ func main() {
 		Str("port", cfg.Port).
 		Float64("rate_limit_rps", cfg.RateLimitRPS).
 		Bool("debug", cfg.Debug).
+		Bool("tls_enabled", cfg.TLSEnabled).
 		Msg("Starting LlamaGate")
 
 	// Initialize cache
@@ -192,6 +194,14 @@ func main() {
 		api.RegisterPluginRoutes(v1, pluginRegistry)
 	}
 
+	// Check port availability before starting server
+	if err := checkPortAvailability(cfg.Port); err != nil {
+		log.Fatal().
+			Str("port", cfg.Port).
+			Err(err).
+			Msg("Port is already in use - another LlamaGate instance may be running. Only one instance should run per machine.")
+	}
+
 	// Create HTTP server
 	srv := &http.Server{
 		Addr:    ":" + cfg.Port,
@@ -200,8 +210,19 @@ func main() {
 
 	// Start server in a goroutine
 	go func() {
-		log.Info().Str("address", srv.Addr).Msg("Server starting")
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		var err error
+		if cfg.TLSEnabled {
+			log.Info().
+				Str("address", srv.Addr).
+				Str("cert_file", cfg.TLSCertFile).
+				Str("key_file", cfg.TLSKeyFile).
+				Msg("Server starting with HTTPS/TLS")
+			err = srv.ListenAndServeTLS(cfg.TLSCertFile, cfg.TLSKeyFile)
+		} else {
+			log.Info().Str("address", srv.Addr).Msg("Server starting with HTTP")
+			err = srv.ListenAndServe()
+		}
+		if err != nil && err != http.ErrServerClosed {
 			log.Fatal().Err(err).Msg("Failed to start server")
 		}
 	}()
@@ -248,4 +269,16 @@ func main() {
 	logger.Close()
 
 	log.Info().Msg("Server exited gracefully")
+}
+
+// checkPortAvailability checks if the specified port is available for binding.
+// Returns an error if the port is already in use, indicating another instance may be running.
+func checkPortAvailability(port string) error {
+	addr := ":" + port
+	ln, err := net.Listen("tcp", addr)
+	if err != nil {
+		return fmt.Errorf("port %s is already in use - another LlamaGate instance may be running. Only one instance should run per machine. Multiple apps can connect to the same LlamaGate instance", port)
+	}
+	ln.Close()
+	return nil
 }

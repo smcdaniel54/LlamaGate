@@ -46,9 +46,9 @@ func RegisterAlexaPlugin(registry *plugins.Registry, proxyInstance *proxy.Proxy,
 	// Set registry reference so plugin can access its context
 	alexaPlugin.SetRegistry(registry)
 	
-	// Create plugin context
+	// Create plugin context with plugin name
 	pluginLogger := log.With().Str("plugin", "alexa_skill").Logger()
-	pluginCtx := plugins.NewPluginContext(llmHandler, pluginLogger, pluginConfig)
+	pluginCtx := plugins.NewPluginContextWithName("alexa_skill", llmHandler, pluginLogger, pluginConfig)
 	
 	// Register plugin with context
 	if err := registry.RegisterWithContext(alexaPlugin, pluginCtx); err != nil {

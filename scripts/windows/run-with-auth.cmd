@@ -5,7 +5,7 @@ REM This script runs LlamaGate with API key authentication
 REM Set environment variables
 set OLLAMA_HOST=http://localhost:11434
 set API_KEY=sk-llamagate
-set RATE_LIMIT_RPS=10
+set RATE_LIMIT_RPS=50
 set DEBUG=false
 set PORT=8080
 

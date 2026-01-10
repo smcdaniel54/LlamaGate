@@ -29,7 +29,7 @@ func TestLoad_Defaults(t *testing.T) {
 
 	assert.Equal(t, "http://localhost:11434", cfg.OllamaHost)
 	assert.Equal(t, "", cfg.APIKey)
-	assert.Equal(t, 10.0, cfg.RateLimitRPS)
+	assert.Equal(t, 50.0, cfg.RateLimitRPS)
 	assert.Equal(t, false, cfg.Debug)
 	assert.Equal(t, "8080", cfg.Port)
 	assert.Equal(t, "", cfg.LogFile)

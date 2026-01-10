@@ -57,7 +57,7 @@ OLLAMA_HOST=http://localhost:11434
 API_KEY=
 
 # Rate limit (requests per second)
-RATE_LIMIT_RPS=10
+RATE_LIMIT_RPS=50
 
 # Enable debug logging (true/false)
 DEBUG=false

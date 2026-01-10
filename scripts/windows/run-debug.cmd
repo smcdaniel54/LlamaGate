@@ -5,7 +5,7 @@ REM This script runs LlamaGate with debug logging enabled
 REM Set environment variables
 set OLLAMA_HOST=http://localhost:11434
 set API_KEY=
-set RATE_LIMIT_RPS=10
+set RATE_LIMIT_RPS=50
 set DEBUG=true
 set PORT=8080
 

@@ -24,6 +24,9 @@ type PluginContext struct {
 
 	// HTTPClient is an HTTP client for making external requests
 	HTTPClient *http.Client
+
+	// PluginName is the name of the plugin (for logging context)
+	PluginName string
 }
 
 // LLMHandlerFunc is a function type for making LLM calls
@@ -39,6 +42,23 @@ func NewPluginContext(llmHandler LLMHandlerFunc, logger zerolog.Logger, config m
 		HTTPClient: &http.Client{
 			Timeout: 5 * time.Minute,
 		},
+		PluginName: "",
+	}
+}
+
+// NewPluginContextWithName creates a new plugin context with plugin name
+func NewPluginContextWithName(pluginName string, llmHandler LLMHandlerFunc, logger zerolog.Logger, config map[string]interface{}) *PluginContext {
+	// Add plugin name to logger context
+	logger = logger.With().Str("plugin", pluginName).Logger()
+	
+	return &PluginContext{
+		LLMHandler: llmHandler,
+		Logger:      logger,
+		Config:      config,
+		HTTPClient: &http.Client{
+			Timeout: 5 * time.Minute,
+		},
+		PluginName: pluginName,
 	}
 }
 
@@ -120,4 +140,24 @@ func (ctx *PluginContext) GetConfigInt(key string, defaultValue int) int {
 		return int(v)
 	}
 	return defaultValue
+}
+
+// LogInfo returns an info-level logger event with plugin context
+func (ctx *PluginContext) LogInfo() *zerolog.Event {
+	return ctx.Logger.Info().Str("plugin", ctx.PluginName)
+}
+
+// LogError logs an error message with plugin context
+func (ctx *PluginContext) LogError(err error) *zerolog.Event {
+	return ctx.Logger.Error().Str("plugin", ctx.PluginName).Err(err)
+}
+
+// LogWarn logs a warning message with plugin context
+func (ctx *PluginContext) LogWarn() *zerolog.Event {
+	return ctx.Logger.Warn().Str("plugin", ctx.PluginName)
+}
+
+// LogDebug logs a debug message with plugin context
+func (ctx *PluginContext) LogDebug() *zerolog.Event {
+	return ctx.Logger.Debug().Str("plugin", ctx.PluginName)
 }

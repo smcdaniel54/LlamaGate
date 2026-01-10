@@ -1,7 +1,9 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/llamagate/llamagate/internal/middleware"
@@ -88,27 +90,66 @@ func (h *PluginHandler) ExecutePlugin(c *gin.Context) {
 		return
 	}
 
+	// Get plugin context for enhanced logging
+	pluginCtx := h.registry.GetContext(pluginName)
+	
 	// Validate input
 	if err := plugin.ValidateInput(input); err != nil {
-		log.Warn().
-			Str("request_id", requestID).
-			Str("plugin", pluginName).
-			Err(err).
-			Msg("Plugin input validation failed")
+		// Use plugin context logger if available
+		if pluginCtx != nil {
+			pluginCtx.LogWarn().
+				Str("request_id", requestID).
+				Err(err).
+				Msg("Plugin input validation failed")
+		} else {
+			log.Warn().
+				Str("request_id", requestID).
+				Str("plugin", pluginName).
+				Err(err).
+				Msg("Plugin input validation failed")
+		}
 		response.BadRequest(c, err.Error(), requestID)
 		return
 	}
 
-	// Execute plugin
+	// Execute plugin with timing
+	startTime := time.Now()
 	result, err := plugin.Execute(c.Request.Context(), input)
+	executionTime := time.Since(startTime)
+	
 	if err != nil {
-		log.Error().
+		// Use plugin context logger if available, otherwise use default logger
+		if pluginCtx != nil {
+			pluginCtx.LogError(err).
+				Str("request_id", requestID).
+				Dur("execution_time", executionTime).
+				Msg("Plugin execution failed")
+		} else {
+			log.Error().
+				Str("request_id", requestID).
+				Str("plugin", pluginName).
+				Dur("execution_time", executionTime).
+				Err(err).
+				Msg("Plugin execution failed")
+		}
+		
+		// Return structured error response
+		response.InternalError(c, fmt.Sprintf("Plugin execution failed: %v", err), requestID)
+		return
+	}
+	
+	// Log successful execution with timing
+	if pluginCtx != nil {
+		pluginCtx.LogInfo().
+			Str("request_id", requestID).
+			Dur("execution_time", executionTime).
+			Msg("Plugin executed successfully")
+	} else {
+		log.Info().
 			Str("request_id", requestID).
 			Str("plugin", pluginName).
-			Err(err).
-			Msg("Plugin execution failed")
-		response.InternalError(c, "Plugin execution failed", requestID)
-		return
+			Dur("execution_time", executionTime).
+			Msg("Plugin executed successfully")
 	}
 
 	c.JSON(http.StatusOK, result)

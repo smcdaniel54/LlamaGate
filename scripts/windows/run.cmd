@@ -7,7 +7,7 @@ REM Environment variables set here will override .env file values
 REM Set default environment variables if not already set
 if "%OLLAMA_HOST%"=="" set OLLAMA_HOST=http://localhost:11434
 if "%API_KEY%"=="" set API_KEY=
-if "%RATE_LIMIT_RPS%"=="" set RATE_LIMIT_RPS=10
+if "%RATE_LIMIT_RPS%"=="" set RATE_LIMIT_RPS=50
 if "%DEBUG%"=="" set DEBUG=false
 if "%PORT%"=="" set PORT=8080
 

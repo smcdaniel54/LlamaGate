@@ -436,7 +436,16 @@ ollama pull llama2  # or mistral, codellama, etc.
 ### Issue: "429 Too Many Requests"
 
 - Adjust `RATE_LIMIT_RPS` in your `.env` file
-- Default is 10 requests per second
+- Default is 50 requests per second
+
+### Issue: "Port is already in use - another LlamaGate instance may be running"
+
+- **Issue:** Trying to start LlamaGate when another instance is already running
+- **Solution:** 
+  - Only one LlamaGate instance should run per machine
+  - Multiple applications can connect to the same LlamaGate instance
+  - Stop the existing instance first, or use a different port (set `PORT` in `.env`)
+  - Check for running instances: `netstat -ano | findstr :8080` (Windows) or `lsof -i :8080` (Unix)
 
 ---
 

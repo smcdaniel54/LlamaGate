@@ -2,6 +2,7 @@ package mcpclient
 
 import (
 	"context"
+	"sync"
 	"testing"
 	"time"
 

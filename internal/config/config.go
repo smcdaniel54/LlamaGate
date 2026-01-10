@@ -24,6 +24,10 @@ type Config struct {
 	HealthCheckTimeout time.Duration // Timeout for /health endpoint
 	MCP                *MCPConfig    // MCP configuration (optional)
 	Plugins            *PluginsConfig // Plugin configuration (optional)
+	// TLS/HTTPS configuration
+	TLSEnabled  bool   // Enable HTTPS/TLS
+	TLSCertFile string // Path to TLS certificate file
+	TLSKeyFile  string // Path to TLS private key file
 }
 
 // PluginsConfig holds plugin configuration
@@ -91,12 +95,16 @@ func Load() (*Config, error) {
 	// Set defaults
 	viper.SetDefault("OLLAMA_HOST", "http://localhost:11434")
 	viper.SetDefault("API_KEY", "")
-	viper.SetDefault("RATE_LIMIT_RPS", 10.0)
+	viper.SetDefault("RATE_LIMIT_RPS", 50.0)
 	viper.SetDefault("DEBUG", false)
 	viper.SetDefault("PORT", "8080")
 	viper.SetDefault("LOG_FILE", "")
 	viper.SetDefault("TIMEOUT", "5m")              // 5 minutes default
 	viper.SetDefault("HEALTH_CHECK_TIMEOUT", "5s") // 5 seconds for health checks
+	// TLS defaults
+	viper.SetDefault("TLS_ENABLED", false)
+	viper.SetDefault("TLS_CERT_FILE", "")
+	viper.SetDefault("TLS_KEY_FILE", "")
 
 	// MCP defaults
 	viper.SetDefault("MCP_ENABLED", false)
@@ -112,6 +120,10 @@ func Load() (*Config, error) {
 		Debug:        viper.GetBool("DEBUG"),
 		Port:         viper.GetString("PORT"),
 		LogFile:      viper.GetString("LOG_FILE"),
+		// TLS configuration
+		TLSEnabled:  viper.GetBool("TLS_ENABLED"),
+		TLSCertFile: viper.GetString("TLS_CERT_FILE"),
+		TLSKeyFile:  viper.GetString("TLS_KEY_FILE"),
 	}
 
 	// Parse timeout duration
@@ -317,6 +329,18 @@ func (c *Config) Validate() error {
 	}
 	if c.Timeout > 30*time.Minute {
 		return fmt.Errorf("invalid TIMEOUT: %v (must be less than 30 minutes)", c.Timeout)
+	}
+
+	// Validate TLS configuration if enabled
+	if c.TLSEnabled {
+		if c.TLSCertFile == "" {
+			return fmt.Errorf("TLS_ENABLED is true but TLS_CERT_FILE is not set")
+		}
+		if c.TLSKeyFile == "" {
+			return fmt.Errorf("TLS_ENABLED is true but TLS_KEY_FILE is not set")
+		}
+		// Note: We don't validate file existence here as files might be created later
+		// (e.g., by Let's Encrypt). The server will fail to start if files don't exist.
 	}
 
 	// Validate MCP configuration if enabled

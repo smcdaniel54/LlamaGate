@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewCache(t *testing.T) {
@@ -136,11 +137,16 @@ func TestCache_StopPreventsGoroutineLeak(t *testing.T) {
 	// This test verifies that Stop() actually stops the cleanup goroutine
 	// by checking that multiple calls to Stop() don't panic and the cache
 	// can still be used after stopping
-	cache := NewCache(100 * time.Millisecond)
+	cache := NewCache(1 * time.Second) // Use longer TTL to avoid expiration during test
 
 	// Add some entries
 	cache.SetTool("server1", []Tool{{Name: "tool1"}})
 	cache.SetResources("server1", []Resource{{URI: "file:///test.txt"}})
+
+	// Verify entries are set before stopping
+	tools, found := cache.GetTool("server1")
+	require.True(t, found, "Tool should be found before Stop()")
+	require.NotNil(t, tools, "Tools should not be nil before Stop()")
 
 	// Stop the cleanup goroutine
 	cache.Stop()
@@ -148,10 +154,10 @@ func TestCache_StopPreventsGoroutineLeak(t *testing.T) {
 	// Wait a bit to ensure cleanup would have run if it was still active
 	time.Sleep(200 * time.Millisecond)
 
-	// Cache operations should still work
-	tools, found := cache.GetTool("server1")
-	assert.True(t, found)
-	assert.NotNil(t, tools)
+	// Cache operations should still work after stopping
+	tools, found = cache.GetTool("server1")
+	assert.True(t, found, "Tool should still be found after Stop()")
+	assert.NotNil(t, tools, "Tools should not be nil after Stop()")
 
 	// Multiple calls to Stop() should be safe
 	cache.Stop()

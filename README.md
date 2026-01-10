@@ -168,10 +168,13 @@ LlamaGate can be configured via:
 | -------- | ------- | ----------- |
 | `OLLAMA_HOST` | `http://localhost:11434` | Ollama server URL |
 | `API_KEY` | (empty) | API key for authentication (optional) |
-| `RATE_LIMIT_RPS` | `10` | Requests per second limit |
+| `RATE_LIMIT_RPS` | `50` | Requests per second limit |
 | `DEBUG` | `false` | Enable debug logging |
 | `PORT` | `8080` | Server port |
 | `LOG_FILE` | (empty) | Path to log file (optional, logs to console if empty) |
+| `TLS_ENABLED` | `false` | Enable HTTPS/TLS |
+| `TLS_CERT_FILE` | (empty) | Path to TLS certificate file (required if TLS_ENABLED=true) |
+| `TLS_KEY_FILE` | (empty) | Path to TLS private key file (required if TLS_ENABLED=true) |
 | `TIMEOUT` | `5m` | HTTP client timeout for Ollama requests (e.g., `5m`, `30s`, `30m` - max 30 minutes) |
 | `MCP_ENABLED` | `false` | Enable MCP client functionality (see [MCP docs](docs/MCP.md)) |
 | `MCP_MAX_TOOL_ROUNDS` | `10` | Maximum tool execution rounds |
@@ -191,7 +194,7 @@ Create a `.env` file in the project root (copy from `.env.example`):
 # .env
 OLLAMA_HOST=http://localhost:11434
 API_KEY=sk-llamagate
-RATE_LIMIT_RPS=10
+RATE_LIMIT_RPS=50
 DEBUG=false
 PORT=8080
 LOG_FILE=llamagate.log
@@ -421,9 +424,36 @@ Identical requests (same model + same messages) will return cached responses, re
 
 ## Rate Limiting
 
-Rate limiting is implemented using a leaky bucket algorithm. The default limit is 10 requests per second, configurable via `RATE_LIMIT_RPS`.
+Rate limiting is implemented using a leaky bucket algorithm. The default limit is 50 requests per second, configurable via `RATE_LIMIT_RPS`.
 
 When the limit is exceeded, requests receive a `429 Too Many Requests` response.
+
+## HTTPS/SSL Support
+
+LlamaGate supports native HTTPS/TLS encryption. To enable HTTPS:
+
+1. **Set TLS configuration in `.env`**:
+   ```bash
+   TLS_ENABLED=true
+   TLS_CERT_FILE=/path/to/certificate.crt
+   TLS_KEY_FILE=/path/to/private.key
+   ```
+
+2. **Or use YAML config**:
+   ```yaml
+   tls_enabled: true
+   tls_cert_file: /path/to/certificate.crt
+   tls_key_file: /path/to/private.key
+   ```
+
+3. **Generate self-signed certificate (for testing)**:
+   ```bash
+   openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes
+   ```
+
+4. **For production with Let's Encrypt**, use a reverse proxy (nginx, Caddy) for automatic certificate management and renewal.
+
+**Note:** When `TLS_ENABLED=true`, the server will use HTTPS. Make sure to use `https://` in your client URLs.
 
 ## Logging
 
@@ -608,11 +638,12 @@ These advanced features are maintained separately and are not part of this repos
 - ✅ **Security guardrails** - Allow/deny lists, timeouts, size limits
 
 ### Other Limitations
-- **No built-in HTTPS/TLS** - Use a reverse proxy (nginx, Caddy) for production
+- **HTTPS/TLS** - Native HTTPS support available via `TLS_ENABLED`, `TLS_CERT_FILE`, and `TLS_KEY_FILE` configuration. For production with Let's Encrypt, a reverse proxy (nginx, Caddy) is still recommended for automatic certificate management.
 - **In-memory cache only** - Cache is lost on restart (persistent cache not included in core)
 - **Global rate limiting** - Per-IP rate limiting not included in core
 - **No cloud fallback** - Core is designed for local Ollama instances only
 - **Single binary deployment** - No built-in clustering or load balancing
+- **Single instance per machine** - Only one LlamaGate instance should run per machine. Multiple applications can connect to the same instance. If you try to start a second instance, you'll get a clear error message indicating the port is already in use.
 
 ### What's Not Included
 - Database persistence (cache, logs, etc.)

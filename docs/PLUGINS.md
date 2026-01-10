@@ -591,69 +591,395 @@ See `plugins/examples/dynamic_config_example.go` for complete examples.
 
 ## API Reference
 
-### Plugin Interface
+### Core Plugin Interface
+
+All plugins must implement the `Plugin` interface:
 
 ```go
 type Plugin interface {
+    // Metadata returns information about the plugin
     Metadata() PluginMetadata
+    
+    // ValidateInput validates the input parameters before execution
     ValidateInput(input map[string]interface{}) error
+    
+    // Execute runs the plugin workflow and returns results
     Execute(ctx context.Context, input map[string]interface{}) (*PluginResult, error)
+}
+```
+
+**Example Implementation:**
+
+```go
+type MyPlugin struct{}
+
+func (p *MyPlugin) Metadata() plugins.PluginMetadata {
+    return plugins.PluginMetadata{
+        Name:        "my_plugin",
+        Version:     "1.0.0",
+        Description: "Does something useful",
+        RequiredInputs: []string{"input"},
+    }
+}
+
+func (p *MyPlugin) ValidateInput(input map[string]interface{}) error {
+    if _, exists := input["input"]; !exists {
+        return fmt.Errorf("input is required")
+    }
+    return nil
+}
+
+func (p *MyPlugin) Execute(ctx context.Context, input map[string]interface{}) (*plugins.PluginResult, error) {
+    // Your logic here
+    return &plugins.PluginResult{
+        Success: true,
+        Data: map[string]interface{}{"result": "done"},
+        Metadata: plugins.ExecutionMetadata{
+            ExecutionTime: time.Since(start),
+            StepsExecuted: 1,
+            Timestamp: time.Now(),
+        },
+    }, nil
 }
 ```
 
 ### PluginMetadata
 
+Complete metadata structure:
+
 ```go
 type PluginMetadata struct {
-    Name           string
-    Version        string
-    Description    string
-    Author         string
-    InputSchema    map[string]interface{} // JSON Schema
-    OutputSchema   map[string]interface{} // JSON Schema
-    RequiredInputs []string
-    OptionalInputs map[string]interface{}
+    // Name is the unique identifier for the plugin (required)
+    Name string `json:"name"`
+    
+    // Version is the plugin version (e.g., "1.0.0")
+    Version string `json:"version"`
+    
+    // Description describes what the plugin does
+    Description string `json:"description"`
+    
+    // Author is the plugin author (optional)
+    Author string `json:"author,omitempty"`
+    
+    // InputSchema defines the expected input parameters (JSON Schema)
+    InputSchema map[string]interface{} `json:"input_schema"`
+    
+    // OutputSchema defines the expected output structure (JSON Schema)
+    OutputSchema map[string]interface{} `json:"output_schema"`
+    
+    // RequiredInputs lists required input parameter names
+    RequiredInputs []string `json:"required_inputs"`
+    
+    // OptionalInputs lists optional input parameter names with defaults
+    OptionalInputs map[string]interface{} `json:"optional_inputs,omitempty"`
 }
 ```
 
 ### PluginResult
 
+Result structure returned by `Execute()`:
+
 ```go
 type PluginResult struct {
-    Success  bool
-    Data     map[string]interface{}
-    Error    string
-    Metadata ExecutionMetadata
+    // Success indicates if the execution was successful
+    Success bool `json:"success"`
+    
+    // Data contains the output data
+    Data map[string]interface{} `json:"data,omitempty"`
+    
+    // Error contains error information if execution failed
+    Error string `json:"error,omitempty"`
+    
+    // Metadata contains execution metadata
+    Metadata ExecutionMetadata `json:"metadata"`
+}
+
+type ExecutionMetadata struct {
+    // ExecutionTime is how long the plugin took to execute
+    ExecutionTime time.Duration `json:"execution_time"`
+    
+    // StepsExecuted is the number of workflow steps executed
+    StepsExecuted int `json:"steps_executed"`
+    
+    // Timestamp is when the execution completed
+    Timestamp time.Time `json:"timestamp"`
 }
 ```
 
-### Workflow
+### PluginContext
+
+The `PluginContext` provides plugins with access to LlamaGate services:
 
 ```go
-type Workflow struct {
-    ID          string
-    Name        string
-    Description string
-    Steps       []WorkflowStep
-    MaxRetries  int
-    Timeout     time.Duration
+type PluginContext struct {
+    // LLMHandler is a function that plugins can use to make LLM calls
+    LLMHandler LLMHandlerFunc
+    
+    // Logger is a plugin-specific logger instance
+    Logger zerolog.Logger
+    
+    // Config is plugin-specific configuration
+    Config map[string]interface{}
+    
+    // HTTPClient is an HTTP client for making external requests
+    HTTPClient *http.Client
+    
+    // PluginName is the name of the plugin (for logging context)
+    PluginName string
 }
 ```
 
-### Registry
+**Accessing PluginContext:**
 
 ```go
+// In your plugin Execute method
+func (p *MyPlugin) Execute(ctx context.Context, input map[string]interface{}) (*plugins.PluginResult, error) {
+    // Get plugin context from registry
+    pluginCtx := p.registry.GetContext("my_plugin")
+    if pluginCtx == nil {
+        return nil, fmt.Errorf("plugin context not available")
+    }
+    
+    // Use LLM handler
+    response, err := pluginCtx.CallLLM(ctx, "llama3.2", messages, options)
+    if err != nil {
+        pluginCtx.LogError(err).Msg("LLM call failed")
+        return nil, err
+    }
+    
+    // Use logger
+    pluginCtx.LogInfo().Msg("Processing complete")
+    
+    // Access configuration
+    timeout := pluginCtx.GetConfigInt("timeout", 30)
+    
+    return result, nil
+}
+```
+
+**PluginContext Methods:**
+
+```go
+// CallLLM makes an LLM call and returns the response content
+func (ctx *PluginContext) CallLLM(
+    pluginCtx context.Context,
+    model string,
+    messages []map[string]interface{},
+    options map[string]interface{},
+) (string, error)
+
+// GetConfig retrieves a configuration value
+func (ctx *PluginContext) GetConfig(key string, defaultValue interface{}) interface{}
+
+// GetConfigString retrieves a string configuration value
+func (ctx *PluginContext) GetConfigString(key string, defaultValue string) string
+
+// GetConfigBool retrieves a boolean configuration value
+func (ctx *PluginContext) GetConfigBool(key string, defaultValue bool) bool
+
+// GetConfigInt retrieves an integer configuration value
+func (ctx *PluginContext) GetConfigInt(key string, defaultValue int) int
+
+// LogInfo returns an info-level logger event with plugin context
+func (ctx *PluginContext) LogInfo() *zerolog.Event
+
+// LogError logs an error message with plugin context
+func (ctx *PluginContext) LogError(err error) *zerolog.Event
+
+// LogWarn logs a warning message with plugin context
+func (ctx *PluginContext) LogWarn() *zerolog.Event
+
+// LogDebug logs a debug message with plugin context
+func (ctx *PluginContext) LogDebug() *zerolog.Event
+```
+
+### ExtendedPlugin Interface
+
+For plugins that need custom API endpoints or agent definitions:
+
+```go
+type ExtendedPlugin interface {
+    Plugin
+    
+    // GetAPIEndpoints returns API endpoint definitions that this plugin exposes
+    GetAPIEndpoints() []APIEndpoint
+    
+    // GetAgentDefinition returns the agent definition if this plugin represents an agent
+    GetAgentDefinition() *AgentDefinition
+}
+```
+
+**APIEndpoint Structure:**
+
+```go
+type APIEndpoint struct {
+    // Path is the endpoint path (e.g., "/custom/endpoint")
+    // Will be prefixed with /v1/plugins/{plugin_name}
+    Path string `json:"path"`
+    
+    // Method is the HTTP method (GET, POST, PUT, DELETE, etc.)
+    Method string `json:"method"`
+    
+    // Handler is the Gin handler function for this endpoint
+    Handler gin.HandlerFunc `json:"-"`
+    
+    // Description describes what this endpoint does
+    Description string `json:"description"`
+    
+    // RequestSchema defines the expected request body schema (JSON Schema)
+    RequestSchema map[string]interface{} `json:"request_schema,omitempty"`
+    
+    // ResponseSchema defines the expected response schema (JSON Schema)
+    ResponseSchema map[string]interface{} `json:"response_schema,omitempty"`
+    
+    // RequiresAuth indicates if this endpoint requires authentication
+    RequiresAuth bool `json:"requires_auth"`
+    
+    // RequiresRateLimit indicates if this endpoint should be rate limited
+    RequiresRateLimit bool `json:"requires_rate_limit"`
+}
+```
+
+### Registry API
+
+The `Registry` manages plugin registration and lookup:
+
+```go
+// Create a new registry
 registry := plugins.NewRegistry()
-registry.Register(plugin)
+
+// Register a plugin
+err := registry.Register(plugin)
+
+// Register a plugin with context
+err := registry.RegisterWithContext(plugin, pluginContext)
+
+// Get a plugin by name
 plugin, err := registry.Get("plugin_name")
-plugins := registry.List()
+
+// Get plugin context
+context := registry.GetContext("plugin_name")
+
+// Set plugin context
+registry.SetContext("plugin_name", context)
+
+// List all registered plugins
+plugins := registry.List() // Returns []PluginMetadata
 ```
 
-### HTTP API
+### HTTP API Endpoints
 
-- `GET /v1/plugins` - List all plugins
-- `GET /v1/plugins/:name` - Get plugin metadata
-- `POST /v1/plugins/:name/execute` - Execute plugin
+#### List All Plugins
+
+**Endpoint:** `GET /v1/plugins`
+
+**Response:**
+```json
+{
+  "plugins": [
+    {
+      "name": "my_plugin",
+      "version": "1.0.0",
+      "description": "Does something useful",
+      "input_schema": {...},
+      "output_schema": {...},
+      "required_inputs": ["input"]
+    }
+  ],
+  "count": 1
+}
+```
+
+**Example:**
+```bash
+curl -X GET http://localhost:8080/v1/plugins \
+  -H "X-API-Key: sk-llamagate"
+```
+
+#### Get Plugin Metadata
+
+**Endpoint:** `GET /v1/plugins/:name`
+
+**Response:**
+```json
+{
+  "name": "my_plugin",
+  "version": "1.0.0",
+  "description": "Does something useful",
+  "input_schema": {...},
+  "output_schema": {...},
+  "required_inputs": ["input"]
+}
+```
+
+**Example:**
+```bash
+curl -X GET http://localhost:8080/v1/plugins/my_plugin \
+  -H "X-API-Key: sk-llamagate"
+```
+
+#### Execute Plugin
+
+**Endpoint:** `POST /v1/plugins/:name/execute`
+
+**Request Body:**
+```json
+{
+  "input": "value",
+  "optional_param": "optional_value"
+}
+```
+
+**Response (Success):**
+```json
+{
+  "success": true,
+  "data": {
+    "result": "output"
+  },
+  "metadata": {
+    "execution_time": "100ms",
+    "steps_executed": 1,
+    "timestamp": "2026-01-10T12:00:00Z"
+  }
+}
+```
+
+**Response (Error):**
+```json
+{
+  "success": false,
+  "error": "Error message",
+  "metadata": {
+    "execution_time": "50ms",
+    "steps_executed": 0,
+    "timestamp": "2026-01-10T12:00:00Z"
+  }
+}
+```
+
+**Example:**
+```bash
+curl -X POST http://localhost:8080/v1/plugins/my_plugin/execute \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: sk-llamagate" \
+  -d '{"input": "test"}'
+```
+
+### Workflow Types
+
+**WorkflowStep Types:**
+
+- `"llm_call"` - Make an LLM call
+- `"tool_call"` - Call an MCP tool
+- `"data_transform"` - Transform data
+- `"condition"` - Conditional logic
+
+**Error Handling (`OnError`):**
+
+- `"stop"` - Stop workflow on error (default)
+- `"continue"` - Continue to next step
+- `"retry"` - Retry the step (up to MaxRetries)
 
 ## Examples
 

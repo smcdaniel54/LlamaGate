@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/llamagate/llamagate/internal/cache"
-	"github.com/llamagate/llamagate/internal/plugins"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -62,14 +61,24 @@ func TestProxy_CreatePluginLLMHandler(t *testing.T) {
 
 	// Verify response format
 	assert.Contains(t, result, "choices")
-	choices, ok := result["choices"].([]interface{})
+	choices, ok := result["choices"]
 	require.True(t, ok)
-	require.Len(t, choices, 1)
-
-	choice, ok := choices[0].(map[string]interface{})
-	require.True(t, ok)
+	
+	// Handle both []interface{} and []map[string]interface{} types
+	var choice map[string]interface{}
+	switch v := choices.(type) {
+	case []interface{}:
+		require.Len(t, v, 1)
+		choice, ok = v[0].(map[string]interface{})
+		require.True(t, ok)
+	case []map[string]interface{}:
+		require.Len(t, v, 1)
+		choice = v[0]
+	default:
+		t.Fatalf("unexpected choices type: %T", choices)
+	}
+	
 	assert.Contains(t, choice, "message")
-
 	message, ok := choice["message"].(map[string]interface{})
 	require.True(t, ok)
 	assert.Equal(t, "Mock response from Ollama", message["content"])
@@ -89,12 +98,24 @@ func TestConvertOllamaToOpenAIFormat(t *testing.T) {
 	assert.Contains(t, result, "model")
 	assert.Equal(t, "llama3.2", result["model"])
 
-	choices, ok := result["choices"].([]interface{})
+	choices, ok := result["choices"]
 	require.True(t, ok)
-	require.Len(t, choices, 1)
-
-	choice, ok := choices[0].(map[string]interface{}).(map[string]interface{})
+	
+	// Handle both []interface{} and []map[string]interface{} types
+	var choice map[string]interface{}
+	switch v := choices.(type) {
+	case []interface{}:
+		require.Len(t, v, 1)
+		choice, ok = v[0].(map[string]interface{})
+		require.True(t, ok)
+	case []map[string]interface{}:
+		require.Len(t, v, 1)
+		choice = v[0]
+	default:
+		t.Fatalf("unexpected choices type: %T", choices)
+	}
+	
+	message, ok := choice["message"].(map[string]interface{})
 	require.True(t, ok)
-	message := choice["message"].(map[string]interface{})
 	assert.Equal(t, "Test response", message["content"])
 }
