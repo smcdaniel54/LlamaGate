@@ -18,7 +18,7 @@ from pathlib import Path
 from openai import OpenAI
 
 # Configuration
-LLAMAGATE_URL = os.getenv("LLAMAGATE_URL", "http://localhost:8080/v1")
+LLAMAGATE_URL = os.getenv("LLAMAGATE_URL", "http://localhost:11435/v1")
 LLAMAGATE_API_KEY = os.getenv("LLAMAGATE_API_KEY", "sk-llamagate")
 MODEL = os.getenv("MODEL", "llama3.2")
 WORKSPACE_DIR = os.getenv("WORKSPACE_DIR", os.path.expanduser("~/llamagate-workspace"))

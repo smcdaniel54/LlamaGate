@@ -7,7 +7,7 @@
 set -euo pipefail
 
 # Configuration
-LLAMAGATE_URL="${LLAMAGATE_URL:-http://localhost:8080/v1}"
+LLAMAGATE_URL="${LLAMAGATE_URL:-http://localhost:11435/v1}"
 LLAMAGATE_API_KEY="${LLAMAGATE_API_KEY:-sk-llamagate}"
 MODEL="${MODEL:-llama3.2}"
 WORKSPACE_DIR="${WORKSPACE_DIR:-$HOME/llamagate-workspace}"

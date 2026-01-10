@@ -11,7 +11,7 @@ LlamaGate is an **OpenAI-compatible API gateway** for local LLMs. Switch from Op
 client = OpenAI(api_key="sk-...")
 
 # After: LlamaGate (free, 100% local, same code!)
-client = OpenAI(base_url="http://localhost:8080/v1", api_key="sk-llamagate")
+client = OpenAI(base_url="http://localhost:11435/v1", api_key="sk-llamagate")
 ```
 
 That's it. Your existing OpenAI code works immediately.
@@ -75,7 +75,7 @@ from openai import OpenAI
 
 # Just change the base_url - that's it!
 client = OpenAI(
-    base_url="http://localhost:8080/v1",  # ← Only change needed
+    base_url="http://localhost:11435/v1",  # ← Only change needed
     api_key="sk-llamagate"  # Or leave empty if auth disabled
 )
 
@@ -152,7 +152,7 @@ from openai import OpenAI
 
 # Just change the base_url - that's it!
 client = OpenAI(
-    base_url="http://localhost:8080/v1",  # ← LlamaGate endpoint
+    base_url="http://localhost:11435/v1",  # ← LlamaGate endpoint
     api_key="sk-llamagate"  # Your API_KEY from .env (or omit if not set)
 )
 
@@ -194,7 +194,7 @@ console.log(response.choices[0].message.content);
 import OpenAI from 'openai';
 
 const openai = new OpenAI({
-  baseURL: 'http://localhost:8080/v1',  // ← LlamaGate endpoint
+  baseURL: 'http://localhost:11435/v1',  // ← LlamaGate endpoint
   apiKey: 'sk-llamagate',  // Your API_KEY from .env (or omit if not set)
 });
 
@@ -225,7 +225,7 @@ curl https://api.openai.com/v1/chat/completions \
 **After (LlamaGate) ✨:**
 
 ```bash
-curl http://localhost:8080/v1/chat/completions \
+curl http://localhost:11435/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "X-API-Key: sk-llamagate" \
   -d '{
@@ -236,7 +236,7 @@ curl http://localhost:8080/v1/chat/completions \
 
 **Changes:**
 
-1. URL: `https://api.openai.com/v1` → `http://localhost:8080/v1`
+1. URL: `https://api.openai.com/v1` → `http://localhost:11435/v1`
 2. Header: `Authorization: Bearer` → `X-API-Key` (or keep `Authorization: Bearer`)
 3. Model: `gpt-3.5-turbo` → `llama2` (or any Ollama model)
 
@@ -250,7 +250,7 @@ One of LlamaGate's superpowers is **instant model switching**. You can switch be
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="http://localhost:8080/v1",
+    base_url="http://localhost:11435/v1",
     api_key="sk-llamagate"
 )
 
@@ -315,7 +315,7 @@ from langchain.chat_models import ChatOpenAI
 
 llm = ChatOpenAI(
     model="llama2",
-    openai_api_base="http://localhost:8080/v1",  # ← Add this
+    openai_api_base="http://localhost:11435/v1",  # ← Add this
     openai_api_key="sk-llamagate"  # ← Add this
 )
 
@@ -350,7 +350,7 @@ from openai import OpenAI
 
 app = FastAPI()
 client = OpenAI(
-    base_url="http://localhost:8080/v1",  # ← Change this
+    base_url="http://localhost:11435/v1",  # ← Change this
     api_key="sk-llamagate"  # ← Change this
 )
 
@@ -445,7 +445,7 @@ ollama pull llama2  # or mistral, codellama, etc.
   - Only one LlamaGate instance should run per machine
   - Multiple applications can connect to the same LlamaGate instance
   - Stop the existing instance first, or use a different port (set `PORT` in `.env`)
-  - Check for running instances: `netstat -ano | findstr :8080` (Windows) or `lsof -i :8080` (Unix)
+  - Check for running instances: `netstat -ano | findstr :11435` (Windows) or `lsof -i :11435` (Unix)
 
 ---
 

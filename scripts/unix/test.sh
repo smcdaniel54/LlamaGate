@@ -12,7 +12,7 @@ if [ -f .env ]; then
     export $(cat .env | grep -v '^#' | xargs)
 fi
 
-BASE_URL="${BASE_URL:-http://localhost:8080}"
+BASE_URL="${BASE_URL:-http://localhost:11435}"
 API_KEY="${API_KEY:-}"
 
 echo "========================================"
@@ -21,7 +21,7 @@ echo "========================================"
 echo ""
 echo "Prerequisites:"
 echo "  1. Ollama must be running on http://localhost:11434"
-echo "  2. LlamaGate must be running on http://localhost:8080"
+echo "  2. LlamaGate must be running on http://localhost:11435"
 echo "  3. At least one model should be available in Ollama"
 echo ""
 read -p "Press Enter to start testing..."

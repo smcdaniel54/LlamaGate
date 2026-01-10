@@ -31,7 +31,7 @@ func TestLoad_Defaults(t *testing.T) {
 	assert.Equal(t, "", cfg.APIKey)
 	assert.Equal(t, 50.0, cfg.RateLimitRPS)
 	assert.Equal(t, false, cfg.Debug)
-	assert.Equal(t, "8080", cfg.Port)
+	assert.Equal(t, "11435", cfg.Port)
 	assert.Equal(t, "", cfg.LogFile)
 	assert.Equal(t, 5*time.Minute, cfg.Timeout)
 	assert.Nil(t, cfg.MCP) // MCP disabled by default
@@ -183,7 +183,7 @@ func TestConfig_Validate(t *testing.T) {
 			name: "valid config",
 			config: &Config{
 				OllamaHost:   "http://localhost:11434",
-				Port:         "8080",
+				Port:         "11435",
 				RateLimitRPS: 10.0,
 				Timeout:      5 * time.Minute,
 			},
@@ -193,7 +193,7 @@ func TestConfig_Validate(t *testing.T) {
 			name: "missing OllamaHost",
 			config: &Config{
 				OllamaHost:   "",
-				Port:         "8080",
+				Port:         "11435",
 				RateLimitRPS: 10.0,
 				Timeout:      5 * time.Minute,
 			},
@@ -204,7 +204,7 @@ func TestConfig_Validate(t *testing.T) {
 			name: "invalid OllamaHost URL",
 			config: &Config{
 				OllamaHost:   "not-a-url",
-				Port:         "8080",
+				Port:         "11435",
 				RateLimitRPS: 10.0,
 				Timeout:      5 * time.Minute,
 			},
@@ -215,7 +215,7 @@ func TestConfig_Validate(t *testing.T) {
 			name: "invalid OllamaHost scheme",
 			config: &Config{
 				OllamaHost:   "ftp://localhost:11434",
-				Port:         "8080",
+				Port:         "11435",
 				RateLimitRPS: 10.0,
 				Timeout:      5 * time.Minute,
 			},
@@ -226,7 +226,7 @@ func TestConfig_Validate(t *testing.T) {
 			name: "negative rate limit",
 			config: &Config{
 				OllamaHost:   "http://localhost:11434",
-				Port:         "8080",
+				Port:         "11435",
 				RateLimitRPS: -1.0,
 				Timeout:      5 * time.Minute,
 			},
@@ -237,7 +237,7 @@ func TestConfig_Validate(t *testing.T) {
 			name: "zero rate limit",
 			config: &Config{
 				OllamaHost:   "http://localhost:11434",
-				Port:         "8080",
+				Port:         "11435",
 				RateLimitRPS: 0.0,
 				Timeout:      5 * time.Minute,
 			},

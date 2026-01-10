@@ -16,7 +16,7 @@ All MCP API endpoints require authentication when `API_KEY` is configured. Use e
 All endpoints are prefixed with `/v1/mcp`:
 
 ```
-http://localhost:8080/v1/mcp
+http://localhost:11435/v1/mcp
 ```
 
 ## Endpoints
@@ -491,21 +491,21 @@ All endpoints return standard error responses when an error occurs:
 
 ```bash
 curl -H "X-API-Key: sk-llamagate" \
-  http://localhost:8080/v1/mcp/servers
+  http://localhost:11435/v1/mcp/servers
 ```
 
 ### Get Server Health
 
 ```bash
 curl -H "X-API-Key: sk-llamagate" \
-  http://localhost:8080/v1/mcp/servers/filesystem/health
+  http://localhost:11435/v1/mcp/servers/filesystem/health
 ```
 
 ### List Server Tools
 
 ```bash
 curl -H "X-API-Key: sk-llamagate" \
-  http://localhost:8080/v1/mcp/servers/filesystem/tools
+  http://localhost:11435/v1/mcp/servers/filesystem/tools
 ```
 
 ### Execute Tool
@@ -515,14 +515,14 @@ curl -X POST \
   -H "X-API-Key: sk-llamagate" \
   -H "Content-Type: application/json" \
   -d '{"server":"filesystem","tool":"read_file","arguments":{"path":"/tmp/test.txt"}}' \
-  http://localhost:8080/v1/mcp/execute
+  http://localhost:11435/v1/mcp/execute
 ```
 
 ### Read Resource
 
 ```bash
 curl -H "X-API-Key: sk-llamagate" \
-  "http://localhost:8080/v1/mcp/servers/filesystem/resources/file%3A%2F%2F%2Ftmp%2Ftest.txt"
+  "http://localhost:11435/v1/mcp/servers/filesystem/resources/file%3A%2F%2F%2Ftmp%2Ftest.txt"
 ```
 
 ### Refresh Server Metadata
@@ -530,7 +530,7 @@ curl -H "X-API-Key: sk-llamagate" \
 ```bash
 curl -X POST \
   -H "X-API-Key: sk-llamagate" \
-  http://localhost:8080/v1/mcp/servers/filesystem/refresh
+  http://localhost:11435/v1/mcp/servers/filesystem/refresh
 ```
 
 ## Rate Limiting
@@ -542,6 +542,6 @@ All endpoints are subject to rate limiting as configured in the server settings.
 The main health endpoint (`/health`) does not require authentication and can be used for monitoring:
 
 ```bash
-curl http://localhost:8080/health
+curl http://localhost:11435/health
 ```
 

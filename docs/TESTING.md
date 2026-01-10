@@ -105,7 +105,7 @@ Test plugins are defined in `tests/plugins/test_plugins.go`. To enable them:
 Test that the server is running:
 
 ```cmd
-curl http://localhost:8080/health
+curl http://localhost:11435/health
 ```
 
 **Expected response:**
@@ -119,7 +119,7 @@ curl http://localhost:8080/health
 Test the models endpoint (if API key is set, include it):
 
 ```cmd
-curl http://localhost:8080/v1/models -H "X-API-Key: sk-llamagate"
+curl http://localhost:11435/v1/models -H "X-API-Key: sk-llamagate"
 ```
 
 **Expected response:**
@@ -143,7 +143,7 @@ curl http://localhost:8080/v1/models -H "X-API-Key: sk-llamagate"
 Test a simple chat completion:
 
 ```cmd
-curl -X POST http://localhost:8080/v1/chat/completions ^
+curl -X POST http://localhost:11435/v1/chat/completions ^
   -H "Content-Type: application/json" ^
   -H "X-API-Key: sk-llamagate" ^
   -d "{\"model\":\"llama2\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello!\"}]}"
@@ -171,13 +171,13 @@ Make the same request twice. The second should be much faster (cached):
 
 ```cmd
 REM First request (slow)
-curl -w "\nTime: %{time_total}s\n" -X POST http://localhost:8080/v1/chat/completions ^
+curl -w "\nTime: %{time_total}s\n" -X POST http://localhost:11435/v1/chat/completions ^
   -H "Content-Type: application/json" ^
   -H "X-API-Key: sk-llamagate" ^
   -d "{\"model\":\"llama2\",\"messages\":[{\"role\":\"user\",\"content\":\"What is 2+2?\"}]}"
 
 REM Second request (fast - cached)
-curl -w "\nTime: %{time_total}s\n" -X POST http://localhost:8080/v1/chat/completions ^
+curl -w "\nTime: %{time_total}s\n" -X POST http://localhost:11435/v1/chat/completions ^
   -H "Content-Type: application/json" ^
   -H "X-API-Key: sk-llamagate" ^
   -d "{\"model\":\"llama2\",\"messages\":[{\"role\":\"user\",\"content\":\"What is 2+2?\"}]}"
@@ -192,7 +192,7 @@ If `API_KEY` is set in your `.env`:
 **Test with invalid key (should fail):**
 
 ```cmd
-curl -w "\nHTTP Status: %{http_code}\n" http://localhost:8080/v1/models -H "X-API-Key: wrong-key"
+curl -w "\nHTTP Status: %{http_code}\n" http://localhost:11435/v1/models -H "X-API-Key: wrong-key"
 ```
 
 **Expected:** `401 Unauthorized`
@@ -200,7 +200,7 @@ curl -w "\nHTTP Status: %{http_code}\n" http://localhost:8080/v1/models -H "X-AP
 **Test with valid key (should succeed):**
 
 ```cmd
-curl -w "\nHTTP Status: %{http_code}\n" http://localhost:8080/v1/models -H "X-API-Key: sk-llamagate"
+curl -w "\nHTTP Status: %{http_code}\n" http://localhost:11435/v1/models -H "X-API-Key: sk-llamagate"
 ```
 
 **Expected:** `200 OK`
@@ -212,19 +212,19 @@ If MCP is enabled in your configuration, you can test the MCP API endpoints:
 **List MCP Servers:**
 
 ```cmd
-curl -H "X-API-Key: sk-llamagate" http://localhost:8080/v1/mcp/servers
+curl -H "X-API-Key: sk-llamagate" http://localhost:11435/v1/mcp/servers
 ```
 
 **Get Server Health:**
 
 ```cmd
-curl -H "X-API-Key: sk-llamagate" http://localhost:8080/v1/mcp/servers/filesystem/health
+curl -H "X-API-Key: sk-llamagate" http://localhost:11435/v1/mcp/servers/filesystem/health
 ```
 
 **List Server Tools:**
 
 ```cmd
-curl -H "X-API-Key: sk-llamagate" http://localhost:8080/v1/mcp/servers/filesystem/tools
+curl -H "X-API-Key: sk-llamagate" http://localhost:11435/v1/mcp/servers/filesystem/tools
 ```
 
 **Execute a Tool:**
@@ -232,7 +232,7 @@ curl -H "X-API-Key: sk-llamagate" http://localhost:8080/v1/mcp/servers/filesyste
 ```cmd
 curl -X POST -H "X-API-Key: sk-llamagate" -H "Content-Type: application/json" ^
   -d "{\"server\":\"filesystem\",\"tool\":\"read_file\",\"arguments\":{\"path\":\"/tmp/test.txt\"}}" ^
-  http://localhost:8080/v1/mcp/execute
+  http://localhost:11435/v1/mcp/execute
 ```
 
 **Note:** If MCP is not enabled, these endpoints will return `503 Service Unavailable`. See [MCP Documentation](MCP.md) for configuration details.
@@ -244,7 +244,7 @@ If MCP is enabled and you have servers with resources configured, you can test t
 **Test with MCP URI in message:**
 
 ```cmd
-curl -X POST http://localhost:8080/v1/chat/completions ^
+curl -X POST http://localhost:11435/v1/chat/completions ^
   -H "Content-Type: application/json" ^
   -H "X-API-Key: sk-llamagate" ^
   -d "{\"model\":\"llama2\",\"messages\":[{\"role\":\"user\",\"content\":\"Summarize mcp://filesystem/file:///docs/readme.txt\"}]}"
@@ -276,7 +276,7 @@ You should see structured JSON logs with request information.
 Make rapid requests to test rate limiting:
 
 ```cmd
-for /L %i in (1,1,15) do @curl -s -X POST http://localhost:8080/v1/chat/completions -H "Content-Type: application/json" -H "X-API-Key: sk-llamagate" -d "{\"model\":\"llama2\",\"messages\":[{\"role\":\"user\",\"content\":\"Test\"}]}" >nul && echo Request %i
+for /L %i in (1,1,15) do @curl -s -X POST http://localhost:11435/v1/chat/completions -H "Content-Type: application/json" -H "X-API-Key: sk-llamagate" -d "{\"model\":\"llama2\",\"messages\":[{\"role\":\"user\",\"content\":\"Test\"}]}" >nul && echo Request %i
 ```
 
 After 50 requests (default `RATE_LIMIT_RPS=50`), you should start getting `429 Too Many Requests` responses.
@@ -286,7 +286,7 @@ After 50 requests (default `RATE_LIMIT_RPS=50`), you should start getting `429 T
 Test streaming chat completions:
 
 ```cmd
-curl -X POST http://localhost:8080/v1/chat/completions ^
+curl -X POST http://localhost:11435/v1/chat/completions ^
   -H "Content-Type: application/json" ^
   -H "X-API-Key: sk-llamagate" ^
   -d "{\"model\":\"llama2\",\"messages\":[{\"role\":\"user\",\"content\":\"Count to 5\"}],\"stream\":true}"
@@ -356,7 +356,7 @@ You can also test using the OpenAI Python SDK:
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="http://localhost:8080/v1",
+    base_url="http://localhost:11435/v1",
     api_key="sk-llamagate"  # Your API_KEY from .env
 )
 
@@ -488,6 +488,6 @@ The unit tests cover:
 
 For load testing, you can use tools like:
 
-- **Apache Bench (ab)**: `ab -n 100 -c 10 http://localhost:8080/health`
-- **wrk**: `wrk -t4 -c100 -d30s http://localhost:8080/health`
+- **Apache Bench (ab)**: `ab -n 100 -c 10 http://localhost:11435/health`
+- **wrk**: `wrk -t4 -c100 -d30s http://localhost:11435/health`
 - **k6**: Write a k6 script for more complex scenarios

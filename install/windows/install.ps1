@@ -214,7 +214,7 @@ if ($createEnv) {
     $apiKey = Get-UserInput "API key (leave empty to disable authentication)" ""
     $rateLimit = Get-UserInput "Rate limit (requests per second)" "10"
     $debug = Get-UserInput "Enable debug logging? (true/false)" "false"
-    $port = Get-UserInput "Server port" "8080"
+    $port = Get-UserInput "Server port" "11435"
     $logFile = Get-UserInput "Log file path (leave empty for console only)" ""
     
     $envContent = @"

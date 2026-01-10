@@ -153,7 +153,7 @@ scripts\windows\run.cmd
 
 ```bash
 docker build -t llamagate .
-docker run -p 8080:8080 llamagate
+docker run -p 11435:11435 llamagate
 ```
 
 ## Configuration
@@ -170,7 +170,7 @@ LlamaGate can be configured via:
 | `API_KEY` | (empty) | API key for authentication (optional) |
 | `RATE_LIMIT_RPS` | `50` | Requests per second limit |
 | `DEBUG` | `false` | Enable debug logging |
-| `PORT` | `8080` | Server port |
+| `PORT` | `11435` | Server port |
 | `LOG_FILE` | (empty) | Path to log file (optional, logs to console if empty) |
 | `TLS_ENABLED` | `false` | Enable HTTPS/TLS |
 | `TLS_CERT_FILE` | (empty) | Path to TLS certificate file (required if TLS_ENABLED=true) |
@@ -196,7 +196,7 @@ OLLAMA_HOST=http://localhost:11434
 API_KEY=sk-llamagate
 RATE_LIMIT_RPS=50
 DEBUG=false
-PORT=8080
+PORT=11435
 LOG_FILE=llamagate.log
 TIMEOUT=5m
 ```
@@ -211,12 +211,12 @@ LlamaGate supports two authentication header formats:
 
 ### X-API-Key Header (Recommended)
 ```bash
-curl -H "X-API-Key: sk-llamagate" http://localhost:8080/v1/models
+curl -H "X-API-Key: sk-llamagate" http://localhost:11435/v1/models
 ```
 
 ### Authorization Bearer Header (Alternative)
 ```bash
-curl -H "Authorization: Bearer sk-llamagate" http://localhost:8080/v1/models
+curl -H "Authorization: Bearer sk-llamagate" http://localhost:11435/v1/models
 ```
 
 The `X-API-Key` header is checked first. If not present, `Authorization: Bearer` is checked.
@@ -230,7 +230,7 @@ export OLLAMA_HOST="http://localhost:11434"
 export API_KEY="sk-llamagate"
 export RATE_LIMIT_RPS=20
 export DEBUG=true
-export PORT=8080
+export PORT=11435
 
 llamagate
 ```
@@ -242,7 +242,7 @@ set OLLAMA_HOST=http://localhost:11434
 set API_KEY=sk-llamagate
 set RATE_LIMIT_RPS=20
 set DEBUG=true
-set PORT=8080
+set PORT=11435
 
 llamagate.exe
 ```
@@ -262,20 +262,20 @@ Or use the provided batch files (see Windows Quick Start above).
 ### Health Check
 
 ```bash
-curl http://localhost:8080/health
+curl http://localhost:11435/health
 ```
 
 ### List Models
 
 ```bash
-curl http://localhost:8080/v1/models \
+curl http://localhost:11435/v1/models \
   -H "X-API-Key: sk-llamagate"
 ```
 
 ### Chat Completions (Non-Streaming)
 
 ```bash
-curl http://localhost:8080/v1/chat/completions \
+curl http://localhost:11435/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "X-API-Key: sk-llamagate" \
   -d '{
@@ -289,7 +289,7 @@ curl http://localhost:8080/v1/chat/completions \
 ### Chat Completions (Streaming)
 
 ```bash
-curl http://localhost:8080/v1/chat/completions \
+curl http://localhost:11435/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "X-API-Key: sk-llamagate" \
   -d '{
@@ -310,7 +310,7 @@ from openai import OpenAI
 
 # Point to LlamaGate instead of OpenAI
 client = OpenAI(
-    base_url="http://localhost:8080/v1",
+    base_url="http://localhost:11435/v1",
     api_key="sk-llamagate"  # Your API_KEY from env
 )
 
@@ -334,7 +334,7 @@ from langchain.chat_models import ChatOpenAI
 # Use ChatOpenAI with LlamaGate endpoint
 llm = ChatOpenAI(
     model="llama2",
-    openai_api_base="http://localhost:8080/v1",
+    openai_api_base="http://localhost:11435/v1",
     openai_api_key="sk-llamagate"
 )
 
@@ -399,12 +399,12 @@ LlamaGate supports two authentication header formats:
 
 ### X-API-Key Header (Recommended)
 ```bash
-curl -H "X-API-Key: sk-llamagate" http://localhost:8080/v1/models
+curl -H "X-API-Key: sk-llamagate" http://localhost:11435/v1/models
 ```
 
 ### Authorization Bearer Header (Alternative)
 ```bash
-curl -H "Authorization: Bearer sk-llamagate" http://localhost:8080/v1/models
+curl -H "Authorization: Bearer sk-llamagate" http://localhost:11435/v1/models
 ```
 
 The `X-API-Key` header is checked first. If not present, `Authorization: Bearer` is checked.
@@ -584,7 +584,7 @@ See [MCP Documentation](docs/MCP.md) for full details and [MCP Quick Start](docs
 You can reference MCP resources directly in chat completion messages:
 
 ```bash
-curl -X POST http://localhost:8080/v1/chat/completions \
+curl -X POST http://localhost:11435/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "X-API-Key: sk-llamagate" \
   -d '{

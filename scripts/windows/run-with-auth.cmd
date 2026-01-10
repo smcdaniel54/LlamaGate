@@ -7,7 +7,7 @@ set OLLAMA_HOST=http://localhost:11434
 set API_KEY=sk-llamagate
 set RATE_LIMIT_RPS=50
 set DEBUG=false
-set PORT=8080
+set PORT=11435
 
 REM Display configuration
 echo ========================================

@@ -8,14 +8,14 @@ echo ========================================
 echo.
 echo Prerequisites:
 echo   1. Ollama must be running on http://localhost:11434
-echo   2. LlamaGate must be running on http://localhost:8080
+echo   2. LlamaGate must be running on http://localhost:11435
 echo   3. At least one model should be available in Ollama (e.g., llama2)
 echo.
 echo Press any key to start testing...
 pause >nul
 echo.
 
-set BASE_URL=http://localhost:8080
+set BASE_URL=http://localhost:11435
 set API_KEY=sk-llamagate
 
 echo [1/9] Testing Health Check...

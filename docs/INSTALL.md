@@ -128,7 +128,7 @@ This installs to `$GOPATH/bin` (or `$HOME/go/bin` by default).
 docker build -t llamagate .
 
 # Run
-docker run -p 8080:8080 llamagate
+docker run -p 11435:11435 llamagate
 ```
 
 ## Configuration
@@ -159,7 +159,7 @@ See [Configuration](#configuration) section in README.md for all options.
 
 2. **Verify it's running:**
    ```bash
-   curl http://localhost:8080/health
+   curl http://localhost:11435/health
    ```
 
 3. **See [Quick Start Guide](../QUICKSTART.md)** for usage examples

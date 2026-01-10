@@ -188,7 +188,7 @@ Deny patterns take precedence over allow patterns.
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="http://localhost:8080/v1",
+    base_url="http://localhost:11435/v1",
     api_key="sk-llamagate"
 )
 

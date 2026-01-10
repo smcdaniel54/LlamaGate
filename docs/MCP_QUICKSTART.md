@@ -84,7 +84,7 @@ echo "Hello, MCP!" > /tmp/test.txt
 Make a chat completion request with tool calling:
 
 ```bash
-curl http://localhost:8080/v1/chat/completions \
+curl http://localhost:11435/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "X-API-Key: sk-llamagate" \
   -d '{
@@ -104,7 +104,7 @@ Or use Python:
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="http://localhost:8080/v1",
+    base_url="http://localhost:11435/v1",
     api_key="sk-llamagate"
 )
 

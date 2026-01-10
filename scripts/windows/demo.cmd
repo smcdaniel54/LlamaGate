@@ -4,7 +4,7 @@ REM Showcases the power of LlamaGate in under 60 seconds
 
 setlocal enabledelayedexpansion
 
-set BASE_URL=http://localhost:8080
+set BASE_URL=http://localhost:11435
 set API_KEY=sk-llamagate
 
 echo ╔════════════════════════════════════════════════════════════╗

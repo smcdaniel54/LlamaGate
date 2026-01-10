@@ -114,7 +114,7 @@ func NewAlexaSkillPlugin() *AlexaSkillPlugin {
 ### Using curl (Linux/macOS)
 
 ```bash
-curl -X POST http://localhost:8080/v1/plugins/alexa_skill/alexa \
+curl -X POST http://localhost:11435/v1/plugins/alexa_skill/alexa \
   -H "Content-Type: application/json" \
   -d '{
     "version": "1.0",
@@ -170,7 +170,7 @@ $body = @{
     }
 } | ConvertTo-Json -Depth 10
 
-Invoke-RestMethod -Uri "http://localhost:8080/v1/plugins/alexa_skill/alexa" -Method Post -Body $body -ContentType "application/json"
+Invoke-RestMethod -Uri "http://localhost:11435/v1/plugins/alexa_skill/alexa" -Method Post -Body $body -ContentType "application/json"
 ```
 
 ### Using Test Scripts
@@ -191,7 +191,7 @@ chmod +x plugins/test_alexa.sh
 To use this plugin with an Alexa Skill:
 
 1. **Create an Alexa Skill** in the Alexa Developer Console
-2. **Set the endpoint URL** to: `http://your-server:8080/v1/plugins/alexa_skill/alexa`
+2. **Set the endpoint URL** to: `http://your-server:11435/v1/plugins/alexa_skill/alexa`
 3. **Configure the skill** to use the "QueryIntent" intent with a "query" slot
 4. **Test the skill** using the Alexa Developer Console or an Alexa device
 

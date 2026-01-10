@@ -118,14 +118,14 @@ scripts\windows\run.cmd
 
 **Expected output:**
 ```
-INFO Starting LlamaGate ollama_host=http://localhost:11434 port=8080
+INFO Starting LlamaGate ollama_host=http://localhost:11434 port=11435
 INFO Initializing MCP clients...
 INFO MCP client initialized server=filesystem transport=stdio
 INFO Discovered tools from MCP server server=filesystem tool_count=5
 INFO MCP client initialized server=fetch transport=stdio
 INFO Discovered tools from MCP server server=fetch tool_count=2
 INFO MCP initialization complete total_tools=7
-INFO Starting HTTP server on :8080
+INFO Starting HTTP server on :11435
 ```
 
 ## Step 4: Verify Tools Are Available
@@ -134,7 +134,7 @@ Check that tools are discovered and namespaced correctly:
 
 ```bash
 # Make a simple request to see available tools
-curl http://localhost:8080/v1/chat/completions \
+curl http://localhost:11435/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "X-API-Key: sk-llamagate" \
   -d '{
@@ -171,7 +171,7 @@ copy sample.pdf C:\llamagate-workspace\  # Windows
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="http://localhost:8080/v1",
+    base_url="http://localhost:11435/v1",
     api_key="sk-llamagate"
 )
 
@@ -191,7 +191,7 @@ print(response.choices[0].message.content)
 
 **cURL Example:**
 ```bash
-curl http://localhost:8080/v1/chat/completions \
+curl http://localhost:11435/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "X-API-Key: sk-llamagate" \
   -d '{
@@ -390,7 +390,7 @@ from openai import OpenAI
 import json
 
 client = OpenAI(
-    base_url="http://localhost:8080/v1",
+    base_url="http://localhost:11435/v1",
     api_key="sk-llamagate"
 )
 

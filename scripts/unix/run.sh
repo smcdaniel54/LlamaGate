@@ -15,7 +15,7 @@ export OLLAMA_HOST="${OLLAMA_HOST:-http://localhost:11434}"
 export API_KEY="${API_KEY:-}"
 export RATE_LIMIT_RPS="${RATE_LIMIT_RPS:-50}"
 export DEBUG="${DEBUG:-false}"
-export PORT="${PORT:-8080}"
+export PORT="${PORT:-11435}"
 export LOG_FILE="${LOG_FILE:-}"
 
 echo "========================================"

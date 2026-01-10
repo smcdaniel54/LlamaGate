@@ -97,7 +97,7 @@ func Load() (*Config, error) {
 	viper.SetDefault("API_KEY", "")
 	viper.SetDefault("RATE_LIMIT_RPS", 50.0)
 	viper.SetDefault("DEBUG", false)
-	viper.SetDefault("PORT", "8080")
+	viper.SetDefault("PORT", "11435")
 	viper.SetDefault("LOG_FILE", "")
 	viper.SetDefault("TIMEOUT", "5m")              // 5 minutes default
 	viper.SetDefault("HEALTH_CHECK_TIMEOUT", "5s") // 5 seconds for health checks

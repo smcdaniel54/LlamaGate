@@ -63,7 +63,7 @@ RATE_LIMIT_RPS=50
 DEBUG=false
 
 # Server port
-PORT=8080
+PORT=11435
 
 # Log file path (leave empty to log only to console)
 LOG_FILE=

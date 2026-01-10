@@ -892,7 +892,7 @@ plugins := registry.List() // Returns []PluginMetadata
 
 **Example:**
 ```bash
-curl -X GET http://localhost:8080/v1/plugins \
+curl -X GET http://localhost:11435/v1/plugins \
   -H "X-API-Key: sk-llamagate"
 ```
 
@@ -914,7 +914,7 @@ curl -X GET http://localhost:8080/v1/plugins \
 
 **Example:**
 ```bash
-curl -X GET http://localhost:8080/v1/plugins/my_plugin \
+curl -X GET http://localhost:11435/v1/plugins/my_plugin \
   -H "X-API-Key: sk-llamagate"
 ```
 
@@ -960,7 +960,7 @@ curl -X GET http://localhost:8080/v1/plugins/my_plugin \
 
 **Example:**
 ```bash
-curl -X POST http://localhost:8080/v1/plugins/my_plugin/execute \
+curl -X POST http://localhost:11435/v1/plugins/my_plugin/execute \
   -H "Content-Type: application/json" \
   -H "X-API-Key: sk-llamagate" \
   -d '{"input": "test"}'

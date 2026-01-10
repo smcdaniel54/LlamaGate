@@ -20,7 +20,7 @@ FROM scratch
 COPY --from=builder /build/llamagate /llamagate
 
 # Expose port
-EXPOSE 8080
+EXPOSE 11435
 
 # Run the binary
 ENTRYPOINT ["/llamagate"]

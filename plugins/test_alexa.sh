@@ -7,17 +7,17 @@ echo ""
 
 # Test 1: List plugins
 echo "1. Listing plugins..."
-curl -s http://localhost:8080/v1/plugins | jq '.'
+curl -s http://localhost:11435/v1/plugins | jq '.'
 echo ""
 
 # Test 2: Get Alexa plugin metadata
 echo "2. Getting Alexa plugin metadata..."
-curl -s http://localhost:8080/v1/plugins/alexa_skill | jq '.'
+curl -s http://localhost:11435/v1/plugins/alexa_skill | jq '.'
 echo ""
 
 # Test 3: Test Alexa endpoint with wake word
 echo "3. Testing Alexa endpoint with wake word..."
-curl -X POST http://localhost:8080/v1/plugins/alexa_skill/alexa \
+curl -X POST http://localhost:11435/v1/plugins/alexa_skill/alexa \
   -H "Content-Type: application/json" \
   -d '{
     "version": "1.0",
@@ -51,7 +51,7 @@ echo ""
 
 # Test 4: Test Alexa endpoint without wake word
 echo "4. Testing Alexa endpoint without wake word..."
-curl -X POST http://localhost:8080/v1/plugins/alexa_skill/alexa \
+curl -X POST http://localhost:11435/v1/plugins/alexa_skill/alexa \
   -H "Content-Type: application/json" \
   -d '{
     "version": "1.0",

@@ -6,13 +6,13 @@ Write-Host ""
 
 # Test 1: List plugins
 Write-Host "1. Listing plugins..." -ForegroundColor Yellow
-$response = Invoke-RestMethod -Uri "http://localhost:8080/v1/plugins" -Method Get
+$response = Invoke-RestMethod -Uri "http://localhost:11435/v1/plugins" -Method Get
 $response | ConvertTo-Json -Depth 10
 Write-Host ""
 
 # Test 2: Get Alexa plugin metadata
 Write-Host "2. Getting Alexa plugin metadata..." -ForegroundColor Yellow
-$response = Invoke-RestMethod -Uri "http://localhost:8080/v1/plugins/alexa_skill" -Method Get
+$response = Invoke-RestMethod -Uri "http://localhost:11435/v1/plugins/alexa_skill" -Method Get
 $response | ConvertTo-Json -Depth 10
 Write-Host ""
 
@@ -47,7 +47,7 @@ $body = @{
     }
 } | ConvertTo-Json -Depth 10
 
-$response = Invoke-RestMethod -Uri "http://localhost:8080/v1/plugins/alexa_skill/alexa" -Method Post -Body $body -ContentType "application/json"
+$response = Invoke-RestMethod -Uri "http://localhost:11435/v1/plugins/alexa_skill/alexa" -Method Post -Body $body -ContentType "application/json"
 $response | ConvertTo-Json -Depth 10
 Write-Host ""
 
@@ -82,7 +82,7 @@ $body = @{
     }
 } | ConvertTo-Json -Depth 10
 
-$response = Invoke-RestMethod -Uri "http://localhost:8080/v1/plugins/alexa_skill/alexa" -Method Post -Body $body -ContentType "application/json"
+$response = Invoke-RestMethod -Uri "http://localhost:11435/v1/plugins/alexa_skill/alexa" -Method Post -Body $body -ContentType "application/json"
 $response | ConvertTo-Json -Depth 10
 Write-Host ""
 

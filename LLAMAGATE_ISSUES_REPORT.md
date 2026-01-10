@@ -110,7 +110,7 @@ plugins:
 **Current State**:
 
 - Multiple instances can be started without detection
-- Each instance attempts to bind to the same port (default: 8080)
+- Each instance attempts to bind to the same port (default: 11435)
 - Port conflict only detected when second instance tries to start
 - No clear error message explaining why only one instance should run
 - Multiple instances waste resources (duplicate MCP clients, cache, connections)
@@ -151,7 +151,7 @@ func checkPortAvailability(port string) error {
 **Error Message**:
 
 ```
-❌ Error: port 8080 is already in use - another LlamaGate instance may be running. 
+❌ Error: port 11435 is already in use - another LlamaGate instance may be running. 
 Only one instance should run per machine.
 
 Only one instance of LlamaGate should run per machine.

@@ -441,7 +441,7 @@ LlamaGate demonstrates **excellent UX fundamentals** with a strong focus on simp
 client = OpenAI(api_key="sk-...")
 
 # After
-client = OpenAI(base_url="http://localhost:8080/v1", api_key="sk-llamagate")
+client = OpenAI(base_url="http://localhost:11435/v1", api_key="sk-llamagate")
 ```
 
 **This is the killer feature - executed perfectly.**

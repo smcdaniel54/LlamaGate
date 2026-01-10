@@ -284,7 +284,7 @@ if [ "$CREATE_ENV" = true ]; then
     API_KEY=$(prompt_user "API key (leave empty to disable authentication)" "")
     RATE_LIMIT=$(prompt_user "Rate limit (requests per second)" "10")
     DEBUG=$(prompt_user "Enable debug logging? (true/false)" "false")
-    PORT=$(prompt_user "Server port" "8080")
+    PORT=$(prompt_user "Server port" "11435")
     LOG_FILE=$(prompt_user "Log file path (leave empty for console only)" "")
     
     cat > "$ENV_FILE" <<EOF

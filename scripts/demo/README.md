@@ -47,7 +47,7 @@ python mcp-demo-workflow.py
 ```
 
 **Environment Variables:**
-- `LLAMAGATE_URL` - LlamaGate API URL (default: `http://localhost:8080/v1`)
+- `LLAMAGATE_URL` - LlamaGate API URL (default: `http://localhost:11435/v1`)
 - `LLAMAGATE_API_KEY` - API key (default: `sk-llamagate`)
 - `MODEL` - Model name (default: `llama3.2`)
 - `WORKSPACE_DIR` - Working directory (default: `~/llamagate-workspace`)
@@ -104,7 +104,7 @@ See [MCP Demo QuickStart](../../docs/MCP_DEMO_QUICKSTART.md) for detailed setup 
 
 ### Script fails to connect
 
-- Ensure LlamaGate is running: `curl http://localhost:8080/health`
+- Ensure LlamaGate is running: `curl http://localhost:11435/health`
 - Check the `LLAMAGATE_URL` environment variable
 - Verify the API key matches your configuration
 

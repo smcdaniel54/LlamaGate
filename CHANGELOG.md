@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+- **Default port changed from 8080 to 11435**: The default server port has been changed from `8080` to `11435` to avoid conflicts with common services like Jenkins, Tomcat, and development servers. Port 11435 follows Ollama's port pattern (11434 + 1) and is easy to remember. Existing installations with `.env` files will continue using their configured port. New installations will use port 11435 by default. You can override the port using the `PORT` environment variable.
+
+
 All notable changes to LlamaGate will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),

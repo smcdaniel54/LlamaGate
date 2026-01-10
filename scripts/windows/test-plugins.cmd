@@ -7,7 +7,7 @@ echo LlamaGate Plugin System Test Suite
 echo ========================================
 echo.
 echo Prerequisites:
-echo   1. LlamaGate must be running on http://localhost:8080
+echo   1. LlamaGate must be running on http://localhost:11435
 echo   2. Plugin system must be enabled
 echo   3. API key should be set (if authentication enabled)
 echo.
@@ -15,7 +15,7 @@ echo Press any key to start testing...
 pause >nul
 echo.
 
-set BASE_URL=http://localhost:8080
+set BASE_URL=http://localhost:11435
 set API_KEY=sk-llamagate
 
 if "%API_KEY%"=="" (
