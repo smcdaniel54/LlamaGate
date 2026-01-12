@@ -113,6 +113,7 @@ func TestLoad_MCPEnabled(t *testing.T) {
 	os.Setenv("MCP_ENABLED", "true")
 	os.Setenv("MCP_MAX_TOOL_ROUNDS", "5")
 	os.Setenv("MCP_MAX_TOOL_CALLS_PER_ROUND", "3")
+	os.Setenv("MCP_MAX_TOTAL_TOOL_CALLS", "20")
 	os.Setenv("MCP_DEFAULT_TOOL_TIMEOUT", "15s")
 	os.Setenv("MCP_MAX_TOOL_RESULT_SIZE", "2048")
 
@@ -122,6 +123,7 @@ func TestLoad_MCPEnabled(t *testing.T) {
 	assert.True(t, cfg.MCP.Enabled)
 	assert.Equal(t, 5, cfg.MCP.MaxToolRounds)
 	assert.Equal(t, 3, cfg.MCP.MaxToolCallsPerRound)
+	assert.Equal(t, 20, cfg.MCP.MaxTotalToolCalls)
 	assert.Equal(t, int64(2048), cfg.MCP.MaxToolResultSize)
 	assert.Equal(t, 15*time.Second, cfg.MCP.DefaultToolTimeout)
 }
@@ -137,6 +139,7 @@ func TestLoad_MCPDefaults(t *testing.T) {
 
 	assert.Equal(t, 10, cfg.MCP.MaxToolRounds)
 	assert.Equal(t, 10, cfg.MCP.MaxToolCallsPerRound)
+	assert.Equal(t, 50, cfg.MCP.MaxTotalToolCalls) // Default max total tool calls
 	assert.Equal(t, int64(1024*1024), cfg.MCP.MaxToolResultSize) // 1MB
 	assert.Equal(t, 30*time.Second, cfg.MCP.DefaultToolTimeout)
 	assert.Equal(t, 5*time.Minute, cfg.MCP.ConnectionIdleTime)

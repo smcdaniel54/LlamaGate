@@ -44,6 +44,7 @@ func InitializeMCP(cfg *config.MCPConfig) (*MCPComponents, error) {
 		cfg.DenyTools,
 		cfg.MaxToolRounds,
 		cfg.MaxToolCallsPerRound,
+		cfg.MaxTotalToolCalls,
 		cfg.DefaultToolTimeout,
 		cfg.MaxToolResultSize,
 	)

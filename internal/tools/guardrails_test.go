@@ -60,6 +60,7 @@ func TestGuardrails_ValidateToolCall(t *testing.T) {
 				tt.denyTools,
 				10,
 				10,
+				50,
 				30*time.Second,
 				1024*1024,
 			)
@@ -81,6 +82,7 @@ func TestGuardrails_ValidateToolRounds(t *testing.T) {
 		[]string{},
 		5,
 		10,
+		50,
 		30*time.Second,
 		1024*1024,
 	)
@@ -97,6 +99,7 @@ func TestGuardrails_ValidateToolCallsPerRound(t *testing.T) {
 		[]string{},
 		10,
 		5,
+		50,
 		30*time.Second,
 		1024*1024,
 	)
@@ -112,6 +115,7 @@ func TestGuardrails_TruncateResult(t *testing.T) {
 		[]string{},
 		10,
 		10,
+		50,
 		30*time.Second,
 		100, // 100 bytes max
 	)
@@ -136,10 +140,54 @@ func TestGuardrails_GetTimeout(t *testing.T) {
 		[]string{},
 		10,
 		10,
+		50,
 		timeout,
 		1024*1024,
 	)
 	require.NoError(t, err)
 
 	assert.Equal(t, timeout, guardrails.GetTimeout())
+}
+
+func TestGuardrails_ValidateTotalToolCalls(t *testing.T) {
+	guardrails, err := NewGuardrails(
+		[]string{},
+		[]string{},
+		10,
+		10,
+		50, // max total tool calls
+		30*time.Second,
+		1024*1024,
+	)
+	require.NoError(t, err)
+
+	// Should pass for values below limit
+	assert.NoError(t, guardrails.ValidateTotalToolCalls(49))
+	assert.NoError(t, guardrails.ValidateTotalToolCalls(0))
+	assert.NoError(t, guardrails.ValidateTotalToolCalls(25))
+
+	// Should fail for values at or above limit
+	assert.Error(t, guardrails.ValidateTotalToolCalls(50))
+	assert.Error(t, guardrails.ValidateTotalToolCalls(51))
+	assert.Error(t, guardrails.ValidateTotalToolCalls(100))
+
+	// Verify error message
+	err = guardrails.ValidateTotalToolCalls(50)
+	assert.Contains(t, err.Error(), "maximum total tool calls")
+	assert.Contains(t, err.Error(), "50")
+}
+
+func TestGuardrails_MaxTotalToolCalls(t *testing.T) {
+	guardrails, err := NewGuardrails(
+		[]string{},
+		[]string{},
+		10,
+		10,
+		75, // max total tool calls
+		30*time.Second,
+		1024*1024,
+	)
+	require.NoError(t, err)
+
+	assert.Equal(t, 75, guardrails.MaxTotalToolCalls())
 }

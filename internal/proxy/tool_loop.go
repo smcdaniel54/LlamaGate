@@ -27,6 +27,7 @@ func (p *Proxy) executeToolLoop(ctx context.Context, requestID string, model str
 
 	round := 0
 	maxRounds := p.guardrails.MaxToolRounds()
+	totalToolCalls := 0 // Track total tool calls across all rounds
 
 	for round < maxRounds {
 		// Get available tools and inject them into the request
@@ -160,19 +161,60 @@ func (p *Proxy) executeToolLoop(ctx context.Context, requestID string, model str
 			return convertToOpenAIResponse(&lastMsg, model), nil
 		}
 
-		// Validate tool calls count
+		// Validate tool calls count per round
 		if err := p.guardrails.ValidateToolCallsPerRound(len(assistantMessage.ToolCalls)); err != nil {
 			log.Warn().
 				Str("request_id", requestID).
+				Int("round", round+1).
+				Int("tool_calls", len(assistantMessage.ToolCalls)).
 				Err(err).
 				Msg("Tool calls per round limit exceeded")
-			// Return error response
-			return createErrorResponse("too_many_tool_calls", err.Error(), requestID), nil
+			// Return clear, user-facing error
+			return createErrorResponse(
+				"too_many_tool_calls_per_round",
+				fmt.Sprintf("Maximum tool calls per round (%d) exceeded. This request attempted %d tool calls in round %d.", p.guardrails.MaxCallsPerRound(), len(assistantMessage.ToolCalls), round+1),
+				requestID,
+			), nil
+		}
+
+		// Check total tool calls limit before executing
+		if err := p.guardrails.ValidateTotalToolCalls(totalToolCalls + len(assistantMessage.ToolCalls)); err != nil {
+			log.Warn().
+				Str("request_id", requestID).
+				Int("round", round+1).
+				Int("total_tool_calls", totalToolCalls).
+				Int("pending_calls", len(assistantMessage.ToolCalls)).
+				Err(err).
+				Msg("Total tool calls limit exceeded")
+			// Return clear, user-facing error
+			return createErrorResponse(
+				"max_total_tool_calls_exceeded",
+				fmt.Sprintf("Maximum total tool calls (%d) exceeded. This request has made %d tool calls and attempted %d more.", p.guardrails.MaxTotalToolCalls(), totalToolCalls, len(assistantMessage.ToolCalls)),
+				requestID,
+			), nil
 		}
 
 		// Execute tool calls
 		toolMessages := make([]Message, 0, len(assistantMessage.ToolCalls))
 		for _, toolCall := range assistantMessage.ToolCalls {
+			// Increment total tool calls counter
+			totalToolCalls++
+			
+			// Check total limit again after increment (defensive check)
+			if err := p.guardrails.ValidateTotalToolCalls(totalToolCalls); err != nil {
+				log.Warn().
+					Str("request_id", requestID).
+					Int("round", round+1).
+					Int("total_tool_calls", totalToolCalls).
+					Err(err).
+					Msg("Total tool calls limit exceeded during execution")
+				// Return clear, user-facing error
+				return createErrorResponse(
+					"max_total_tool_calls_exceeded",
+					fmt.Sprintf("Maximum total tool calls (%d) exceeded. This request has executed %d tool calls.", p.guardrails.MaxTotalToolCalls(), totalToolCalls),
+					requestID,
+				), nil
+			}
 			// Validate tool is allowed
 			if err := p.guardrails.ValidateToolCall(toolCall.Function.Name); err != nil {
 				log.Warn().
@@ -224,7 +266,8 @@ func (p *Proxy) executeToolLoop(ctx context.Context, requestID string, model str
 		log.Debug().
 			Str("request_id", requestID).
 			Int("round", round).
-			Int("tool_calls", len(assistantMessage.ToolCalls)).
+			Int("tool_calls_this_round", len(assistantMessage.ToolCalls)).
+			Int("total_tool_calls", totalToolCalls).
 			Msg("Tool execution round completed")
 
 		// Check if we've hit the max rounds limit
@@ -237,8 +280,14 @@ func (p *Proxy) executeToolLoop(ctx context.Context, requestID string, model str
 				log.Warn().
 					Str("request_id", requestID).
 					Int("rounds", round).
+					Int("pending_tool_calls", len(assistantMessage.ToolCalls)).
 					Msg("Maximum tool rounds reached with pending tool calls")
-				return createErrorResponse("max_tool_rounds_exceeded", fmt.Sprintf("Maximum tool rounds (%d) exceeded", maxRounds), requestID), nil
+				// Return clear, user-facing error
+				return createErrorResponse(
+					"max_tool_rounds_exceeded",
+					fmt.Sprintf("Maximum tool execution rounds (%d) exceeded. This request completed %d rounds with %d pending tool calls.", maxRounds, round, len(assistantMessage.ToolCalls)),
+					requestID,
+				), nil
 			}
 			// If no tool calls, we completed naturally at the limit - this is fine
 			// The loop will exit naturally and we'll return the final response below

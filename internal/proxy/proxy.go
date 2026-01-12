@@ -2,6 +2,7 @@
 package proxy
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -250,14 +251,14 @@ func (p *Proxy) HandleChatCompletions(c *gin.Context) {
 
 	// Handle streaming vs non-streaming
 	if req.Stream {
-		p.handleStreamingResponse(c, httpReq, requestID, startTime)
+		p.handleStreamingResponse(c, httpReq, requestID, startTime, req.Model)
 	} else {
 		p.handleNonStreamingResponse(c, httpReq, requestID, startTime, req.Model, finalMessages)
 	}
 }
 
-// handleStreamingResponse handles streaming responses from Ollama
-func (p *Proxy) handleStreamingResponse(c *gin.Context, httpReq *http.Request, requestID string, startTime time.Time) {
+// handleStreamingResponse handles streaming responses from Ollama and converts them to OpenAI-compatible SSE format
+func (p *Proxy) handleStreamingResponse(c *gin.Context, httpReq *http.Request, requestID string, startTime time.Time, model string) {
 	resp, err := p.client.Do(httpReq)
 	if err != nil {
 		log.Error().
@@ -276,27 +277,194 @@ func (p *Proxy) handleStreamingResponse(c *gin.Context, httpReq *http.Request, r
 		}
 	}()
 
-	// Set headers for streaming
+	// Set headers for streaming (OpenAI-compatible SSE)
 	c.Header("Content-Type", "text/event-stream")
 	c.Header("Cache-Control", "no-cache")
 	c.Header("Connection", "keep-alive")
 	c.Status(resp.StatusCode)
 
-	// Stream the response
-	_, err = io.Copy(c.Writer, resp.Body)
-	if err != nil {
+	// Flush headers immediately
+	c.Writer.Flush()
+
+	// Handle non-OK responses
+	if resp.StatusCode != http.StatusOK {
+		// Forward error response as-is
+		_, err = io.Copy(c.Writer, resp.Body)
+		if err != nil {
+			log.Error().
+				Str("request_id", requestID).
+				Err(err).
+				Msg("Failed to stream error response")
+		}
+		return
+	}
+
+	// Parse Ollama SSE chunks and convert to OpenAI format
+	scanner := bufio.NewScanner(resp.Body)
+	chunkID := fmt.Sprintf("chatcmpl-%d", time.Now().UnixNano())
+	created := time.Now().Unix()
+	accumulatedContent := ""
+
+	for scanner.Scan() {
+		// Check for client disconnect
+		select {
+		case <-c.Request.Context().Done():
+			log.Info().
+				Str("request_id", requestID).
+				Msg("Client disconnected, stopping stream")
+			return
+		default:
+		}
+
+		line := scanner.Text()
+		if !strings.HasPrefix(line, "data: ") {
+			continue
+		}
+
+		// Extract JSON from SSE line
+		jsonStr := strings.TrimPrefix(line, "data: ")
+		if jsonStr == "" {
+			continue
+		}
+
+		// Parse Ollama chunk
+		var ollamaChunk map[string]interface{}
+		if err := json.Unmarshal([]byte(jsonStr), &ollamaChunk); err != nil {
+			log.Warn().
+				Str("request_id", requestID).
+				Err(err).
+				Str("line", line).
+				Msg("Failed to parse Ollama SSE chunk, skipping")
+			continue
+		}
+
+		// Check if stream is done
+		done, _ := ollamaChunk["done"].(bool)
+		if done {
+			// Send final chunk with accumulated content and finish_reason
+			finalChunk := convertOllamaStreamChunkToOpenAI(ollamaChunk, model, chunkID, created, true)
+			if finalChunk != nil {
+				chunkJSON, err := json.Marshal(finalChunk)
+				if err == nil {
+					_, writeErr := fmt.Fprintf(c.Writer, "data: %s\n\n", chunkJSON)
+					if writeErr != nil {
+						log.Warn().
+							Str("request_id", requestID).
+							Err(writeErr).
+							Msg("Failed to write final chunk, client may have disconnected")
+						return
+					}
+					c.Writer.Flush()
+				}
+			}
+			// Send OpenAI-compatible [DONE] message
+			_, writeErr := fmt.Fprintf(c.Writer, "data: [DONE]\n\n")
+			if writeErr != nil {
+				log.Warn().
+					Str("request_id", requestID).
+					Err(writeErr).
+					Msg("Failed to write [DONE] marker, client may have disconnected")
+				return
+			}
+			c.Writer.Flush()
+			break
+		}
+
+		// Convert Ollama chunk to OpenAI format
+		openAIChunk := convertOllamaStreamChunkToOpenAI(ollamaChunk, model, chunkID, created, false)
+		if openAIChunk == nil {
+			continue
+		}
+
+		// Marshal and send as SSE
+		chunkJSON, err := json.Marshal(openAIChunk)
+		if err != nil {
+			log.Warn().
+				Str("request_id", requestID).
+				Err(err).
+				Msg("Failed to marshal OpenAI chunk, skipping")
+			continue
+		}
+
+		// Write SSE-formatted chunk: "data: {...}\n\n"
+		_, writeErr := fmt.Fprintf(c.Writer, "data: %s\n\n", chunkJSON)
+		if writeErr != nil {
+			log.Warn().
+				Str("request_id", requestID).
+				Err(writeErr).
+				Msg("Failed to write chunk, client may have disconnected")
+			return
+		}
+
+		// Flush to ensure client receives chunk immediately
+		c.Writer.Flush()
+
+		// Accumulate content for final chunk
+		if message, ok := ollamaChunk["message"].(map[string]interface{}); ok {
+			if content, ok := message["content"].(string); ok {
+				accumulatedContent += content
+			}
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
 		log.Error().
 			Str("request_id", requestID).
 			Err(err).
-			Msg("Failed to stream response")
+			Msg("Error reading streaming response")
+		// Send error chunk in OpenAI format
+		errorChunk := map[string]interface{}{
+			"error": map[string]interface{}{
+				"message": fmt.Sprintf("Stream error: %v", err),
+				"type":    "stream_error",
+			},
+		}
+		errorJSON, _ := json.Marshal(errorChunk)
+		fmt.Fprintf(c.Writer, "data: %s\n\n", errorJSON)
+		c.Writer.Flush()
 		return
 	}
 
 	log.Info().
 		Str("request_id", requestID).
 		Dur("duration", time.Since(startTime)).
-		Int("status", resp.StatusCode).
 		Msg("Streaming response completed")
+}
+
+// convertOllamaStreamChunkToOpenAI converts an Ollama streaming chunk to OpenAI-compatible format
+func convertOllamaStreamChunkToOpenAI(ollamaChunk map[string]interface{}, model, chunkID string, created int64, isFinal bool) map[string]interface{} {
+	var deltaContent string
+	var finishReason interface{} = nil
+
+	if message, ok := ollamaChunk["message"].(map[string]interface{}); ok {
+		if content, ok := message["content"].(string); ok {
+			deltaContent = content
+		}
+	}
+
+	if isFinal {
+		finishReason = "stop"
+	}
+
+	// OpenAI streaming chunk format
+	chunk := map[string]interface{}{
+		"id":      chunkID,
+		"object":  "chat.completion.chunk",
+		"created": created,
+		"model":   model,
+		"choices": []map[string]interface{}{
+			{
+				"index": 0,
+				"delta": map[string]interface{}{
+					"role":    "assistant",
+					"content": deltaContent,
+				},
+				"finish_reason": finishReason,
+			},
+		},
+	}
+
+	return chunk
 }
 
 // handleNonStreamingResponse handles non-streaming responses from Ollama
@@ -330,18 +498,48 @@ func (p *Proxy) handleNonStreamingResponse(c *gin.Context, httpReq *http.Request
 		return
 	}
 
-	// Cache successful responses
+	// Convert Ollama response to OpenAI format for successful responses
+	var responseBody []byte
 	if resp.StatusCode == http.StatusOK {
-		if err := p.cache.Set(model, messages, body); err != nil {
+		// Parse Ollama response
+		var ollamaResp map[string]interface{}
+		if err := json.Unmarshal(body, &ollamaResp); err != nil {
+			log.Error().
+				Str("request_id", requestID).
+				Err(err).
+				Msg("Failed to parse Ollama response")
+			response.ServerError(c, "Failed to parse response from Ollama", requestID)
+			return
+		}
+
+		// Convert to OpenAI format
+		openAIResp := convertOllamaToOpenAIFormat(ollamaResp, model)
+
+		// Marshal to JSON
+		responseBody, err = json.Marshal(openAIResp)
+		if err != nil {
+			log.Error().
+				Str("request_id", requestID).
+				Err(err).
+				Msg("Failed to marshal OpenAI response")
+			response.ServerError(c, "Failed to format response", requestID)
+			return
+		}
+
+		// Cache the converted OpenAI-format response
+		if err := p.cache.Set(model, messages, responseBody); err != nil {
 			log.Warn().
 				Str("request_id", requestID).
 				Err(err).
 				Msg("Failed to cache response")
 		}
+	} else {
+		// For non-OK responses, forward as-is
+		responseBody = body
 	}
 
-	// Forward response to client
-	c.Data(resp.StatusCode, resp.Header.Get("Content-Type"), body)
+	// Return response to client
+	c.Data(resp.StatusCode, "application/json", responseBody)
 
 	log.Info().
 		Str("request_id", requestID).

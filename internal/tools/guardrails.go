@@ -15,6 +15,7 @@ type Guardrails struct {
 	denyPatterns     []glob.Glob
 	maxToolRounds    int
 	maxCallsPerRound int
+	maxTotalCalls    int // Maximum total tool calls across all rounds
 	defaultTimeout   time.Duration
 	maxResultSize    int64
 }
@@ -25,12 +26,14 @@ func NewGuardrails(
 	denyTools []string,
 	maxToolRounds int,
 	maxCallsPerRound int,
+	maxTotalCalls int,
 	defaultTimeout time.Duration,
 	maxResultSize int64,
 ) (*Guardrails, error) {
 	g := &Guardrails{
 		maxToolRounds:    maxToolRounds,
 		maxCallsPerRound: maxCallsPerRound,
+		maxTotalCalls:    maxTotalCalls,
 		defaultTimeout:   defaultTimeout,
 		maxResultSize:    maxResultSize,
 	}
@@ -94,6 +97,19 @@ func (g *Guardrails) ValidateToolCallsPerRound(count int) error {
 		return fmt.Errorf("maximum tool calls per round (%d) exceeded", g.maxCallsPerRound)
 	}
 	return nil
+}
+
+// ValidateTotalToolCalls validates the total number of tool calls across all rounds
+func (g *Guardrails) ValidateTotalToolCalls(totalCount int) error {
+	if totalCount >= g.maxTotalCalls {
+		return fmt.Errorf("maximum total tool calls (%d) exceeded", g.maxTotalCalls)
+	}
+	return nil
+}
+
+// MaxTotalToolCalls returns the maximum total tool calls allowed
+func (g *Guardrails) MaxTotalToolCalls() int {
+	return g.maxTotalCalls
 }
 
 // GetTimeout returns the timeout for tool execution

@@ -41,6 +41,7 @@ type MCPConfig struct {
 	Enabled              bool
 	MaxToolRounds        int
 	MaxToolCallsPerRound int
+	MaxTotalToolCalls    int // Maximum total tool calls across all rounds
 	DefaultToolTimeout   time.Duration
 	MaxToolResultSize    int64
 	AllowTools           []string
@@ -110,6 +111,7 @@ func Load() (*Config, error) {
 	viper.SetDefault("MCP_ENABLED", false)
 	viper.SetDefault("MCP_MAX_TOOL_ROUNDS", 10)
 	viper.SetDefault("MCP_MAX_TOOL_CALLS_PER_ROUND", 10)
+	viper.SetDefault("MCP_MAX_TOTAL_TOOL_CALLS", 50) // Maximum total tool calls across all rounds
 	viper.SetDefault("MCP_DEFAULT_TOOL_TIMEOUT", "30s")
 	viper.SetDefault("MCP_MAX_TOOL_RESULT_SIZE", 1024*1024) // 1MB
 
@@ -212,6 +214,7 @@ func loadMCPConfig() (*MCPConfig, error) {
 		Enabled:              enabled,
 		MaxToolRounds:        viper.GetInt("MCP_MAX_TOOL_ROUNDS"),
 		MaxToolCallsPerRound: viper.GetInt("MCP_MAX_TOOL_CALLS_PER_ROUND"),
+		MaxTotalToolCalls:    viper.GetInt("MCP_MAX_TOTAL_TOOL_CALLS"),
 		MaxToolResultSize:    viper.GetInt64("MCP_MAX_TOOL_RESULT_SIZE"),
 		ConnectionPoolSize:   viper.GetInt("MCP_CONNECTION_POOL_SIZE"),
 	}
@@ -360,6 +363,9 @@ func (m *MCPConfig) Validate() error {
 	}
 	if m.MaxToolCallsPerRound <= 0 {
 		return fmt.Errorf("MCP_MAX_TOOL_CALLS_PER_ROUND must be greater than 0")
+	}
+	if m.MaxTotalToolCalls <= 0 {
+		return fmt.Errorf("MCP_MAX_TOTAL_TOOL_CALLS must be greater than 0")
 	}
 	if m.DefaultToolTimeout <= 0 {
 		return fmt.Errorf("MCP_DEFAULT_TOOL_TIMEOUT must be greater than 0")
