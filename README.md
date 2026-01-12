@@ -251,6 +251,59 @@ Or use the provided batch files (see Windows Quick Start above).
 
 **Note:** If you use a `.env` file, you don't need to set environment variables manually - just create `.env` and run the application!
 
+### Supported Authentication Headers
+
+LlamaGate supports two authentication header formats (both are case-insensitive):
+
+#### 1. X-API-Key Header (Recommended)
+```bash
+curl -H "X-API-Key: sk-llamagate" http://localhost:11435/v1/models
+```
+
+The header name is case-insensitive. All of the following are accepted:
+- `X-API-Key`
+- `x-api-key`
+- `X-Api-Key`
+- Any other case variation
+
+#### 2. Authorization Bearer Header (Alternative)
+```bash
+curl -H "Authorization: Bearer sk-llamagate" http://localhost:11435/v1/models
+```
+
+The "Bearer" scheme is case-insensitive. All of the following are accepted:
+- `Authorization: Bearer sk-llamagate`
+- `Authorization: bearer sk-llamagate`
+- `Authorization: BEARER sk-llamagate`
+
+**Header Priority:** The `X-API-Key` header is checked first. If not present, `Authorization: Bearer` is checked.
+
+### Authentication Behavior
+
+- **When Authentication is Required:** All endpoints except `/health` require authentication when `API_KEY` is configured.
+- **When Authentication is Missing:** Requests without a valid authentication header return `401 Unauthorized` with an OpenAI-compatible error response.
+- **When Authentication is Invalid:** Requests with an invalid or incorrect API key return `401 Unauthorized` with an OpenAI-compatible error response.
+
+### Error Response Format
+
+Authentication errors return HTTP `401 Unauthorized` with a JSON response in OpenAI-compatible format:
+
+```json
+{
+  "error": {
+    "message": "Invalid API key",
+    "type": "invalid_request_error",
+    "request_id": "req-123456"
+  }
+}
+```
+
+### Security
+
+- **API keys are never logged:** Authentication failures are logged with a generic message ("Authentication failed") but the provided API key or bearer token is never included in logs.
+- **Constant-time comparison:** API key validation uses constant-time comparison to prevent timing attacks.
+- **Health endpoint bypass:** The `/health` endpoint does not require authentication and can be used for monitoring and load balancer health checks.
+
 ## Usage
 
 > 💡 **Migrating from OpenAI?** See the [Quick Start Guide](QUICKSTART.md) for step-by-step migration examples.
@@ -395,21 +448,58 @@ Returns `200 OK` when healthy, `503 Service Unavailable` when Ollama is unreacha
 
 When `API_KEY` is configured, all API endpoints (except `/health`) require authentication.
 
-LlamaGate supports two authentication header formats:
+### Supported Authentication Headers
 
-### X-API-Key Header (Recommended)
+LlamaGate supports two authentication header formats (both are case-insensitive):
+
+#### 1. X-API-Key Header (Recommended)
 ```bash
 curl -H "X-API-Key: sk-llamagate" http://localhost:11435/v1/models
 ```
 
-### Authorization Bearer Header (Alternative)
+The header name is case-insensitive. All of the following are accepted:
+- `X-API-Key`
+- `x-api-key`
+- `X-Api-Key`
+- Any other case variation
+
+#### 2. Authorization Bearer Header (Alternative)
 ```bash
 curl -H "Authorization: Bearer sk-llamagate" http://localhost:11435/v1/models
 ```
 
-The `X-API-Key` header is checked first. If not present, `Authorization: Bearer` is checked.
+The "Bearer" scheme is case-insensitive. All of the following are accepted:
+- `Authorization: Bearer sk-llamagate`
+- `Authorization: bearer sk-llamagate`
+- `Authorization: BEARER sk-llamagate`
 
-**Note:** The `/health` endpoint does not require authentication and can be used for monitoring and load balancer health checks.
+**Header Priority:** The `X-API-Key` header is checked first. If not present, `Authorization: Bearer` is checked.
+
+### Authentication Behavior
+
+- **When Authentication is Required:** All endpoints except `/health` require authentication when `API_KEY` is configured.
+- **When Authentication is Missing:** Requests without a valid authentication header return `401 Unauthorized` with an OpenAI-compatible error response.
+- **When Authentication is Invalid:** Requests with an invalid or incorrect API key return `401 Unauthorized` with an OpenAI-compatible error response.
+
+### Error Response Format
+
+Authentication errors return HTTP `401 Unauthorized` with a JSON response in OpenAI-compatible format:
+
+```json
+{
+  "error": {
+    "message": "Invalid API key",
+    "type": "invalid_request_error",
+    "request_id": "req-123456"
+  }
+}
+```
+
+### Security
+
+- **API keys are never logged:** Authentication failures are logged with a generic message ("Authentication failed") but the provided API key or bearer token is never included in logs.
+- **Constant-time comparison:** API key validation uses constant-time comparison to prevent timing attacks.
+- **Health endpoint bypass:** The `/health` endpoint does not require authentication and can be used for monitoring and load balancer health checks.
 
 If `API_KEY` is not set, authentication is disabled and all requests are allowed.
 

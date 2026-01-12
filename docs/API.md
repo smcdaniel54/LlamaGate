@@ -6,10 +6,45 @@ LlamaGate provides a RESTful HTTP API for managing MCP (Model Context Protocol) 
 
 ## Authentication
 
-All MCP API endpoints require authentication when `API_KEY` is configured. Use either:
+All MCP API endpoints require authentication when `API_KEY` is configured.
 
-- **X-API-Key header**: `X-API-Key: sk-llamagate`
-- **Authorization Bearer header**: `Authorization: Bearer sk-llamagate`
+### Supported Authentication Headers
+
+LlamaGate supports two authentication header formats (both are case-insensitive):
+
+#### 1. X-API-Key Header (Recommended)
+```bash
+curl -H "X-API-Key: sk-llamagate" http://localhost:11435/v1/mcp/servers
+```
+
+The header name is case-insensitive. All of the following are accepted:
+- `X-API-Key`
+- `x-api-key`
+- `X-Api-Key`
+- Any other case variation
+
+#### 2. Authorization Bearer Header (Alternative)
+```bash
+curl -H "Authorization: Bearer sk-llamagate" http://localhost:11435/v1/mcp/servers
+```
+
+The "Bearer" scheme is case-insensitive. All of the following are accepted:
+- `Authorization: Bearer sk-llamagate`
+- `Authorization: bearer sk-llamagate`
+- `Authorization: BEARER sk-llamagate`
+
+**Header Priority:** The `X-API-Key` header is checked first. If not present, `Authorization: Bearer` is checked.
+
+### Authentication Behavior
+
+- **When Authentication is Required:** All endpoints require authentication when `API_KEY` is configured.
+- **When Authentication is Missing:** Requests without a valid authentication header return `401 Unauthorized` with an OpenAI-compatible error response.
+- **When Authentication is Invalid:** Requests with an invalid or incorrect API key return `401 Unauthorized` with an OpenAI-compatible error response.
+
+### Security
+
+- **API keys are never logged:** Authentication failures are logged with a generic message ("Authentication failed") but the provided API key or bearer token is never included in logs.
+- **Constant-time comparison:** API key validation uses constant-time comparison to prevent timing attacks.
 
 ## Base URL
 
@@ -467,10 +502,16 @@ All endpoints return standard error responses when an error occurs:
 {
   "error": {
     "message": "Invalid API key",
-    "type": "invalid_request_error"
+    "type": "invalid_request_error",
+    "request_id": "req-123456"
   }
 }
 ```
+
+**Note:** This error is returned when:
+- No authentication header is provided
+- An invalid or incorrect API key is provided
+- The authentication header format is invalid (e.g., `Authorization: Bearer` without a token)
 
 #### Rate Limit Exceeded
 
