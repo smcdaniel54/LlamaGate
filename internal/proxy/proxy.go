@@ -248,6 +248,8 @@ func (p *Proxy) HandleChatCompletions(c *gin.Context) {
 	}
 
 	httpReq.Header.Set("Content-Type", "application/json")
+	// Propagate request ID to Ollama for correlation
+	httpReq.Header.Set("X-Request-ID", requestID)
 
 	// Handle streaming vs non-streaming
 	if req.Stream {

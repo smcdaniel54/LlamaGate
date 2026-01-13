@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/llamagate/llamagate/internal/mcpclient"
+	"github.com/llamagate/llamagate/internal/middleware"
 	"github.com/rs/zerolog/log"
 )
 
@@ -92,13 +93,14 @@ func (p *Proxy) fetchMCPResource(ctx context.Context, requestID string, mcpURI *
 		return "", fmt.Errorf("client not available for server %s", mcpURI.Server)
 	}
 
-	// Read resource with timeout
+	// Read resource with timeout and propagate request ID
 	timeout := p.resourceFetchTimeout
 	if timeout == 0 {
 		timeout = 30 * time.Second // Default fallback
 	}
 	resourceCtx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
+	resourceCtx = middleware.WithRequestID(resourceCtx, requestID)
 
 	result, err := client.ReadResource(resourceCtx, mcpURI.Resource)
 	if err != nil {

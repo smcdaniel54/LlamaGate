@@ -46,6 +46,51 @@ The "Bearer" scheme is case-insensitive. All of the following are accepted:
 - **API keys are never logged:** Authentication failures are logged with a generic message ("Authentication failed") but the provided API key or bearer token is never included in logs.
 - **Constant-time comparison:** API key validation uses constant-time comparison to prevent timing attacks.
 
+## Request ID and Correlation
+
+LlamaGate implements consistent request correlation across all components for easier troubleshooting and debugging.
+
+### Request ID Header
+
+LlamaGate supports the `X-Request-ID` header for request correlation:
+
+- **If provided**: LlamaGate uses your provided request ID and includes it in the response
+- **If not provided**: LlamaGate generates a UUID v4 request ID
+
+**Example:**
+```bash
+curl -H "X-API-Key: sk-llamagate" \
+     -H "X-Request-ID: my-custom-request-id-123" \
+     http://localhost:11435/v1/chat/completions
+```
+
+The same request ID will appear in:
+- Response header: `X-Request-ID: my-custom-request-id-123`
+- All log entries for this request
+- Error responses (if any)
+- Downstream calls to Ollama (via `X-Request-ID` header)
+- Tool/function calls (via context)
+- MCP/plugin calls (via context and HTTP headers)
+
+### Sensitive Data Redaction
+
+LlamaGate automatically redacts sensitive values from all logs:
+
+**Redacted Values:**
+- API keys (`X-API-Key` header)
+- Bearer tokens (`Authorization: Bearer` header)
+- Secrets in headers, environment variables, or configuration
+
+**Logging Behavior:**
+- ✅ Request method, path, status, latency, IP address
+- ✅ Request ID for correlation
+- ✅ Error messages (without sensitive data)
+- ❌ API key values
+- ❌ Bearer token values
+- ❌ Authorization header contents
+
+This ensures that secrets never appear in log files, even if accidentally included in request headers.
+
 ## Base URL
 
 All endpoints are prefixed with `/v1/mcp`:

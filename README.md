@@ -544,6 +544,64 @@ Retry-After: 1
 
 Rate-limited requests are logged with structured fields including request ID, IP address, path, retry time, and limiter decision.
 
+## Request ID and Logging
+
+LlamaGate implements consistent request correlation and secure logging across all components.
+
+### Request ID Generation
+
+Every inbound request receives a unique request ID:
+
+- **If `X-Request-ID` header is provided**: LlamaGate uses the provided request ID
+- **If no header is provided**: LlamaGate generates a UUID v4 request ID
+
+The request ID is:
+- Included in the `X-Request-ID` response header
+- Propagated to all downstream components:
+  - Ollama upstream calls (via `X-Request-ID` header)
+  - Tool/function calling (via context)
+  - MCP/plugin calls (via context and HTTP headers)
+- Included in all structured log entries for the request
+
+### Sensitive Data Redaction
+
+LlamaGate automatically redacts sensitive values from logs to prevent secret leakage:
+
+**Redacted Values:**
+- API keys (`X-API-Key` header values)
+- Bearer tokens (`Authorization: Bearer` header values)
+- Any other secrets in headers, environment variables, or configuration
+
+**What is Logged:**
+- Request method, path, status code, latency
+- Request ID for correlation
+- Client IP address
+- Error messages (without sensitive data)
+- Authentication failures (generic message only)
+
+**What is NOT Logged:**
+- API key values
+- Bearer token values
+- Authorization header contents
+- Any header values that contain secrets
+
+**Example Log Entry:**
+```json
+{
+  "level": "info",
+  "request_id": "550e8400-e29b-41d4-a716-446655440000",
+  "method": "POST",
+  "path": "/v1/chat/completions",
+  "status": 200,
+  "latency": "1.234s",
+  "ip": "192.168.1.100",
+  "time": "2026-01-12T10:00:00Z",
+  "message": "HTTP request"
+}
+```
+
+Notice that the API key is not present in the log, even though it was sent in the request headers.
+
 ## HTTPS/SSL Support
 
 LlamaGate supports native HTTPS/TLS encryption. To enable HTTPS:

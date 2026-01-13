@@ -13,6 +13,15 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+// getRequestIDFromContext extracts request ID from context
+// Uses the same key as middleware package for consistency
+func getRequestIDFromContext(ctx context.Context) string {
+	if requestID, ok := ctx.Value("request_id").(string); ok {
+		return requestID
+	}
+	return ""
+}
+
 // HTTPTransport implements MCP communication over HTTP
 type HTTPTransport struct {
 	url        string
@@ -101,6 +110,11 @@ func (t *HTTPTransport) SendRequest(ctx context.Context, method string, params i
 	// Set headers
 	for k, v := range t.headers {
 		httpReq.Header.Set(k, v)
+	}
+
+	// Propagate request ID from context if available
+	if requestID := getRequestIDFromContext(ctx); requestID != "" {
+		httpReq.Header.Set("X-Request-ID", requestID)
 	}
 
 	// Send request

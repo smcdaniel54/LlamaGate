@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/llamagate/llamagate/internal/middleware"
 	"github.com/llamagate/llamagate/internal/tools"
 	"github.com/rs/zerolog/log"
 )
@@ -98,6 +99,8 @@ func (p *Proxy) executeToolLoop(ctx context.Context, requestID string, model str
 		}
 
 		httpReq.Header.Set("Content-Type", "application/json")
+		// Propagate request ID to Ollama for correlation
+		httpReq.Header.Set("X-Request-ID", requestID)
 
 		resp, err := p.client.Do(httpReq)
 		if err != nil {
@@ -330,10 +333,11 @@ func (p *Proxy) executeTool(ctx context.Context, requestID string, toolCall Tool
 		arguments = make(map[string]interface{})
 	}
 
-	// Execute tool with timeout
+	// Execute tool with timeout and propagate request ID
 	timeout := p.guardrails.GetTimeout()
 	toolCtx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
+	toolCtx = middleware.WithRequestID(toolCtx, requestID)
 
 	startTime := time.Now()
 	result, err := client.CallTool(toolCtx, originalToolName, arguments)
