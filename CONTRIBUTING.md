@@ -35,10 +35,12 @@ Feature suggestions are welcome! Please open an issue describing:
    go test ./...
    go build ./cmd/llamagate
    ```
-   For concurrent code, also run race detector tests:
-   ```bash
-   CGO_ENABLED=1 go test -race ./...
-   ```
+   For concurrent code, also run race detector tests (matches CI):
+   - **Windows:** `.\scripts\windows\test-race.ps1`
+   - **Unix/Linux/macOS:** `./scripts/unix/test-race.sh`
+   - **Manual:** `CGO_ENABLED=1 go test -race -timeout=10m ./...`
+   
+   **Note:** Race detector tests require CGO_ENABLED=1 and match the CI configuration exactly.
 5. **Commit your changes:**
    ```bash
    git commit -m "Add: description of your changes"
@@ -52,7 +54,9 @@ Feature suggestions are welcome! Please open an issue describing:
 ## Code Style
 
 - Follow standard Go formatting (`go fmt`)
-- Use `golangci-lint` for linting (if available)
+- Use `golangci-lint` v2.8.0 for linting (matches CI):
+  - **Windows:** `.\scripts\windows\install-golangci-lint.ps1` then `golangci-lint run`
+  - **Unix/Linux/macOS:** `./scripts/unix/lint.sh`
 - Write clear, self-documenting code
 - Add comments for exported functions
 - Keep functions small and focused
