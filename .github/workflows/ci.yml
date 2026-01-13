@@ -54,6 +54,7 @@ jobs:
     
     - name: Run tests with race detector
       timeout-minutes: 15
+      shell: bash
       run: |
         PACKAGES=$(go list ./... 2>/dev/null | grep -v "^\.out$" || go list ./...)
         if [ -z "$PACKAGES" ]; then
