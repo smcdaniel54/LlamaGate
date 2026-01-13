@@ -46,8 +46,16 @@ jobs:
     - name: Download dependencies
       run: go mod download
     
-    - name: Run tests
-      run: go test ./...
+    - name: Run tests with race detector
+      run: go test -race -coverprofile=coverage.out -covermode=atomic ./...
+    
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./coverage.out
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
     
     - name: Build binary
       env:
@@ -56,6 +64,26 @@ jobs:
         CGO_ENABLED: 0
       shell: bash
       run: go build -o ${{ matrix.binary_name }} ./cmd/llamagate
+    
+    - name: Verify binary (Linux/macOS)
+      if: matrix.goos != 'windows'
+      run: |
+        chmod +x ${{ matrix.binary_name }}
+        file ${{ matrix.binary_name }}
+        # Verify binary is executable and not empty
+        test -f ${{ matrix.binary_name }} && test -s ${{ matrix.binary_name }} && echo "Binary verification passed"
+    
+    - name: Verify binary (Windows)
+      if: matrix.goos == 'windows'
+      shell: pwsh
+      run: |
+        $binary = Get-Item ${{ matrix.binary_name }}
+        if ($binary.Length -gt 0) {
+          Write-Host "Binary verification passed: $($binary.Name) ($($binary.Length) bytes)"
+        } else {
+          Write-Error "Binary is empty or missing"
+          exit 1
+        }
 
   lint:
     name: Lint
@@ -66,7 +94,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v5
       with:
-        go-version: '1.23'
+        go-version: '1.24'
     
     - name: Download dependencies
       run: go mod download
@@ -78,3 +106,57 @@ jobs:
         args: --timeout=15m --verbose
       timeout-minutes: 20
 
+  test-installers:
+    name: Test Installers
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            installer_type: unix
+          - os: windows-latest
+            installer_type: windows
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Test Unix Installer
+      if: matrix.installer_type == 'unix'
+      run: |
+        chmod +x tests/installer/test-installer-unix.sh
+        ./tests/installer/test-installer-unix.sh
+    
+    - name: Test Windows Installer
+      if: matrix.installer_type == 'windows'
+      shell: pwsh
+      run: |
+        .\tests\installer\test-installer-windows.ps1
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.24'
+    
+    - name: Run Gosec Security Scanner
+      uses: securego/gosec@master
+      with:
+        args: '-no-fail -fmt json -out gosec-report.json ./...'
+    
+    - name: Upload Gosec results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: gosec-report
+        path: gosec-report.json
+        retention-days: 7
+    
+    - name: Run govulncheck
+      run: |
+        go install golang.org/x/vuln/cmd/govulncheck@latest
+        govulncheck ./...
