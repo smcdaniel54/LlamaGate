@@ -18,25 +18,43 @@ else
     ERRORS=$((ERRORS + 1))
 fi
 
-# Test 2: Validate bash syntax
-echo "[2/7] Validating bash syntax..."
-if bash -n install/unix/install.sh 2>&1; then
-    echo "  ✓ Bash syntax is valid"
+# Test 2: Validate bash syntax for binary installer (one-liner installer)
+echo "[2/8] Validating binary installer bash syntax..."
+if [ -f "install/unix/install-binary.sh" ]; then
+    if bash -n install/unix/install-binary.sh 2>&1; then
+        echo "  ✓ Binary installer bash syntax is valid"
+    else
+        echo "  ✗ Binary installer syntax errors found"
+        ERRORS=$((ERRORS + 1))
+    fi
 else
-    echo "  ✗ Syntax errors found"
+    echo "  ✗ Binary installer file not found"
     ERRORS=$((ERRORS + 1))
 fi
 
-# Test 3: Check if file is executable
-echo "[3/7] Checking file permissions..."
+# Test 2b: Validate bash syntax for source installer
+echo "[3/8] Validating source installer bash syntax..."
+if [ -f "install/unix/install.sh" ]; then
+    if bash -n install/unix/install.sh 2>&1; then
+        echo "  ✓ Source installer bash syntax is valid"
+    else
+        echo "  ✗ Source installer syntax errors found"
+        ERRORS=$((ERRORS + 1))
+    fi
+else
+    echo "  ⚠ Source installer file not found (optional)"
+fi
+
+# Test 4: Check if file is executable
+echo "[4/8] Checking file permissions..."
 if [ -x "install/unix/install.sh" ]; then
     echo "  ✓ File is executable"
 else
     echo "  ⚠ File is not executable (will be set during install)"
 fi
 
-# Test 4: Check for required functions
-echo "[4/7] Checking required functions..."
+# Test 5: Check for required functions
+echo "[5/8] Checking required functions..."
 REQUIRED_FUNCS=("command_exists" "prompt_user" "detect_os" "print_info" "print_success" "print_error")
 CONTENT=$(cat install/unix/install.sh)
 ALL_FOUND=true
@@ -54,16 +72,16 @@ if [ "$ALL_FOUND" = false ]; then
     ERRORS=$((ERRORS + 1))
 fi
 
-# Test 5: Check for shebang
-echo "[5/7] Checking shebang..."
+# Test 6: Check for shebang
+echo "[6/8] Checking shebang..."
 if head -n 1 install/unix/install.sh | grep -q "^#!/bin/bash"; then
     echo "  ✓ Shebang is correct"
 else
     echo "  ⚠ Shebang may be missing or incorrect"
 fi
 
-# Test 6: Test one-liner binary installer download
-echo "[6/7] Testing one-liner binary installer download..."
+# Test 7: Test one-liner binary installer download
+echo "[7/8] Testing one-liner binary installer download..."
 ONE_LINER_BINARY_URL="https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/unix/install-binary.sh"
 if command -v curl >/dev/null 2>&1; then
     if curl -fsSL --max-time 10 "$ONE_LINER_BINARY_URL" 2>/dev/null | grep -q "LlamaGate Binary Installer"; then
@@ -82,8 +100,8 @@ else
     echo "  This is expected in CI environments without internet access"
 fi
 
-# Test 7: Test one-liner source installer download
-echo "[7/7] Testing one-liner source installer download..."
+# Test 8: Test one-liner source installer download
+echo "[8/8] Testing one-liner source installer download..."
 ONE_LINER_SOURCE_URL="https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/unix/install.sh"
 if command -v curl >/dev/null 2>&1; then
     if curl -fsSL --max-time 10 "$ONE_LINER_SOURCE_URL" 2>/dev/null | grep -q "LlamaGate Installer"; then
