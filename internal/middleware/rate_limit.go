@@ -2,8 +2,12 @@
 package middleware
 
 import (
+	"math"
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/llamagate/llamagate/internal/response"
+	"github.com/rs/zerolog/log"
 	"golang.org/x/time/rate"
 )
 
@@ -36,13 +40,52 @@ func (rl *RateLimitMiddleware) Handler() gin.HandlerFunc {
 			return
 		}
 
-		// Check if request is allowed
-		if !rl.limiter.Allow() {
+		// Check if request is allowed using Reserve to get retry time
+		reservation := rl.limiter.Reserve()
+		if !reservation.OK() {
+			// Limiter is closed or invalid - should not happen in normal operation
 			requestID := GetRequestID(c)
+			log.Error().
+				Str("request_id", requestID).
+				Str("ip", c.ClientIP()).
+				Str("path", c.Request.URL.Path).
+				Msg("Rate limiter returned invalid reservation")
 			response.RateLimitExceeded(c, "Rate limit exceeded", requestID)
 			c.Abort()
 			return
 		}
+
+		// Check if reservation allows immediate access
+		delay := reservation.Delay()
+		if delay > 0 {
+			// Request is rate limited
+			reservation.Cancel() // Cancel the reservation since we're rejecting the request
+			requestID := GetRequestID(c)
+
+			// Calculate Retry-After header value (in seconds, rounded up)
+			retryAfter := int(math.Ceil(delay.Seconds()))
+			if retryAfter < 1 {
+				retryAfter = 1 // Minimum 1 second
+			}
+			c.Header("Retry-After", strconv.Itoa(retryAfter))
+
+			// Log rate limit decision with structured fields
+			log.Warn().
+				Str("request_id", requestID).
+				Str("ip", c.ClientIP()).
+				Str("path", c.Request.URL.Path).
+				Dur("retry_after", delay).
+				Int("retry_after_seconds", retryAfter).
+				Str("limiter_decision", "rate_limited").
+				Msg("Rate limit exceeded")
+
+			response.RateLimitExceeded(c, "Rate limit exceeded", requestID)
+			c.Abort()
+			return
+		}
+
+		// Request is allowed - reservation will be consumed when request completes
+		// We don't need to explicitly cancel it as it will be consumed naturally
 
 		c.Next()
 	}

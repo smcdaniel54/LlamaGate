@@ -517,14 +517,31 @@ All endpoints return standard error responses when an error occurs:
 
 **Status:** `429 Too Many Requests`
 
+**Headers:**
+```
+Retry-After: 1
+```
+
+The `Retry-After` header indicates the number of seconds to wait before retrying the request. The value is calculated based on the rate limiter's current state and is always at least 1 second.
+
+**Response Body:**
 ```json
 {
   "error": {
     "message": "Rate limit exceeded",
-    "type": "rate_limit_error"
+    "type": "rate_limit_error",
+    "request_id": "req-123456"
   }
 }
 ```
+
+**Note:** Rate-limited requests are logged with structured fields including:
+- `request_id` - Unique request identifier
+- `ip` - Client IP address
+- `path` - Request path
+- `retry_after` - Duration until next request is allowed
+- `retry_after_seconds` - Retry-After header value in seconds
+- `limiter_decision` - Always "rate_limited" for rate-limited requests
 
 ## Examples
 
@@ -576,7 +593,13 @@ curl -X POST \
 
 ## Rate Limiting
 
-All endpoints are subject to rate limiting as configured in the server settings. The default rate limit is 10 requests per second.
+All endpoints are subject to rate limiting as configured in the server settings. The default rate limit is 50 requests per second, configurable via `RATE_LIMIT_RPS`.
+
+When the rate limit is exceeded:
+- Requests receive HTTP `429 Too Many Requests` status
+- A `Retry-After` header is included indicating seconds to wait before retrying
+- Response body follows OpenAI-compatible error format with `rate_limit_error` type
+- Structured logs capture the rate limit decision with request ID and retry information
 
 ## Health Endpoint
 

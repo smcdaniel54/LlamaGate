@@ -516,7 +516,33 @@ Identical requests (same model + same messages) will return cached responses, re
 
 Rate limiting is implemented using a leaky bucket algorithm. The default limit is 50 requests per second, configurable via `RATE_LIMIT_RPS`.
 
-When the limit is exceeded, requests receive a `429 Too Many Requests` response.
+When the limit is exceeded, requests receive a `429 Too Many Requests` response with:
+
+- **HTTP Status**: `429 Too Many Requests`
+- **Retry-After Header**: Number of seconds to wait before retrying (e.g., `Retry-After: 1`)
+- **Response Body**: OpenAI-compatible JSON error format
+
+### Rate Limit Response Format
+
+**Status:** `429 Too Many Requests`
+
+**Headers:**
+```
+Retry-After: 1
+```
+
+**Response Body:**
+```json
+{
+  "error": {
+    "message": "Rate limit exceeded",
+    "type": "rate_limit_error",
+    "request_id": "req-123456"
+  }
+}
+```
+
+Rate-limited requests are logged with structured fields including request ID, IP address, path, retry time, and limiter decision.
 
 ## HTTPS/SSL Support
 
