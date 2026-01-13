@@ -31,7 +31,7 @@ This will:
 ### Windows
 
 1. **Download the binary:**
-   - Go to [Releases](https://github.com/llamagate/llamagate/releases/latest)
+   - Go to [Releases](https://github.com/smcdaniel54/LlamaGate/releases/latest)
    - Download `llamagate-windows-amd64.exe`
 
 2. **Run it:**
@@ -45,7 +45,7 @@ This will:
 
 ```bash
 # Download
-curl -LO https://github.com/llamagate/llamagate/releases/latest/download/llamagate-linux-amd64
+curl -LO https://github.com/smcdaniel54/LlamaGate/releases/latest/download/llamagate-linux-amd64
 
 # Make executable
 chmod +x llamagate-linux-amd64
@@ -56,7 +56,7 @@ chmod +x llamagate-linux-amd64
 
 **For ARM64 (Raspberry Pi, etc.):**
 ```bash
-curl -LO https://github.com/llamagate/llamagate/releases/latest/download/llamagate-linux-arm64
+curl -LO https://github.com/smcdaniel54/LlamaGate/releases/latest/download/llamagate-linux-arm64
 chmod +x llamagate-linux-arm64
 ./llamagate-linux-arm64
 ```
@@ -65,14 +65,14 @@ chmod +x llamagate-linux-arm64
 
 **Apple Silicon (M1/M2/M3):**
 ```bash
-curl -LO https://github.com/llamagate/llamagate/releases/latest/download/llamagate-darwin-arm64
+curl -LO https://github.com/smcdaniel54/LlamaGate/releases/latest/download/llamagate-darwin-arm64
 chmod +x llamagate-darwin-arm64
 ./llamagate-darwin-arm64
 ```
 
 **Intel Mac:**
 ```bash
-curl -LO https://github.com/llamagate/llamagate/releases/latest/download/llamagate-darwin-amd64
+curl -LO https://github.com/smcdaniel54/LlamaGate/releases/latest/download/llamagate-darwin-amd64
 chmod +x llamagate-darwin-amd64
 ./llamagate-darwin-amd64
 ```
@@ -123,7 +123,7 @@ If you have Go installed and want to build yourself:
 
 ```bash
 # Clone the repository
-git clone https://github.com/llamagate/llamagate.git
+git clone https://github.com/smcdaniel54/LlamaGate.git
 cd llamagate
 
 # Build
@@ -138,7 +138,7 @@ go build -o llamagate ./cmd/llamagate
 If you have Go installed:
 
 ```bash
-go install github.com/llamagate/llamagate/cmd/llamagate@latest
+go install github.com/smcdaniel54/LlamaGate/cmd/llamagate@latest
 ```
 
 This installs to `$GOPATH/bin` (or `$HOME/go/bin` by default).
@@ -205,11 +205,11 @@ chmod +x llamagate-*
 
 - Check it's the correct architecture for your system
 - Verify the download completed (check file size)
-- Try re-downloading from [Releases](https://github.com/llamagate/llamagate/releases)
+- Try re-downloading from [Releases](https://github.com/smcdaniel54/LlamaGate/releases)
 
 ### Need a different architecture?
 
-Check [Releases](https://github.com/llamagate/llamagate/releases) for:
+Check [Releases](https://github.com/smcdaniel54/LlamaGate/releases) for:
 - Linux: amd64, arm64
 - macOS: amd64 (Intel), arm64 (Apple Silicon)
 - Windows: amd64
