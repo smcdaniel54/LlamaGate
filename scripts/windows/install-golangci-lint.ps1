@@ -17,13 +17,15 @@ if (-not (Test-Path $binDir)) {
     New-Item -ItemType Directory -Path $binDir -Force | Out-Null
 }
 
-$version = "1.64.8"
+# Use v2.x to match CI (golangci-lint-action uses 'latest' which resolves to v2.8.0+)
+# This ensures compatibility with .golangci.yml version: 2
+$version = "2.8.0"
 $url = "https://github.com/golangci/golangci-lint/releases/download/v$version/golangci-lint-$version-windows-amd64.zip"
 $zipFile = "$env:TEMP\golangci-lint.zip"
 $extractDir = "$env:TEMP\golangci-lint"
 
 try {
-    Write-Host "Downloading from GitHub releases..." -ForegroundColor Yellow
+    Write-Host "Downloading golangci-lint v$version from GitHub releases..." -ForegroundColor Yellow
     Invoke-WebRequest -Uri $url -OutFile $zipFile -UseBasicParsing
     
     Write-Host "Extracting..." -ForegroundColor Yellow
