@@ -1,5 +1,5 @@
 # Install golangci-lint using official method to match CI
-# CI uses golangci-lint-action@v3 with version: latest
+# CI uses golangci-lint-action@v3 with version: v2.8.0
 # This script uses the same official install method
 
 $ErrorActionPreference = "Stop"
@@ -18,16 +18,16 @@ if (-not (Test-Path $binDir)) {
     New-Item -ItemType Directory -Path $binDir -Force | Out-Null
 }
 
-# Use official install script (same method CI uses internally)
-# This ensures we get the same 'latest' version CI uses
-try {
-    Write-Host "Downloading and installing latest version..." -ForegroundColor Yellow
-    $installScript = Invoke-WebRequest -Uri "https://golangci-lint.run/install.sh" -UseBasicParsing
-    
-    # Execute install script via bash (available on Windows via Git Bash or WSL)
-    # If bash is not available, fall back to manual download
-    if (Get-Command bash -ErrorAction SilentlyContinue) {
-        $installScript.Content | bash -s -- -b $binDir latest
+    # Use official install script (same method CI uses internally)
+    # Pin to v2.8.0 to match CI exactly
+    try {
+        Write-Host "Downloading and installing v2.8.0 (matches CI)..." -ForegroundColor Yellow
+        $installScript = Invoke-WebRequest -Uri "https://golangci-lint.run/install.sh" -UseBasicParsing
+        
+        # Execute install script via bash (available on Windows via Git Bash or WSL)
+        # If bash is not available, fall back to manual download
+        if (Get-Command bash -ErrorAction SilentlyContinue) {
+            $installScript.Content | bash -s -- -b $binDir v2.8.0
         if ($LASTEXITCODE -eq 0) {
             Write-Host "Installed to $binDir\golangci-lint.exe" -ForegroundColor Green
             & "$binDir\golangci-lint.exe" --version
@@ -36,10 +36,9 @@ try {
         }
     }
     
-    # Fallback: Download latest release manually
-    Write-Host "Bash not available, downloading latest release manually..." -ForegroundColor Yellow
-    $latestRelease = Invoke-RestMethod -Uri "https://api.github.com/repos/golangci/golangci-lint/releases/latest" -UseBasicParsing
-    $version = $latestRelease.tag_name -replace '^v', ''
+    # Fallback: Download v2.8.0 manually to match CI
+    Write-Host "Bash not available, downloading v2.8.0 manually (matches CI)..." -ForegroundColor Yellow
+    $version = "2.8.0"
     $url = "https://github.com/golangci/golangci-lint/releases/download/v$version/golangci-lint-$version-windows-amd64.zip"
     $zipFile = "$env:TEMP\golangci-lint.zip"
     $extractDir = "$env:TEMP\golangci-lint"
