@@ -66,12 +66,32 @@ else
 fi
 
 # Download
-if $DOWNLOAD_CMD "$TARGET_PATH" "$LATEST_RELEASE_URL" 2>/dev/null; then
+HTTP_CODE=0
+if command -v curl >/dev/null 2>&1; then
+    HTTP_CODE=$(curl -sL -o "$TARGET_PATH" -w "%{http_code}" "$LATEST_RELEASE_URL" 2>/dev/null || echo "000")
+elif command -v wget >/dev/null 2>&1; then
+    HTTP_CODE=$(wget -q -O "$TARGET_PATH" --server-response "$LATEST_RELEASE_URL" 2>&1 | awk '/HTTP/{print $2}' | tail -1 || echo "000")
+fi
+
+if [ "$HTTP_CODE" = "200" ] && [ -f "$TARGET_PATH" ] && [ -s "$TARGET_PATH" ]; then
     echo -e "${GREEN}✓${NC} Download complete"
-else
-    echo -e "${RED}✗${NC} Download failed"
+elif [ "$HTTP_CODE" = "404" ]; then
+    echo -e "${RED}✗${NC} Binary not found (404) - Pre-built binaries are not yet available"
     echo ""
-    echo "Please download manually from:"
+    echo "Options:"
+    echo -e "${CYAN}  1.${NC} Build from source using the source installer:"
+    echo -e "${GRAY}     ./install/unix/install.sh${NC}"
+    echo ""
+    echo -e "${CYAN}  2.${NC} Wait for binaries to be published to releases:"
+    echo -e "${GRAY}     https://github.com/smcdaniel54/LlamaGate/releases${NC}"
+    echo ""
+    echo -e "${CYAN}  3.${NC} Build manually:"
+    echo -e "${GRAY}     go build -o llamagate ./cmd/llamagate${NC}"
+    exit 1
+else
+    echo -e "${RED}✗${NC} Download failed (HTTP $HTTP_CODE)"
+    echo ""
+    echo "Please try again or download manually from:"
     echo -e "${CYAN}  https://github.com/smcdaniel54/LlamaGate/releases/latest${NC}"
     exit 1
 fi

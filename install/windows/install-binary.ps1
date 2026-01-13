@@ -22,13 +22,28 @@ Write-Host "  URL: $latestReleaseUrl" -ForegroundColor Gray
 
 try {
     # Download the binary
-    Invoke-WebRequest -Uri $latestReleaseUrl -OutFile $targetPath -UseBasicParsing
+    $response = Invoke-WebRequest -Uri $latestReleaseUrl -OutFile $targetPath -UseBasicParsing -ErrorAction Stop
     Write-Host "  [OK] Download complete" -ForegroundColor Green
 } catch {
-    Write-Host "  [ERROR] Download failed: $_" -ForegroundColor Red
-    Write-Host ""
-    Write-Host "Please download manually from:" -ForegroundColor Yellow
-    Write-Host "  https://github.com/smcdaniel54/LlamaGate/releases/latest" -ForegroundColor Cyan
+    $statusCode = $_.Exception.Response.StatusCode.value__
+    if ($statusCode -eq 404) {
+        Write-Host "  [ERROR] Binary not found (404) - Pre-built binaries are not yet available" -ForegroundColor Red
+        Write-Host ""
+        Write-Host "Options:" -ForegroundColor Yellow
+        Write-Host "  1. Build from source using the source installer:" -ForegroundColor Cyan
+        Write-Host "     install\windows\install.ps1" -ForegroundColor Gray
+        Write-Host ""
+        Write-Host "  2. Wait for binaries to be published to releases:" -ForegroundColor Cyan
+        Write-Host "     https://github.com/smcdaniel54/LlamaGate/releases" -ForegroundColor Gray
+        Write-Host ""
+        Write-Host "  3. Build manually:" -ForegroundColor Cyan
+        Write-Host "     go build -o llamagate.exe ./cmd/llamagate" -ForegroundColor Gray
+    } else {
+        Write-Host "  [ERROR] Download failed: $_" -ForegroundColor Red
+        Write-Host ""
+        Write-Host "Please try again or download manually from:" -ForegroundColor Yellow
+        Write-Host "  https://github.com/smcdaniel54/LlamaGate/releases/latest" -ForegroundColor Cyan
+    }
     exit 1
 }
 
