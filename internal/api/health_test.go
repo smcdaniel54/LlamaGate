@@ -66,7 +66,7 @@ func TestHealthHandler_CheckHealth(t *testing.T) {
 			if !tt.ollamaError {
 				ollamaServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 					w.WriteHeader(tt.ollamaStatus)
-					w.Write([]byte(`{"models":[]}`))
+					_, _ = w.Write([]byte(`{"models":[]}`))
 				}))
 				defer ollamaServer.Close()
 				cfg.OllamaHost = ollamaServer.URL

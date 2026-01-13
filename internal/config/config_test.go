@@ -40,13 +40,13 @@ func TestLoad_Defaults(t *testing.T) {
 func TestLoad_FromEnvVars(t *testing.T) {
 	setupTestEnv()
 
-	os.Setenv("OLLAMA_HOST", "http://example.com:11434")
-	os.Setenv("API_KEY", "test-key-123")
-	os.Setenv("RATE_LIMIT_RPS", "20.5")
-	os.Setenv("DEBUG", "true")
-	os.Setenv("PORT", "9090")
-	os.Setenv("LOG_FILE", "/tmp/llamagate.log")
-	os.Setenv("TIMEOUT", "10m")
+	_ = os.Setenv("OLLAMA_HOST", "http://example.com:11434")
+	_ = os.Setenv("API_KEY", "test-key-123")
+	_ = os.Setenv("RATE_LIMIT_RPS", "20.5")
+	_ = os.Setenv("DEBUG", "true")
+	_ = os.Setenv("PORT", "9090")
+	_ = os.Setenv("LOG_FILE", "/tmp/llamagate.log")
+	_ = os.Setenv("TIMEOUT", "10m")
 
 	cfg, err := Load()
 	require.NoError(t, err)
@@ -64,7 +64,7 @@ func TestLoad_FromEnvVars(t *testing.T) {
 func TestLoad_APIKeyTrimsWhitespace(t *testing.T) {
 	setupTestEnv()
 
-	os.Setenv("API_KEY", "  test-key-123  ")
+	_ = os.Setenv("API_KEY", "  test-key-123  ")
 
 	cfg, err := Load()
 	require.NoError(t, err)
@@ -74,7 +74,7 @@ func TestLoad_APIKeyTrimsWhitespace(t *testing.T) {
 func TestLoad_InvalidTimeout(t *testing.T) {
 	setupTestEnv()
 
-	os.Setenv("TIMEOUT", "invalid-duration")
+	_ = os.Setenv("TIMEOUT", "invalid-duration")
 
 	cfg, err := Load()
 	assert.Error(t, err)
@@ -98,7 +98,7 @@ func TestLoad_ValidTimeoutFormats(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.timeoutStr, func(t *testing.T) {
 			setupTestEnv()
-			os.Setenv("TIMEOUT", tc.timeoutStr)
+			_ = os.Setenv("TIMEOUT", tc.timeoutStr)
 
 			cfg, err := Load()
 			require.NoError(t, err)
@@ -110,12 +110,12 @@ func TestLoad_ValidTimeoutFormats(t *testing.T) {
 func TestLoad_MCPEnabled(t *testing.T) {
 	setupTestEnv()
 
-	os.Setenv("MCP_ENABLED", "true")
-	os.Setenv("MCP_MAX_TOOL_ROUNDS", "5")
-	os.Setenv("MCP_MAX_TOOL_CALLS_PER_ROUND", "3")
-	os.Setenv("MCP_MAX_TOTAL_TOOL_CALLS", "20")
-	os.Setenv("MCP_DEFAULT_TOOL_TIMEOUT", "15s")
-	os.Setenv("MCP_MAX_TOOL_RESULT_SIZE", "2048")
+	_ = os.Setenv("MCP_ENABLED", "true")
+	_ = os.Setenv("MCP_MAX_TOOL_ROUNDS", "5")
+	_ = os.Setenv("MCP_MAX_TOOL_CALLS_PER_ROUND", "3")
+	_ = os.Setenv("MCP_MAX_TOTAL_TOOL_CALLS", "20")
+	_ = os.Setenv("MCP_DEFAULT_TOOL_TIMEOUT", "15s")
+	_ = os.Setenv("MCP_MAX_TOOL_RESULT_SIZE", "2048")
 
 	cfg, err := Load()
 	require.NoError(t, err)
@@ -131,7 +131,7 @@ func TestLoad_MCPEnabled(t *testing.T) {
 func TestLoad_MCPDefaults(t *testing.T) {
 	setupTestEnv()
 
-	os.Setenv("MCP_ENABLED", "true")
+	_ = os.Setenv("MCP_ENABLED", "true")
 
 	cfg, err := Load()
 	require.NoError(t, err)
@@ -151,9 +151,9 @@ func TestLoad_MCPDefaults(t *testing.T) {
 func TestLoad_MCPAllowDenyTools(t *testing.T) {
 	setupTestEnv()
 
-	os.Setenv("MCP_ENABLED", "true")
-	os.Setenv("MCP_ALLOW_TOOLS", "tool1,tool2,tool3")
-	os.Setenv("MCP_DENY_TOOLS", "tool4, tool5")
+	_ = os.Setenv("MCP_ENABLED", "true")
+	_ = os.Setenv("MCP_ALLOW_TOOLS", "tool1,tool2,tool3")
+	_ = os.Setenv("MCP_DENY_TOOLS", "tool4, tool5")
 
 	cfg, err := Load()
 	require.NoError(t, err)
@@ -166,8 +166,8 @@ func TestLoad_MCPAllowDenyTools(t *testing.T) {
 func TestLoad_MCPInvalidDuration(t *testing.T) {
 	setupTestEnv()
 
-	os.Setenv("MCP_ENABLED", "true")
-	os.Setenv("MCP_CONNECTION_IDLE_TIME", "invalid")
+	_ = os.Setenv("MCP_ENABLED", "true")
+	_ = os.Setenv("MCP_CONNECTION_IDLE_TIME", "invalid")
 
 	cfg, err := Load()
 	assert.Error(t, err)

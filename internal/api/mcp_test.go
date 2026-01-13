@@ -40,7 +40,7 @@ func setupTestRouter(handler *MCPHandler) *gin.Engine {
 func createMockMCPServer() *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var req mcpclient.JSONRPCRequest
-		json.NewDecoder(r.Body).Decode(&req)
+		_ = json.NewDecoder(r.Body).Decode(&req)
 
 		var resp mcpclient.JSONRPCResponse
 		resp.JSONRPC = mcpclient.JSONRPCVersion
@@ -82,7 +82,7 @@ func createMockMCPServer() *httptest.Server {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 	}))
 }
 
@@ -110,7 +110,7 @@ func TestMCPHandler_ListServers(t *testing.T) {
 		CacheTTL:       2 * time.Minute,
 	}
 	serverManager := mcpclient.NewServerManager(managerConfig)
-	defer serverManager.Close()
+	defer func() { _ = serverManager.Close() }()
 
 	toolManager := tools.NewManager()
 
@@ -120,10 +120,10 @@ func TestMCPHandler_ListServers(t *testing.T) {
 
 	client, err := mcpclient.NewClientWithHTTP("test-server", mcpServer.URL, nil, 30*time.Second)
 	require.NoError(t, err)
-	defer client.Close()
+	defer func() { _ = client.Close() }()
 
-	toolManager.AddClient(client)
-	serverManager.AddServer("test-server", client, "http")
+	require.NoError(t, toolManager.AddClient(client))
+	require.NoError(t, serverManager.AddServer("test-server", client, "http"))
 
 	handler := NewMCPHandler(toolManager, serverManager, 30*time.Second)
 	router := setupTestRouter(handler)
@@ -149,7 +149,7 @@ func TestMCPHandler_GetServer_NotFound(t *testing.T) {
 		CacheTTL:       2 * time.Minute,
 	}
 	serverManager := mcpclient.NewServerManager(managerConfig)
-	defer serverManager.Close()
+	defer func() { _ = serverManager.Close() }()
 
 	toolManager := tools.NewManager()
 	handler := NewMCPHandler(toolManager, serverManager, 30*time.Second)
@@ -171,7 +171,7 @@ func TestMCPHandler_GetServerHealth(t *testing.T) {
 		CacheTTL:       2 * time.Minute,
 	}
 	serverManager := mcpclient.NewServerManager(managerConfig)
-	defer serverManager.Close()
+	defer func() { _ = serverManager.Close() }()
 
 	toolManager := tools.NewManager()
 
@@ -180,10 +180,10 @@ func TestMCPHandler_GetServerHealth(t *testing.T) {
 
 	client, err := mcpclient.NewClientWithHTTP("test-server", mcpServer.URL, nil, 30*time.Second)
 	require.NoError(t, err)
-	defer client.Close()
+	defer func() { _ = client.Close() }()
 
-	toolManager.AddClient(client)
-	serverManager.AddServer("test-server", client, "http")
+	require.NoError(t, toolManager.AddClient(client))
+	require.NoError(t, serverManager.AddServer("test-server", client, "http"))
 
 	handler := NewMCPHandler(toolManager, serverManager, 30*time.Second)
 	router := setupTestRouter(handler)
@@ -209,7 +209,7 @@ func TestMCPHandler_ListServerTools(t *testing.T) {
 		CacheTTL:       2 * time.Minute,
 	}
 	serverManager := mcpclient.NewServerManager(managerConfig)
-	defer serverManager.Close()
+	defer func() { _ = serverManager.Close() }()
 
 	toolManager := tools.NewManager()
 
@@ -218,14 +218,14 @@ func TestMCPHandler_ListServerTools(t *testing.T) {
 
 	client, err := mcpclient.NewClientWithHTTP("test-server", mcpServer.URL, nil, 30*time.Second)
 	require.NoError(t, err)
-	defer client.Close()
+	defer func() { _ = client.Close() }()
 
 	// Add client to tool manager (may fail silently if no tools, but that's OK for testing)
 	err = toolManager.AddClient(client)
 	// Don't fail if AddClient returns error - it's OK if server has no tools
 	_ = err
 
-	serverManager.AddServer("test-server", client, "http")
+	require.NoError(t, serverManager.AddServer("test-server", client, "http"))
 
 	handler := NewMCPHandler(toolManager, serverManager, 30*time.Second)
 	router := setupTestRouter(handler)
@@ -252,7 +252,7 @@ func TestMCPHandler_ListServerResources(t *testing.T) {
 		CacheTTL:       2 * time.Minute,
 	}
 	serverManager := mcpclient.NewServerManager(managerConfig)
-	defer serverManager.Close()
+	defer func() { _ = serverManager.Close() }()
 
 	toolManager := tools.NewManager()
 
@@ -261,10 +261,10 @@ func TestMCPHandler_ListServerResources(t *testing.T) {
 
 	client, err := mcpclient.NewClientWithHTTP("test-server", mcpServer.URL, nil, 30*time.Second)
 	require.NoError(t, err)
-	defer client.Close()
+	defer func() { _ = client.Close() }()
 
-	toolManager.AddClient(client)
-	serverManager.AddServer("test-server", client, "http")
+	require.NoError(t, toolManager.AddClient(client))
+	require.NoError(t, serverManager.AddServer("test-server", client, "http"))
 
 	handler := NewMCPHandler(toolManager, serverManager, 30*time.Second)
 	router := setupTestRouter(handler)
@@ -291,7 +291,7 @@ func TestMCPHandler_ListServerPrompts(t *testing.T) {
 		CacheTTL:       2 * time.Minute,
 	}
 	serverManager := mcpclient.NewServerManager(managerConfig)
-	defer serverManager.Close()
+	defer func() { _ = serverManager.Close() }()
 
 	toolManager := tools.NewManager()
 
@@ -300,10 +300,10 @@ func TestMCPHandler_ListServerPrompts(t *testing.T) {
 
 	client, err := mcpclient.NewClientWithHTTP("test-server", mcpServer.URL, nil, 30*time.Second)
 	require.NoError(t, err)
-	defer client.Close()
+	defer func() { _ = client.Close() }()
 
-	toolManager.AddClient(client)
-	serverManager.AddServer("test-server", client, "http")
+	require.NoError(t, toolManager.AddClient(client))
+	require.NoError(t, serverManager.AddServer("test-server", client, "http"))
 
 	handler := NewMCPHandler(toolManager, serverManager, 30*time.Second)
 	router := setupTestRouter(handler)
@@ -330,7 +330,7 @@ func TestMCPHandler_ExecuteTool(t *testing.T) {
 		CacheTTL:       2 * time.Minute,
 	}
 	serverManager := mcpclient.NewServerManager(managerConfig)
-	defer serverManager.Close()
+	defer func() { _ = serverManager.Close() }()
 
 	toolManager := tools.NewManager()
 
@@ -339,10 +339,10 @@ func TestMCPHandler_ExecuteTool(t *testing.T) {
 
 	client, err := mcpclient.NewClientWithHTTP("test-server", mcpServer.URL, nil, 30*time.Second)
 	require.NoError(t, err)
-	defer client.Close()
+	defer func() { _ = client.Close() }()
 
-	toolManager.AddClient(client)
-	serverManager.AddServer("test-server", client, "http")
+	require.NoError(t, toolManager.AddClient(client))
+	require.NoError(t, serverManager.AddServer("test-server", client, "http"))
 
 	handler := NewMCPHandler(toolManager, serverManager, 30*time.Second)
 	router := setupTestRouter(handler)
@@ -383,7 +383,7 @@ func TestMCPHandler_RefreshServerMetadata(t *testing.T) {
 		CacheTTL:       2 * time.Minute,
 	}
 	serverManager := mcpclient.NewServerManager(managerConfig)
-	defer serverManager.Close()
+	defer func() { _ = serverManager.Close() }()
 
 	toolManager := tools.NewManager()
 
@@ -392,10 +392,10 @@ func TestMCPHandler_RefreshServerMetadata(t *testing.T) {
 
 	client, err := mcpclient.NewClientWithHTTP("test-server", mcpServer.URL, nil, 30*time.Second)
 	require.NoError(t, err)
-	defer client.Close()
+	defer func() { _ = client.Close() }()
 
-	toolManager.AddClient(client)
-	serverManager.AddServer("test-server", client, "http")
+	require.NoError(t, toolManager.AddClient(client))
+	require.NoError(t, serverManager.AddServer("test-server", client, "http"))
 
 	handler := NewMCPHandler(toolManager, serverManager, 30*time.Second)
 	router := setupTestRouter(handler)

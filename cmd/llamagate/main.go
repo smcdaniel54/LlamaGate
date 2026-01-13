@@ -305,6 +305,6 @@ func checkPortAvailability(port string) error {
 	if err != nil {
 		return fmt.Errorf("port %s is already in use - another LlamaGate instance may be running. Only one instance should run per machine. Multiple apps can connect to the same LlamaGate instance", port)
 	}
-	ln.Close()
+	_ = ln.Close() // Ignore error - we're just checking if port is available
 	return nil
 }
