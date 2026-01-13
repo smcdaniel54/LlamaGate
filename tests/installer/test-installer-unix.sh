@@ -55,11 +55,51 @@ if [ "$ALL_FOUND" = false ]; then
 fi
 
 # Test 5: Check for shebang
-echo "[5/5] Checking shebang..."
+echo "[5/6] Checking shebang..."
 if head -n 1 install/unix/install.sh | grep -q "^#!/bin/bash"; then
     echo "  ✓ Shebang is correct"
 else
     echo "  ⚠ Shebang may be missing or incorrect"
+fi
+
+# Test 6: Test one-liner binary installer download
+echo "[6/7] Testing one-liner binary installer download..."
+ONE_LINER_BINARY_URL="https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/unix/install-binary.sh"
+if command -v curl >/dev/null 2>&1; then
+    if curl -fsSL --max-time 10 "$ONE_LINER_BINARY_URL" 2>/dev/null | grep -q "LlamaGate Binary Installer"; then
+        echo "  ✓ One-liner binary installer is downloadable and valid"
+    else
+        echo "  ⚠ One-liner binary installer download succeeded but content may be invalid"
+    fi
+elif command -v wget >/dev/null 2>&1; then
+    if wget -q --timeout=10 -O- "$ONE_LINER_BINARY_URL" 2>/dev/null | grep -q "LlamaGate Binary Installer"; then
+        echo "  ✓ One-liner binary installer is downloadable and valid"
+    else
+        echo "  ⚠ One-liner binary installer download succeeded but content may be invalid"
+    fi
+else
+    echo "  ⚠ Cannot test one-liner download (curl/wget not available)"
+    echo "  This is expected in CI environments without internet access"
+fi
+
+# Test 7: Test one-liner source installer download
+echo "[7/7] Testing one-liner source installer download..."
+ONE_LINER_SOURCE_URL="https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/unix/install.sh"
+if command -v curl >/dev/null 2>&1; then
+    if curl -fsSL --max-time 10 "$ONE_LINER_SOURCE_URL" 2>/dev/null | grep -q "LlamaGate Installer"; then
+        echo "  ✓ One-liner source installer is downloadable and valid"
+    else
+        echo "  ⚠ One-liner source installer download succeeded but content may be invalid"
+    fi
+elif command -v wget >/dev/null 2>&1; then
+    if wget -q --timeout=10 -O- "$ONE_LINER_SOURCE_URL" 2>/dev/null | grep -q "LlamaGate Installer"; then
+        echo "  ✓ One-liner source installer is downloadable and valid"
+    else
+        echo "  ⚠ One-liner source installer download succeeded but content may be invalid"
+    fi
+else
+    echo "  ⚠ Cannot test one-liner download (curl/wget not available)"
+    echo "  This is expected in CI environments without internet access"
 fi
 
 # Summary

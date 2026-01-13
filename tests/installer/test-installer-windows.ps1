@@ -80,11 +80,41 @@ if (-not $allFound) {
 }
 
 # Test 4: Check installer launcher
-Write-Host "[4/4] Checking installer launcher..." -ForegroundColor Yellow
+Write-Host "[4/5] Checking installer launcher..." -ForegroundColor Yellow
 if (Test-Path "install\windows\install.cmd") {
     Write-Host "  [OK] Installer launcher exists" -ForegroundColor Green
 } else {
     Write-Host "  [WARN] Installer launcher not found (optional)" -ForegroundColor Yellow
+}
+
+# Test 5: Test one-liner binary installer download
+Write-Host "[5/6] Testing one-liner binary installer download..." -ForegroundColor Yellow
+$oneLinerUrl = "https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/windows/install-binary.ps1"
+try {
+    $response = Invoke-WebRequest -Uri $oneLinerUrl -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+    if ($response.StatusCode -eq 200 -and $response.Content -match "LlamaGate Binary Installer") {
+        Write-Host "  [OK] One-liner binary installer is downloadable and valid" -ForegroundColor Green
+    } else {
+        Write-Host "  [WARN] One-liner binary installer download succeeded but content may be invalid" -ForegroundColor Yellow
+    }
+} catch {
+    Write-Host "  [WARN] Could not test one-liner download (network issue or GitHub unavailable): $_" -ForegroundColor Yellow
+    Write-Host "  This is expected in CI environments without internet access" -ForegroundColor Gray
+}
+
+# Test 6: Test one-liner source installer download
+Write-Host "[6/6] Testing one-liner source installer download..." -ForegroundColor Yellow
+$sourceInstallerUrl = "https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/windows/install.ps1"
+try {
+    $response = Invoke-WebRequest -Uri $sourceInstallerUrl -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+    if ($response.StatusCode -eq 200 -and $response.Content -match "LlamaGate Installer") {
+        Write-Host "  [OK] One-liner source installer is downloadable and valid" -ForegroundColor Green
+    } else {
+        Write-Host "  [WARN] One-liner source installer download succeeded but content may be invalid" -ForegroundColor Yellow
+    }
+} catch {
+    Write-Host "  [WARN] Could not test one-liner download (network issue or GitHub unavailable): $_" -ForegroundColor Yellow
+    Write-Host "  This is expected in CI environments without internet access" -ForegroundColor Gray
 }
 
 # Summary
