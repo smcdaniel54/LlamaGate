@@ -128,7 +128,7 @@ func (sm *ServerManager) RemoveServer(name string) error {
 
 	// Close pool if exists
 	if serverInfo.Pool != nil {
-		serverInfo.Pool.Close()
+		_ = serverInfo.Pool.Close() // Logged elsewhere if needed
 		delete(sm.pools, name)
 	}
 
@@ -199,19 +199,19 @@ func (sm *ServerManager) GetClient(ctx context.Context, name string) (*Client, e
 				// This shouldn't happen for HTTP transport, but handle gracefully
 				return serverInfo.Client, nil
 			}
-			
+
 			// Get connection parameters from the original transport
 			url := httpTransport.GetURL()
 			headers := httpTransport.GetHeaders()
 			timeout := httpTransport.GetTimeout()
-			
+
 			// Create a new client with the same configuration
 			// NewClientWithHTTP handles context creation internally
 			newClient, err := NewClientWithHTTP(serverInfo.Client.name, url, headers, timeout)
 			if err != nil {
 				return nil, fmt.Errorf("failed to create new pooled client: %w", err)
 			}
-			
+
 			return newClient, nil
 		})
 		if err != nil {

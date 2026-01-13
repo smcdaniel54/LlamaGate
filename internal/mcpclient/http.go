@@ -122,7 +122,7 @@ func (t *HTTPTransport) SendRequest(ctx context.Context, method string, params i
 	if err != nil {
 		return nil, fmt.Errorf("HTTP request failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	// Check HTTP status
 	if resp.StatusCode != http.StatusOK {
@@ -165,7 +165,7 @@ func (t *HTTPTransport) SendRequest(ctx context.Context, method string, params i
 			Msg("Request ID mismatch in HTTP transport response (non-numeric ID)")
 		return &jsonRPCResp, nil
 	}
-	
+
 	expectedID := float64(requestID)
 	if receivedID != expectedID {
 		log.Warn().

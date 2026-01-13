@@ -59,7 +59,7 @@ func NewClientWithTimeout(name, command string, args []string, env map[string]st
 
 	// Initialize the connection
 	if err := client.initialize(ctx); err != nil {
-		transport.Close()
+		_ = transport.Close() // Ignore error - we're already returning an error
 		return nil, fmt.Errorf("failed to initialize MCP client: %w", err)
 	}
 
@@ -108,7 +108,7 @@ func NewClientWithSSE(name, url string, headers map[string]string) (*Client, err
 	// Initialize the client (MCP handshake)
 	ctx := context.Background()
 	if err := client.initialize(ctx); err != nil {
-		transport.Close()
+		_ = transport.Close() // Ignore error - we're already returning an error
 		return nil, fmt.Errorf("failed to initialize client: %w", err)
 	}
 
@@ -329,7 +329,7 @@ func NewClientWithHTTP(name, url string, headers map[string]string, timeout time
 
 	// Initialize the connection
 	if err := client.initialize(ctx); err != nil {
-		transport.Close()
+		_ = transport.Close() // Ignore error - we're already returning an error
 		return nil, fmt.Errorf("failed to initialize MCP client: %w", err)
 	}
 

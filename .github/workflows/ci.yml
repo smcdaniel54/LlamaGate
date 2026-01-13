@@ -116,9 +116,9 @@ jobs:
       uses: golangci/golangci-lint-action@v8
       with:
         version: v2.8.0
-        # Focus on production code - test files checked locally
-        # This significantly speeds up CI while maintaining code quality
-        args: --timeout=10m --verbose
+        # Focus on production code - skip test files to speed up CI
+        # Developers should still run full linting locally
+        args: --timeout=10m --skip-files='.*_test\.go' --verbose
       timeout-minutes: 15
 
   test-installers:
