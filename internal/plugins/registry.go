@@ -7,8 +7,8 @@ import (
 
 // Registry manages plugin registration and lookup
 type Registry struct {
-	mu      sync.RWMutex
-	plugins map[string]Plugin
+	mu       sync.RWMutex
+	plugins  map[string]Plugin
 	contexts map[string]*PluginContext // Plugin-specific contexts
 }
 

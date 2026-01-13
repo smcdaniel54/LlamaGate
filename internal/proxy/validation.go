@@ -35,4 +35,3 @@ func ValidateChatRequest(req *ChatCompletionRequest) error {
 
 	return nil
 }
-

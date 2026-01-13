@@ -202,7 +202,7 @@ func (p *Proxy) executeToolLoop(ctx context.Context, requestID string, model str
 		for _, toolCall := range assistantMessage.ToolCalls {
 			// Increment total tool calls counter
 			totalToolCalls++
-			
+
 			// Check total limit again after increment (defensive check)
 			if err := p.guardrails.ValidateTotalToolCalls(totalToolCalls); err != nil {
 				log.Warn().

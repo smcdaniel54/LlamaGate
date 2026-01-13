@@ -1,3 +1,4 @@
+// Package setup provides initialization and setup utilities for LlamaGate components.
 package setup
 
 import (
@@ -11,7 +12,7 @@ import (
 )
 
 // RegisterAlexaPlugin registers the Alexa Skill plugin with context
-func RegisterAlexaPlugin(registry *plugins.Registry, proxyInstance *proxy.Proxy, llmHandler plugins.LLMHandlerFunc, cfg *config.Config) error {
+func RegisterAlexaPlugin(registry *plugins.Registry, _ *proxy.Proxy, llmHandler plugins.LLMHandlerFunc, cfg *config.Config) error {
 	// Get plugin configuration
 	var pluginConfig map[string]interface{}
 	if cfg.Plugins != nil && cfg.Plugins.Configs != nil {
@@ -19,12 +20,12 @@ func RegisterAlexaPlugin(registry *plugins.Registry, proxyInstance *proxy.Proxy,
 			pluginConfig = config
 		}
 	}
-	
+
 	// If no config from file, create from environment variables
 	if pluginConfig == nil {
 		pluginConfig = make(map[string]interface{})
 	}
-	
+
 	// Load from environment variables (with defaults)
 	// These can be overridden by config file
 	if pluginConfig["wake_word"] == nil {
@@ -39,22 +40,22 @@ func RegisterAlexaPlugin(registry *plugins.Registry, proxyInstance *proxy.Proxy,
 	if pluginConfig["default_model"] == nil {
 		pluginConfig["default_model"] = getEnvOrDefault("ALEXA_DEFAULT_MODEL", "llama3.2")
 	}
-	
+
 	// Create plugin with configuration
 	alexaPlugin := alexaplugin.NewAlexaSkillPluginWithConfig(pluginConfig)
-	
+
 	// Set registry reference so plugin can access its context
 	alexaPlugin.SetRegistry(registry)
-	
+
 	// Create plugin context with plugin name
 	pluginLogger := log.With().Str("plugin", "alexa_skill").Logger()
 	pluginCtx := plugins.NewPluginContextWithName("alexa_skill", llmHandler, pluginLogger, pluginConfig)
-	
+
 	// Register plugin with context
 	if err := registry.RegisterWithContext(alexaPlugin, pluginCtx); err != nil {
 		return err
 	}
-	
+
 	log.Info().Msg("Alexa Skill plugin registered with LLM handler and configuration")
 	return nil
 }

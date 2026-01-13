@@ -30,7 +30,7 @@ func TestToolLoop_MaxRoundsLimit(t *testing.T) {
 	assert.NoError(t, guardrails.ValidateToolRounds(2))
 	assert.Error(t, guardrails.ValidateToolRounds(3))
 	assert.Error(t, guardrails.ValidateToolRounds(4))
-	
+
 	// Verify error message is user-facing
 	err = guardrails.ValidateToolRounds(3)
 	assert.Contains(t, err.Error(), "maximum tool rounds")
@@ -55,7 +55,7 @@ func TestToolLoop_MaxTotalToolCallsLimit(t *testing.T) {
 	assert.NoError(t, guardrails.ValidateTotalToolCalls(4))
 	assert.Error(t, guardrails.ValidateTotalToolCalls(5))
 	assert.Error(t, guardrails.ValidateTotalToolCalls(6))
-	
+
 	// Verify error message is user-facing
 	err = guardrails.ValidateTotalToolCalls(5)
 	assert.Contains(t, err.Error(), "maximum total tool calls")
@@ -80,7 +80,7 @@ func TestToolLoop_MaxCallsPerRoundLimit(t *testing.T) {
 	assert.NoError(t, guardrails.ValidateToolCallsPerRound(10))
 	assert.Error(t, guardrails.ValidateToolCallsPerRound(11))
 	assert.Error(t, guardrails.ValidateToolCallsPerRound(15))
-	
+
 	// Verify error message is user-facing
 	err = guardrails.ValidateToolCallsPerRound(11)
 	assert.Contains(t, err.Error(), "maximum tool calls per round")

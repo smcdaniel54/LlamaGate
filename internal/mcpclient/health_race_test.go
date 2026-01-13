@@ -8,7 +8,7 @@ import (
 
 // TestHealthMonitor_Start_RaceCondition tests that Start() can be called concurrently
 // without starting multiple monitor loops
-func TestHealthMonitor_Start_RaceCondition(t *testing.T) {
+func TestHealthMonitor_Start_RaceCondition(_ *testing.T) {
 	hm := NewHealthMonitor(100*time.Millisecond, 5*time.Second)
 
 	// Call Start() concurrently from multiple goroutines
@@ -43,7 +43,7 @@ func TestHealthMonitor_Start_RaceCondition(t *testing.T) {
 }
 
 // TestHealthMonitor_Start_AfterStop tests that Start() doesn't start a new loop after Stop()
-func TestHealthMonitor_Start_AfterStop(t *testing.T) {
+func TestHealthMonitor_Start_AfterStop(_ *testing.T) {
 	hm := NewHealthMonitor(100*time.Millisecond, 5*time.Second)
 
 	// Start and stop
@@ -61,7 +61,7 @@ func TestHealthMonitor_Start_AfterStop(t *testing.T) {
 
 // TestHealthMonitor_Stop_MultipleCalls tests that Stop() can be called multiple times
 // without panicking (close of closed channel)
-func TestHealthMonitor_Stop_MultipleCalls(t *testing.T) {
+func TestHealthMonitor_Stop_MultipleCalls(_ *testing.T) {
 	hm := NewHealthMonitor(100*time.Millisecond, 5*time.Second)
 
 	// Start the monitor
@@ -90,7 +90,7 @@ func TestHealthMonitor_Stop_MultipleCalls(t *testing.T) {
 	hm2 := NewHealthMonitor(100*time.Millisecond, 5*time.Second)
 	hm2.Start()
 	time.Sleep(50 * time.Millisecond)
-	
+
 	// Multiple sequential calls should be safe
 	hm2.Stop()
 	hm2.Stop()

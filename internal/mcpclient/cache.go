@@ -247,4 +247,3 @@ func (c *Cache) cleanup() {
 		}
 	}
 }
-

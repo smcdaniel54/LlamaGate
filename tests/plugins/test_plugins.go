@@ -1,3 +1,4 @@
+// Package testplugins provides test plugin implementations for LlamaGate testing.
 package testplugins
 
 import (
@@ -11,14 +12,15 @@ import (
 
 // Test plugins for each use case
 
-// UseCase1Plugin: Environment-Aware Plugin Configuration
+// UseCase1Plugin provides environment-aware plugin configuration.
 type UseCase1Plugin struct{}
 
+// Metadata returns the plugin metadata.
 func (p *UseCase1Plugin) Metadata() plugins.PluginMetadata {
 	return plugins.PluginMetadata{
-		Name:        "usecase1_environment_aware",
-		Version:     "1.0.0",
-		Description: "Environment-aware plugin that adapts behavior based on environment",
+		Name:           "usecase1_environment_aware",
+		Version:        "1.0.0",
+		Description:    "Environment-aware plugin that adapts behavior based on environment",
 		RequiredInputs: []string{"input"},
 		OptionalInputs: map[string]interface{}{
 			"environment": "development",
@@ -26,6 +28,7 @@ func (p *UseCase1Plugin) Metadata() plugins.PluginMetadata {
 	}
 }
 
+// ValidateInput validates the plugin input.
 func (p *UseCase1Plugin) ValidateInput(input map[string]interface{}) error {
 	if _, exists := input["input"]; !exists {
 		return fmt.Errorf("required input 'input' is missing")
@@ -33,7 +36,8 @@ func (p *UseCase1Plugin) ValidateInput(input map[string]interface{}) error {
 	return nil
 }
 
-func (p *UseCase1Plugin) Execute(ctx context.Context, input map[string]interface{}) (*plugins.PluginResult, error) {
+// Execute executes the plugin with the given input.
+func (p *UseCase1Plugin) Execute(_ context.Context, input map[string]interface{}) (*plugins.PluginResult, error) {
 	env := os.Getenv("ENVIRONMENT")
 	if env == "" {
 		env = "development"
@@ -67,16 +71,17 @@ func (p *UseCase1Plugin) Execute(ctx context.Context, input map[string]interface
 	}, nil
 }
 
-// UseCase2Plugin: User-Configurable Workflow Parameters
+// UseCase2Plugin provides user-configurable workflow parameters.
 type UseCase2Plugin struct {
 	executor *plugins.WorkflowExecutor
 }
 
+// Metadata returns the plugin metadata.
 func (p *UseCase2Plugin) Metadata() plugins.PluginMetadata {
 	return plugins.PluginMetadata{
-		Name:        "usecase2_user_configurable",
-		Version:     "1.0.0",
-		Description: "Plugin with user-configurable workflow parameters",
+		Name:           "usecase2_user_configurable",
+		Version:        "1.0.0",
+		Description:    "Plugin with user-configurable workflow parameters",
 		RequiredInputs: []string{"query"},
 		OptionalInputs: map[string]interface{}{
 			"max_depth": 3,
@@ -85,6 +90,7 @@ func (p *UseCase2Plugin) Metadata() plugins.PluginMetadata {
 	}
 }
 
+// ValidateInput validates the plugin input.
 func (p *UseCase2Plugin) ValidateInput(input map[string]interface{}) error {
 	if _, exists := input["query"]; !exists {
 		return fmt.Errorf("required input 'query' is missing")
@@ -92,7 +98,8 @@ func (p *UseCase2Plugin) ValidateInput(input map[string]interface{}) error {
 	return nil
 }
 
-func (p *UseCase2Plugin) Execute(ctx context.Context, input map[string]interface{}) (*plugins.PluginResult, error) {
+// Execute executes the plugin with the given input.
+func (p *UseCase2Plugin) Execute(_ context.Context, input map[string]interface{}) (*plugins.PluginResult, error) {
 	maxDepth := 3
 	if md, ok := input["max_depth"].(float64); ok {
 		maxDepth = int(md)
@@ -144,8 +151,8 @@ func (p *UseCase2Plugin) Execute(ctx context.Context, input map[string]interface
 	return &plugins.PluginResult{
 		Success: true,
 		Data: map[string]interface{}{
-			"max_depth":  maxDepth,
-			"use_cache":  useCache,
+			"max_depth":   maxDepth,
+			"use_cache":   useCache,
 			"steps_count": len(steps),
 		},
 		Metadata: plugins.ExecutionMetadata{
@@ -156,20 +163,22 @@ func (p *UseCase2Plugin) Execute(ctx context.Context, input map[string]interface
 	}, nil
 }
 
+// SetExecutor sets the workflow executor for the plugin.
 func (p *UseCase2Plugin) SetExecutor(executor *plugins.WorkflowExecutor) {
 	p.executor = executor
 }
 
-// UseCase3Plugin: Configuration-Driven Tool Selection
+// UseCase3Plugin provides configuration-driven tool selection.
 type UseCase3Plugin struct {
 	executor *plugins.WorkflowExecutor
 }
 
+// Metadata returns the plugin metadata.
 func (p *UseCase3Plugin) Metadata() plugins.PluginMetadata {
 	return plugins.PluginMetadata{
-		Name:        "usecase3_tool_selection",
-		Version:     "1.0.0",
-		Description: "Plugin with configuration-driven tool selection",
+		Name:           "usecase3_tool_selection",
+		Version:        "1.0.0",
+		Description:    "Plugin with configuration-driven tool selection",
 		RequiredInputs: []string{"action"},
 		OptionalInputs: map[string]interface{}{
 			"enabled_tools": []string{},
@@ -177,6 +186,7 @@ func (p *UseCase3Plugin) Metadata() plugins.PluginMetadata {
 	}
 }
 
+// ValidateInput validates the plugin input.
 func (p *UseCase3Plugin) ValidateInput(input map[string]interface{}) error {
 	if _, exists := input["action"]; !exists {
 		return fmt.Errorf("required input 'action' is missing")
@@ -184,7 +194,8 @@ func (p *UseCase3Plugin) ValidateInput(input map[string]interface{}) error {
 	return nil
 }
 
-func (p *UseCase3Plugin) Execute(ctx context.Context, input map[string]interface{}) (*plugins.PluginResult, error) {
+// Execute executes the plugin with the given input.
+func (p *UseCase3Plugin) Execute(_ context.Context, input map[string]interface{}) (*plugins.PluginResult, error) {
 	enabledTools := []string{}
 	if et, ok := input["enabled_tools"].([]interface{}); ok {
 		for _, tool := range et {
@@ -230,18 +241,20 @@ func (p *UseCase3Plugin) Execute(ctx context.Context, input map[string]interface
 	}, nil
 }
 
+// SetExecutor sets the workflow executor for the plugin.
 func (p *UseCase3Plugin) SetExecutor(executor *plugins.WorkflowExecutor) {
 	p.executor = executor
 }
 
-// UseCase4Plugin: Adaptive Timeout Configuration
+// UseCase4Plugin provides adaptive timeout configuration.
 type UseCase4Plugin struct{}
 
+// Metadata returns the plugin metadata.
 func (p *UseCase4Plugin) Metadata() plugins.PluginMetadata {
 	return plugins.PluginMetadata{
-		Name:        "usecase4_adaptive_timeout",
-		Version:     "1.0.0",
-		Description: "Plugin with adaptive timeout configuration",
+		Name:           "usecase4_adaptive_timeout",
+		Version:        "1.0.0",
+		Description:    "Plugin with adaptive timeout configuration",
 		RequiredInputs: []string{"text"},
 		OptionalInputs: map[string]interface{}{
 			"complexity": "low",
@@ -249,6 +262,7 @@ func (p *UseCase4Plugin) Metadata() plugins.PluginMetadata {
 	}
 }
 
+// ValidateInput validates the plugin input.
 func (p *UseCase4Plugin) ValidateInput(input map[string]interface{}) error {
 	if _, exists := input["text"]; !exists {
 		return fmt.Errorf("required input 'text' is missing")
@@ -256,7 +270,8 @@ func (p *UseCase4Plugin) ValidateInput(input map[string]interface{}) error {
 	return nil
 }
 
-func (p *UseCase4Plugin) Execute(ctx context.Context, input map[string]interface{}) (*plugins.PluginResult, error) {
+// Execute executes the plugin with the given input.
+func (p *UseCase4Plugin) Execute(_ context.Context, input map[string]interface{}) (*plugins.PluginResult, error) {
 	text := input["text"].(string)
 	complexity := "low"
 	if c, ok := input["complexity"].(string); ok {
@@ -279,8 +294,8 @@ func (p *UseCase4Plugin) Execute(ctx context.Context, input map[string]interface
 	return &plugins.PluginResult{
 		Success: true,
 		Data: map[string]interface{}{
-			"text_length":    textLength,
-			"complexity":      complexity,
+			"text_length":        textLength,
+			"complexity":         complexity,
 			"calculated_timeout": baseTimeout.String(),
 		},
 		Metadata: plugins.ExecutionMetadata{
@@ -291,14 +306,15 @@ func (p *UseCase4Plugin) Execute(ctx context.Context, input map[string]interface
 	}, nil
 }
 
-// UseCase5Plugin: Configuration File-Based Plugin Setup
+// UseCase5Plugin provides configuration file-based plugin setup.
 type UseCase5Plugin struct{}
 
+// Metadata returns the plugin metadata.
 func (p *UseCase5Plugin) Metadata() plugins.PluginMetadata {
 	return plugins.PluginMetadata{
-		Name:        "usecase5_config_file",
-		Version:     "1.0.0",
-		Description: "Plugin that can be configured via config file",
+		Name:           "usecase5_config_file",
+		Version:        "1.0.0",
+		Description:    "Plugin that can be configured via config file",
 		RequiredInputs: []string{"operation"},
 		OptionalInputs: map[string]interface{}{
 			"config_file": "default.json",
@@ -306,6 +322,7 @@ func (p *UseCase5Plugin) Metadata() plugins.PluginMetadata {
 	}
 }
 
+// ValidateInput validates the plugin input.
 func (p *UseCase5Plugin) ValidateInput(input map[string]interface{}) error {
 	if _, exists := input["operation"]; !exists {
 		return fmt.Errorf("required input 'operation' is missing")
@@ -313,7 +330,8 @@ func (p *UseCase5Plugin) ValidateInput(input map[string]interface{}) error {
 	return nil
 }
 
-func (p *UseCase5Plugin) Execute(ctx context.Context, input map[string]interface{}) (*plugins.PluginResult, error) {
+// Execute executes the plugin with the given input.
+func (p *UseCase5Plugin) Execute(_ context.Context, input map[string]interface{}) (*plugins.PluginResult, error) {
 	configFile := "default.json"
 	if cf, ok := input["config_file"].(string); ok {
 		configFile = cf
@@ -334,16 +352,17 @@ func (p *UseCase5Plugin) Execute(ctx context.Context, input map[string]interface
 	}, nil
 }
 
-// UseCase6Plugin: Runtime Configuration Updates
+// UseCase6Plugin provides runtime configuration updates.
 type UseCase6Plugin struct {
 	config map[string]interface{}
 }
 
+// Metadata returns the plugin metadata.
 func (p *UseCase6Plugin) Metadata() plugins.PluginMetadata {
 	return plugins.PluginMetadata{
-		Name:        "usecase6_runtime_config",
-		Version:     "1.0.0",
-		Description: "Plugin that supports runtime configuration updates",
+		Name:           "usecase6_runtime_config",
+		Version:        "1.0.0",
+		Description:    "Plugin that supports runtime configuration updates",
 		RequiredInputs: []string{"action"},
 		OptionalInputs: map[string]interface{}{
 			"config": map[string]interface{}{},
@@ -351,6 +370,7 @@ func (p *UseCase6Plugin) Metadata() plugins.PluginMetadata {
 	}
 }
 
+// ValidateInput validates the plugin input.
 func (p *UseCase6Plugin) ValidateInput(input map[string]interface{}) error {
 	if _, exists := input["action"]; !exists {
 		return fmt.Errorf("required input 'action' is missing")
@@ -358,7 +378,8 @@ func (p *UseCase6Plugin) ValidateInput(input map[string]interface{}) error {
 	return nil
 }
 
-func (p *UseCase6Plugin) Execute(ctx context.Context, input map[string]interface{}) (*plugins.PluginResult, error) {
+// Execute executes the plugin with the given input.
+func (p *UseCase6Plugin) Execute(_ context.Context, input map[string]interface{}) (*plugins.PluginResult, error) {
 	action := input["action"].(string)
 
 	if action == "update_config" {
@@ -388,21 +409,23 @@ func (p *UseCase6Plugin) Execute(ctx context.Context, input map[string]interface
 	}, nil
 }
 
-// UseCase7Plugin: Context-Aware Configuration
+// UseCase7Plugin provides context-aware configuration.
 type UseCase7Plugin struct {
 	executor *plugins.WorkflowExecutor
 }
 
+// Metadata returns the plugin metadata.
 func (p *UseCase7Plugin) Metadata() plugins.PluginMetadata {
 	return plugins.PluginMetadata{
-		Name:        "usecase7_context_aware",
-		Version:     "1.0.0",
-		Description: "Plugin with context-aware configuration",
+		Name:           "usecase7_context_aware",
+		Version:        "1.0.0",
+		Description:    "Plugin with context-aware configuration",
 		RequiredInputs: []string{"query"},
 		OptionalInputs: map[string]interface{}{},
 	}
 }
 
+// ValidateInput validates the plugin input.
 func (p *UseCase7Plugin) ValidateInput(input map[string]interface{}) error {
 	if _, exists := input["query"]; !exists {
 		return fmt.Errorf("required input 'query' is missing")
@@ -410,7 +433,8 @@ func (p *UseCase7Plugin) ValidateInput(input map[string]interface{}) error {
 	return nil
 }
 
-func (p *UseCase7Plugin) Execute(ctx context.Context, input map[string]interface{}) (*plugins.PluginResult, error) {
+// Execute executes the plugin with the given input.
+func (p *UseCase7Plugin) Execute(_ context.Context, _ map[string]interface{}) (*plugins.PluginResult, error) {
 	steps := []plugins.WorkflowStep{
 		{
 			ID:   "analyze",
@@ -441,7 +465,7 @@ func (p *UseCase7Plugin) Execute(ctx context.Context, input map[string]interface
 	return &plugins.PluginResult{
 		Success: true,
 		Data: map[string]interface{}{
-			"steps_count": len(steps),
+			"steps_count":  len(steps),
 			"context_used": true,
 		},
 		Metadata: plugins.ExecutionMetadata{
@@ -452,25 +476,28 @@ func (p *UseCase7Plugin) Execute(ctx context.Context, input map[string]interface
 	}, nil
 }
 
+// SetExecutor sets the workflow executor for the plugin.
 func (p *UseCase7Plugin) SetExecutor(executor *plugins.WorkflowExecutor) {
 	p.executor = executor
 }
 
-// UseCase8Plugin: Multi-Tenant Configuration
+// UseCase8Plugin provides multi-tenant configuration.
 type UseCase8Plugin struct {
 	tenantConfigs map[string]map[string]interface{}
 }
 
+// Metadata returns the plugin metadata.
 func (p *UseCase8Plugin) Metadata() plugins.PluginMetadata {
 	return plugins.PluginMetadata{
-		Name:        "usecase8_multi_tenant",
-		Version:     "1.0.0",
-		Description: "Plugin with multi-tenant configuration support",
+		Name:           "usecase8_multi_tenant",
+		Version:        "1.0.0",
+		Description:    "Plugin with multi-tenant configuration support",
 		RequiredInputs: []string{"tenant_id", "operation"},
 		OptionalInputs: map[string]interface{}{},
 	}
 }
 
+// ValidateInput validates the plugin input.
 func (p *UseCase8Plugin) ValidateInput(input map[string]interface{}) error {
 	if _, exists := input["tenant_id"]; !exists {
 		return fmt.Errorf("required input 'tenant_id' is missing")
@@ -481,7 +508,8 @@ func (p *UseCase8Plugin) ValidateInput(input map[string]interface{}) error {
 	return nil
 }
 
-func (p *UseCase8Plugin) Execute(ctx context.Context, input map[string]interface{}) (*plugins.PluginResult, error) {
+// Execute executes the plugin with the given input.
+func (p *UseCase8Plugin) Execute(_ context.Context, input map[string]interface{}) (*plugins.PluginResult, error) {
 	tenantID := input["tenant_id"].(string)
 	if p.tenantConfigs == nil {
 		p.tenantConfigs = make(map[string]map[string]interface{})
@@ -511,7 +539,7 @@ func (p *UseCase8Plugin) Execute(ctx context.Context, input map[string]interface
 	}, nil
 }
 
-// Helper to create all test plugins
+// CreateTestPlugins creates all test plugins for testing purposes.
 func CreateTestPlugins() []plugins.Plugin {
 	return []plugins.Plugin{
 		&UseCase1Plugin{},

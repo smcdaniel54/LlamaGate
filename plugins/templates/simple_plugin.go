@@ -15,9 +15,9 @@ type SimplePlugin struct{}
 // Metadata - Define what your plugin does
 func (p *SimplePlugin) Metadata() plugins.PluginMetadata {
 	return plugins.PluginMetadata{
-		Name:        "simple_plugin",
-		Version:     "1.0.0",
-		Description: "A simple example plugin",
+		Name:           "simple_plugin",
+		Version:        "1.0.0",
+		Description:    "A simple example plugin",
 		RequiredInputs: []string{"input"},
 		OptionalInputs: map[string]interface{}{
 			"option": "default",
@@ -34,7 +34,7 @@ func (p *SimplePlugin) ValidateInput(input map[string]interface{}) error {
 }
 
 // Execute - Do the work
-func (p *SimplePlugin) Execute(ctx context.Context, input map[string]interface{}) (*plugins.PluginResult, error) {
+func (p *SimplePlugin) Execute(_ context.Context, input map[string]interface{}) (*plugins.PluginResult, error) {
 	startTime := time.Now()
 
 	// Get inputs

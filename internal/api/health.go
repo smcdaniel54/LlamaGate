@@ -1,3 +1,4 @@
+// Package api provides HTTP API handlers for LlamaGate endpoints.
 package api
 
 import (
@@ -82,4 +83,3 @@ func (h *HealthHandler) CheckHealth(c *gin.Context) {
 		"ollama_host": h.ollamaHost,
 	})
 }
-

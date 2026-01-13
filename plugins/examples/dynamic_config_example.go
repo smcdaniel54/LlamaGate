@@ -164,11 +164,11 @@ func (p *DynamicConfigPlugin) Execute(ctx context.Context, input map[string]inte
 
 	// Build result with configuration used
 	result := map[string]interface{}{
-		"result":     finalResult,
+		"result":      finalResult,
 		"config_used": config,
 		"execution_metadata": map[string]interface{}{
 			"steps_executed": len(stepResults),
-			"environment":   config["environment"],
+			"environment":    config["environment"],
 		},
 	}
 

@@ -139,8 +139,8 @@ type ResourceContent struct {
 
 // Prompt represents an MCP prompt definition
 type Prompt struct {
-	Name        string         `json:"name"`
-	Description string         `json:"description,omitempty"`
+	Name        string           `json:"name"`
+	Description string           `json:"description,omitempty"`
 	Arguments   []PromptArgument `json:"arguments,omitempty"`
 }
 

@@ -10,8 +10,10 @@ import (
 )
 
 var (
+	// ErrPoolExhausted is returned when the connection pool has no available connections.
 	ErrPoolExhausted = errors.New("connection pool exhausted")
-	ErrPoolClosed    = errors.New("connection pool closed")
+	// ErrPoolClosed is returned when attempting to use a closed connection pool.
+	ErrPoolClosed = errors.New("connection pool closed")
 )
 
 // PoolConfig holds configuration for a connection pool
@@ -32,10 +34,10 @@ func DefaultPoolConfig() PoolConfig {
 
 // PooledConnection represents a connection in the pool
 type PooledConnection struct {
-	client      *Client
-	lastUsed    time.Time
-	inUse       bool
-	mu          sync.Mutex
+	client   *Client
+	lastUsed time.Time
+	inUse    bool
+	mu       sync.Mutex
 }
 
 // ConnectionPool manages a pool of MCP client connections
@@ -301,4 +303,3 @@ func (p *ConnectionPool) cleanup() {
 func (pc *PooledConnection) GetClient() *Client {
 	return pc.client
 }
-

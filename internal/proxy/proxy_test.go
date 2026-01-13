@@ -100,7 +100,7 @@ func TestProxy_HandleChatCompletions_Success(t *testing.T) {
 			json.NewDecoder(r.Body).Decode(&req)
 
 			response := map[string]interface{}{
-				"model":   req["model"],
+				"model": req["model"],
 				"message": map[string]interface{}{
 					"role":    "assistant",
 					"content": "Hello! How can I help you?",
@@ -204,7 +204,7 @@ func TestProxy_HandleChatCompletions_WithTemperature(t *testing.T) {
 			assert.Equal(t, 0.7, options["temperature"])
 
 			response := map[string]interface{}{
-				"model":   req["model"],
+				"model": req["model"],
 				"message": map[string]interface{}{
 					"role":    "assistant",
 					"content": "Response",
@@ -333,7 +333,7 @@ func TestProxy_HandleChatCompletions_OllamaError(t *testing.T) {
 
 func TestProxy_HandleModels_OllamaError(t *testing.T) {
 	// Create a mock Ollama server that returns an error
-	mockOllama := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	mockOllama := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(`{"error":"Internal server error"}`))
 	}))

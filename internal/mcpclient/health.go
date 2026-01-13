@@ -13,9 +13,12 @@ import (
 type HealthStatus string
 
 const (
-	HealthStatusHealthy   HealthStatus = "healthy"
+	// HealthStatusHealthy indicates the MCP server is healthy and responding.
+	HealthStatusHealthy HealthStatus = "healthy"
+	// HealthStatusUnhealthy indicates the MCP server is unhealthy or not responding.
 	HealthStatusUnhealthy HealthStatus = "unhealthy"
-	HealthStatusUnknown   HealthStatus = "unknown"
+	// HealthStatusUnknown indicates the health status is unknown.
+	HealthStatusUnknown HealthStatus = "unknown"
 )
 
 // String returns the string representation of the health status
@@ -43,13 +46,13 @@ type HealthCheckResult struct {
 
 // HealthMonitor monitors the health of MCP clients
 type HealthMonitor struct {
-	clients  map[string]*Client
-	results  map[string]*HealthCheckResult
-	mu       sync.RWMutex
-	interval time.Duration
-	timeout  time.Duration
-	stopChan chan struct{}
-	stopped  bool
+	clients   map[string]*Client
+	results   map[string]*HealthCheckResult
+	mu        sync.RWMutex
+	interval  time.Duration
+	timeout   time.Duration
+	stopChan  chan struct{}
+	stopped   bool
 	startOnce sync.Once // Ensures Start() only runs once
 	stopOnce  sync.Once // Ensures Stop() only runs once
 }

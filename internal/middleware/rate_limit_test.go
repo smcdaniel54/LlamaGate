@@ -130,7 +130,7 @@ func TestNewRateLimitMiddleware(t *testing.T) {
 		{1.0, true},   // Normal value
 		{10.0, true},  // Normal value
 		{100.0, true}, // High value
-		{-1.0, true},   // Negative should still work (burst defaults to 1)
+		{-1.0, true},  // Negative should still work (burst defaults to 1)
 	}
 
 	for _, tc := range testCases {

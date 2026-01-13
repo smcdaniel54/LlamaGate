@@ -62,19 +62,19 @@ func NewWithOptions(opts CacheOptions) *Cache {
 	return c
 }
 
-// CacheKeyParams holds all parameters that affect the cache key
-type CacheKeyParams struct {
+// KeyParams holds all parameters that affect the cache key
+type KeyParams struct {
 	Model       string      `json:"model"`
 	Messages    interface{} `json:"messages"`
-	Temperature float64    `json:"temperature,omitempty"`
+	Temperature float64     `json:"temperature,omitempty"`
 	MaxTokens   int         `json:"max_tokens,omitempty"`
-	Tools      interface{} `json:"tools,omitempty"`      // Tool definitions
+	Tools       interface{} `json:"tools,omitempty"`     // Tool definitions
 	Functions   interface{} `json:"functions,omitempty"` // Function definitions (legacy)
 	ToolChoice  interface{} `json:"tool_choice,omitempty"`
 }
 
 // hashRequest creates a SHA256 hash of all cache key parameters
-func hashRequest(params CacheKeyParams) (string, error) {
+func hashRequest(params KeyParams) (string, error) {
 	// Marshal to JSON
 	jsonData, err := json.Marshal(params)
 	if err != nil {
@@ -87,7 +87,7 @@ func hashRequest(params CacheKeyParams) (string, error) {
 }
 
 // Get retrieves a cached response if it exists and is not expired
-func (c *Cache) Get(params CacheKeyParams) ([]byte, bool) {
+func (c *Cache) Get(params KeyParams) ([]byte, bool) {
 	key, err := hashRequest(params)
 	if err != nil {
 		return nil, false
@@ -138,7 +138,7 @@ func (c *Cache) Get(params CacheKeyParams) ([]byte, bool) {
 }
 
 // Set stores a response in the cache, evicting old entries if size limit is reached
-func (c *Cache) Set(params CacheKeyParams, response []byte) error {
+func (c *Cache) Set(params KeyParams, response []byte) error {
 	key, err := hashRequest(params)
 	if err != nil {
 		return err

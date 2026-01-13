@@ -11,13 +11,13 @@ import (
 
 // ServerManager manages MCP server connections with pooling, health monitoring, and caching
 type ServerManager struct {
-	servers          map[string]*ManagedServer
-	pools            map[string]*ConnectionPool
+	servers           map[string]*ManagedServer
+	pools             map[string]*ConnectionPool
 	activeConnections map[*Client]*PooledConnection // Track active pooled connections
-	healthMonitor    *HealthMonitor
-	cache            *Cache
-	mu               sync.RWMutex
-	config           ManagerConfig
+	healthMonitor     *HealthMonitor
+	cache             *Cache
+	mu                sync.RWMutex
+	config            ManagerConfig
 }
 
 // ManagerConfig holds configuration for the server manager
@@ -56,12 +56,12 @@ func NewServerManager(config ManagerConfig) *ServerManager {
 	}
 
 	manager := &ServerManager{
-		servers:          make(map[string]*ManagedServer),
-		pools:            make(map[string]*ConnectionPool),
+		servers:           make(map[string]*ManagedServer),
+		pools:             make(map[string]*ConnectionPool),
 		activeConnections: make(map[*Client]*PooledConnection),
-		healthMonitor:    NewHealthMonitor(config.HealthInterval, config.HealthTimeout),
-		cache:            NewCache(config.CacheTTL),
-		config:           config,
+		healthMonitor:     NewHealthMonitor(config.HealthInterval, config.HealthTimeout),
+		cache:             NewCache(config.CacheTTL),
+		config:            config,
 	}
 
 	// Start health monitoring
@@ -200,12 +200,12 @@ func (sm *ServerManager) GetClient(ctx context.Context, name string) (*Client, e
 			return nil, fmt.Errorf("failed to acquire connection from pool: %w", err)
 		}
 		client := pooledConn.GetClient()
-		
+
 		// Track the active connection so we can release it later
 		sm.mu.Lock()
 		sm.activeConnections[client] = pooledConn
 		sm.mu.Unlock()
-		
+
 		return client, nil
 	}
 

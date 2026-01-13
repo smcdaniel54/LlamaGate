@@ -68,4 +68,3 @@ func TestValidateChatRequest(t *testing.T) {
 		})
 	}
 }
-

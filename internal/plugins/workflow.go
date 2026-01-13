@@ -21,7 +21,7 @@ func NewWorkflowExecutor(
 	toolHandler func(ctx context.Context, toolName string, arguments map[string]interface{}) (map[string]interface{}, error),
 ) *WorkflowExecutor {
 	return &WorkflowExecutor{
-		LLMCallHandler: llmHandler,
+		LLMCallHandler:  llmHandler,
 		ToolCallHandler: toolHandler,
 	}
 }

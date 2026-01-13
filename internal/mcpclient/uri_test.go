@@ -94,10 +94,10 @@ func TestParseMCPURI(t *testing.T) {
 
 func TestExtractMCPURIs(t *testing.T) {
 	tests := []struct {
-		name     string
-		text     string
-		want     []*MCPURI
-		wantLen  int
+		name    string
+		text    string
+		want    []*MCPURI
+		wantLen int
 	}{
 		{
 			name: "single URI",
@@ -125,9 +125,9 @@ func TestExtractMCPURIs(t *testing.T) {
 			wantLen: 1,
 		},
 		{
-			name: "no URIs",
-			text: "This is just regular text",
-			want: []*MCPURI{},
+			name:    "no URIs",
+			text:    "This is just regular text",
+			want:    []*MCPURI{},
 			wantLen: 0,
 		},
 		{
@@ -169,4 +169,3 @@ func TestMCPURI_String(t *testing.T) {
 	}
 	assert.Equal(t, "mcp://filesystem/file:///test.txt", uri.String())
 }
-

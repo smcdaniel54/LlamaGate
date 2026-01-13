@@ -78,7 +78,7 @@ func TestAuthMiddleware_InvalidHeaders(t *testing.T) {
 	}{
 		{
 			name:        "missing_key",
-			setupHeader: func(req *http.Request) {}, // No header set
+			setupHeader: func(_ *http.Request) {}, // No header set
 		},
 		{
 			name: "invalid_key",
@@ -218,7 +218,7 @@ func TestAuthMiddleware_ErrorResponseFormat(t *testing.T) {
 	}{
 		{
 			name:        "missing_key",
-			setupHeader: func(req *http.Request) {}, // No header set
+			setupHeader: func(_ *http.Request) {}, // No header set
 		},
 		{
 			name: "invalid_key",

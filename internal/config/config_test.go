@@ -139,7 +139,7 @@ func TestLoad_MCPDefaults(t *testing.T) {
 
 	assert.Equal(t, 10, cfg.MCP.MaxToolRounds)
 	assert.Equal(t, 10, cfg.MCP.MaxToolCallsPerRound)
-	assert.Equal(t, 50, cfg.MCP.MaxTotalToolCalls) // Default max total tool calls
+	assert.Equal(t, 50, cfg.MCP.MaxTotalToolCalls)               // Default max total tool calls
 	assert.Equal(t, int64(1024*1024), cfg.MCP.MaxToolResultSize) // 1MB
 	assert.Equal(t, 30*time.Second, cfg.MCP.DefaultToolTimeout)
 	assert.Equal(t, 5*time.Minute, cfg.MCP.ConnectionIdleTime)

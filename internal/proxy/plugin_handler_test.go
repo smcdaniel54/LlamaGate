@@ -63,7 +63,7 @@ func TestProxy_CreatePluginLLMHandler(t *testing.T) {
 	assert.Contains(t, result, "choices")
 	choices, ok := result["choices"]
 	require.True(t, ok)
-	
+
 	// Handle both []interface{} and []map[string]interface{} types
 	var choice map[string]interface{}
 	switch v := choices.(type) {
@@ -77,7 +77,7 @@ func TestProxy_CreatePluginLLMHandler(t *testing.T) {
 	default:
 		t.Fatalf("unexpected choices type: %T", choices)
 	}
-	
+
 	assert.Contains(t, choice, "message")
 	message, ok := choice["message"].(map[string]interface{})
 	require.True(t, ok)
@@ -100,7 +100,7 @@ func TestConvertOllamaToOpenAIFormat(t *testing.T) {
 
 	choices, ok := result["choices"]
 	require.True(t, ok)
-	
+
 	// Handle both []interface{} and []map[string]interface{} types
 	var choice map[string]interface{}
 	switch v := choices.(type) {
@@ -114,7 +114,7 @@ func TestConvertOllamaToOpenAIFormat(t *testing.T) {
 	default:
 		t.Fatalf("unexpected choices type: %T", choices)
 	}
-	
+
 	message, ok := choice["message"].(map[string]interface{})
 	require.True(t, ok)
 	assert.Equal(t, "Test response", message["content"])

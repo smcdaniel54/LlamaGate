@@ -1,3 +1,4 @@
+// Package response provides standardized HTTP error response utilities.
 package response
 
 import (
@@ -8,12 +9,12 @@ import (
 
 // Error types
 const (
-	ErrorTypeInvalidRequest    = "invalid_request_error"
-	ErrorTypeInternalError     = "internal_error"
-	ErrorTypeServerError       = "server_error"
-	ErrorTypeNotFound          = "not_found"
+	ErrorTypeInvalidRequest     = "invalid_request_error"
+	ErrorTypeInternalError      = "internal_error"
+	ErrorTypeServerError        = "server_error"
+	ErrorTypeNotFound           = "not_found"
 	ErrorTypeServiceUnavailable = "service_unavailable"
-	ErrorTypeRateLimit         = "rate_limit_error"
+	ErrorTypeRateLimit          = "rate_limit_error"
 )
 
 // ErrorResponse sends a standardized error response
@@ -76,4 +77,3 @@ func ServiceUnavailable(c *gin.Context, message, requestID string) {
 func RateLimitExceeded(c *gin.Context, message, requestID string) {
 	ErrorResponse(c, http.StatusTooManyRequests, ErrorTypeRateLimit, message, requestID)
 }
-

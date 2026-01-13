@@ -361,7 +361,7 @@ func TestStreaming_FinalDoneMarker(t *testing.T) {
 	body := w.Body.String()
 	// Should end with [DONE] marker
 	assert.Contains(t, body, "data: [DONE]", "Should contain [DONE] marker")
-	
+
 	// [DONE] should be the last data line
 	lines := strings.Split(body, "\n")
 	doneFound := false

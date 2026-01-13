@@ -31,7 +31,7 @@ func newMockTransport() *mockTransport {
 	}
 }
 
-func (m *mockTransport) SendRequest(ctx context.Context, method string, params interface{}) (*JSONRPCResponse, error) {
+func (m *mockTransport) SendRequest(_ context.Context, method string, params interface{}) (*JSONRPCResponse, error) {
 	if m.closed {
 		return nil, ErrConnectionClosed
 	}
@@ -161,7 +161,7 @@ func TestClient_Resources(t *testing.T) {
 	assert.Error(t, err)
 
 	// Test ReadResource
-	transport.responseFunc = func(method string, params interface{}) (*JSONRPCResponse, error) {
+	transport.responseFunc = func(method string, _ interface{}) (*JSONRPCResponse, error) {
 		if method == "resources/read" {
 			result := ResourceReadResult{
 				Contents: []ResourceContent{
@@ -233,7 +233,7 @@ func TestClient_Prompts(t *testing.T) {
 	assert.Error(t, err)
 
 	// Test GetPromptTemplate
-	transport.responseFunc = func(method string, params interface{}) (*JSONRPCResponse, error) {
+	transport.responseFunc = func(method string, _ interface{}) (*JSONRPCResponse, error) {
 		if method == "prompts/get" {
 			result := PromptGetResult{
 				Messages: []PromptMessage{
@@ -359,7 +359,7 @@ func TestNewClientWithHTTP(t *testing.T) {
 
 func TestClient_Resources_EmptyList(t *testing.T) {
 	transport := newMockTransport()
-	transport.responseFunc = func(method string, params interface{}) (*JSONRPCResponse, error) {
+	transport.responseFunc = func(method string, _ interface{}) (*JSONRPCResponse, error) {
 		if method == "resources/list" {
 			result := ResourcesListResult{Resources: []Resource{}}
 			resultJSON, _ := json.Marshal(result)
@@ -398,7 +398,7 @@ func TestClient_Resources_EmptyList(t *testing.T) {
 
 func TestClient_Prompts_EmptyList(t *testing.T) {
 	transport := newMockTransport()
-	transport.responseFunc = func(method string, params interface{}) (*JSONRPCResponse, error) {
+	transport.responseFunc = func(method string, _ interface{}) (*JSONRPCResponse, error) {
 		if method == "prompts/list" {
 			result := PromptsListResult{Prompts: []Prompt{}}
 			resultJSON, _ := json.Marshal(result)

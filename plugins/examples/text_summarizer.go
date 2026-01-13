@@ -156,9 +156,9 @@ func (p *TextSummarizerPlugin) Execute(ctx context.Context, input map[string]int
 
 	// Build result
 	result := map[string]interface{}{
-		"summary":          summary,
-		"original_length":  originalLength,
-		"summary_length":   summaryLength,
+		"summary":           summary,
+		"original_length":   originalLength,
+		"summary_length":    summaryLength,
 		"compression_ratio": compressionRatio,
 	}
 
@@ -187,7 +187,7 @@ func (p *TextSummarizerPlugin) preprocessText(text string) string {
 func (p *TextSummarizerPlugin) extractKeySentences(text string, maxLength int, style string) []string {
 	// Split into sentences (simple approach - can be enhanced)
 	sentences := strings.Split(text, ".")
-	
+
 	// Filter out empty sentences
 	filtered := make([]string, 0)
 	for _, s := range sentences {
@@ -201,7 +201,7 @@ func (p *TextSummarizerPlugin) extractKeySentences(text string, maxLength int, s
 	// In a real implementation, this would use more sophisticated algorithms
 	selected := make([]string, 0)
 	currentLength := 0
-	
+
 	for _, sentence := range filtered {
 		sentenceLength := len(sentence) + 1 // +1 for period
 		if currentLength+sentenceLength <= maxLength {

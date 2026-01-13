@@ -1,3 +1,4 @@
+// Package plugins provides plugin implementations for LlamaGate.
 package plugins
 
 import (
@@ -41,7 +42,7 @@ func NewAlexaSkillPluginWithConfig(config map[string]interface{}) *AlexaSkillPlu
 		removeFromQuery: true,
 		defaultModel:    "llama3.2",
 	}
-	
+
 	// Apply configuration
 	if wakeWord, ok := config["wake_word"].(string); ok && wakeWord != "" {
 		plugin.wakeWord = wakeWord
@@ -55,7 +56,7 @@ func NewAlexaSkillPluginWithConfig(config map[string]interface{}) *AlexaSkillPlu
 	if defaultModel, ok := config["default_model"].(string); ok && defaultModel != "" {
 		plugin.defaultModel = defaultModel
 	}
-	
+
 	return plugin
 }
 
@@ -216,7 +217,7 @@ func (p *AlexaSkillPlugin) handleAlexaEndpoint(c *gin.Context) {
 	if p.registry != nil {
 		pluginCtx = p.registry.GetContext("alexa_skill")
 	}
-	
+
 	var logger *zerolog.Logger
 	if pluginCtx != nil {
 		logger = &pluginCtx.Logger
@@ -224,7 +225,7 @@ func (p *AlexaSkillPlugin) handleAlexaEndpoint(c *gin.Context) {
 		baseLogger := log.With().Str("plugin", "alexa_skill").Logger()
 		logger = &baseLogger
 	}
-	
+
 	var alexaReq AlexaRequest
 	if err := c.ShouldBindJSON(&alexaReq); err != nil {
 		logger.Error().Err(err).Msg("Failed to parse Alexa request")
@@ -257,7 +258,7 @@ type AlexaRequest struct {
 type AlexaResponse struct {
 	Version           string                 `json:"version"`
 	SessionAttributes map[string]interface{} `json:"sessionAttributes,omitempty"`
-	Response          AlexaResponseBody       `json:"response"`
+	Response          AlexaResponseBody      `json:"response"`
 }
 
 // AlexaResponseBody contains the response details
@@ -305,8 +306,9 @@ func (p *AlexaSkillPlugin) parseAlexaRequest(input map[string]interface{}) (*Ale
 	return &alexaReq, nil
 }
 
-// processAlexaRequest processes an Alexa request and returns a response
-func (p *AlexaSkillPlugin) processAlexaRequest(ctx context.Context, alexaReq *AlexaRequest) (*AlexaResponse, error) {
+// processAlexaRequest processes an Alexa request and returns a response.
+// Errors are handled internally and converted to error responses, so this always returns nil error.
+func (p *AlexaSkillPlugin) processAlexaRequest(ctx context.Context, alexaReq *AlexaRequest) (*AlexaResponse, error) { //nolint:unparam // Error is always nil by design
 	// Extract query text from Alexa request
 	query := p.extractQueryText(alexaReq)
 
@@ -466,12 +468,12 @@ func (p *AlexaSkillPlugin) processWithLLM(ctx context.Context, query string) (st
 	if p.registry == nil {
 		return "", fmt.Errorf("plugin registry not available")
 	}
-	
+
 	pluginCtx := p.registry.GetContext("alexa_skill")
 	if pluginCtx == nil {
 		return "", fmt.Errorf("plugin context not available")
 	}
-	
+
 	// Use LLM handler from context
 	messages := []map[string]interface{}{
 		{
@@ -479,17 +481,17 @@ func (p *AlexaSkillPlugin) processWithLLM(ctx context.Context, query string) (st
 			"content": query,
 		},
 	}
-	
+
 	options := map[string]interface{}{
 		"temperature": 0.7,
 	}
-	
+
 	response, err := pluginCtx.CallLLM(ctx, p.defaultModel, messages, options)
 	if err != nil {
 		pluginCtx.Logger.Error().Err(err).Str("query", query).Msg("LLM call failed")
 		return "", fmt.Errorf("LLM processing failed: %w", err)
 	}
-	
+
 	pluginCtx.Logger.Info().Str("query", query).Str("model", p.defaultModel).Msg("LLM call successful")
 	return response, nil
 }

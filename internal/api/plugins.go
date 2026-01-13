@@ -92,7 +92,7 @@ func (h *PluginHandler) ExecutePlugin(c *gin.Context) {
 
 	// Get plugin context for enhanced logging
 	pluginCtx := h.registry.GetContext(pluginName)
-	
+
 	// Validate input
 	if err := plugin.ValidateInput(input); err != nil {
 		// Use plugin context logger if available
@@ -116,7 +116,7 @@ func (h *PluginHandler) ExecutePlugin(c *gin.Context) {
 	startTime := time.Now()
 	result, err := plugin.Execute(c.Request.Context(), input)
 	executionTime := time.Since(startTime)
-	
+
 	if err != nil {
 		// Use plugin context logger if available, otherwise use default logger
 		if pluginCtx != nil {
@@ -132,12 +132,12 @@ func (h *PluginHandler) ExecutePlugin(c *gin.Context) {
 				Err(err).
 				Msg("Plugin execution failed")
 		}
-		
+
 		// Return structured error response
 		response.InternalError(c, fmt.Sprintf("Plugin execution failed: %v", err), requestID)
 		return
 	}
-	
+
 	// Log successful execution with timing
 	if pluginCtx != nil {
 		pluginCtx.LogInfo().

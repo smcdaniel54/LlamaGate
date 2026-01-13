@@ -1,3 +1,4 @@
+// Package templates provides plugin templates and examples for LlamaGate.
 package templates
 
 import (
@@ -17,10 +18,10 @@ type TemplatePlugin struct {
 // Metadata returns plugin metadata
 func (p *TemplatePlugin) Metadata() plugins.PluginMetadata {
 	return plugins.PluginMetadata{
-		Name:        "template_plugin", // TODO: Change to your plugin name
-		Version:     "1.0.0",           // TODO: Set your version
+		Name:        "template_plugin",                            // TODO: Change to your plugin name
+		Version:     "1.0.0",                                      // TODO: Set your version
 		Description: "A template plugin for creating new plugins", // TODO: Describe your plugin
-		Author:      "Your Name",       // TODO: Set your name
+		Author:      "Your Name",                                  // TODO: Set your name
 
 		// Define your input schema (JSON Schema format)
 		InputSchema: map[string]interface{}{
@@ -80,7 +81,7 @@ func (p *TemplatePlugin) ValidateInput(input map[string]interface{}) error {
 }
 
 // Execute runs the plugin workflow
-func (p *TemplatePlugin) Execute(ctx context.Context, input map[string]interface{}) (*plugins.PluginResult, error) {
+func (p *TemplatePlugin) Execute(_ context.Context, input map[string]interface{}) (*plugins.PluginResult, error) {
 	startTime := time.Now()
 
 	// Apply default values for optional inputs

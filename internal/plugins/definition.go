@@ -10,10 +10,10 @@ import (
 // PluginDefinition represents a plugin defined in JSON/YAML
 // This allows models to define plugins declaratively
 type PluginDefinition struct {
-	Name        string                 `json:"name"`
-	Version     string                 `json:"version,omitempty"`
-	Description string                 `json:"description"`
-	Author      string                 `json:"author,omitempty"`
+	Name        string `json:"name"`
+	Version     string `json:"version,omitempty"`
+	Description string `json:"description"`
+	Author      string `json:"author,omitempty"`
 
 	InputSchema  map[string]interface{} `json:"input_schema,omitempty"`
 	OutputSchema map[string]interface{} `json:"output_schema,omitempty"`
@@ -26,23 +26,23 @@ type PluginDefinition struct {
 
 // WorkflowDefinition represents a workflow in JSON/YAML format
 type WorkflowDefinition struct {
-	ID          string                    `json:"id,omitempty"`
-	Name        string                    `json:"name,omitempty"`
-	Description string                    `json:"description,omitempty"`
-	Steps       []WorkflowStepDefinition  `json:"steps"`
-	MaxRetries  int                       `json:"max_retries,omitempty"`
-	Timeout     string                    `json:"timeout,omitempty"` // Duration string like "30s"
+	ID          string                   `json:"id,omitempty"`
+	Name        string                   `json:"name,omitempty"`
+	Description string                   `json:"description,omitempty"`
+	Steps       []WorkflowStepDefinition `json:"steps"`
+	MaxRetries  int                      `json:"max_retries,omitempty"`
+	Timeout     string                   `json:"timeout,omitempty"` // Duration string like "30s"
 }
 
 // WorkflowStepDefinition represents a workflow step in JSON/YAML format
 type WorkflowStepDefinition struct {
-	ID          string                 `json:"id"`
-	Name        string                 `json:"name,omitempty"`
-	Description string                 `json:"description,omitempty"`
-	Type        string                 `json:"type"`
-	Config      map[string]interface{} `json:"config"`
-	Dependencies []string              `json:"dependencies,omitempty"`
-	OnError     string                 `json:"on_error,omitempty"`
+	ID           string                 `json:"id"`
+	Name         string                 `json:"name,omitempty"`
+	Description  string                 `json:"description,omitempty"`
+	Type         string                 `json:"type"`
+	Config       map[string]interface{} `json:"config"`
+	Dependencies []string               `json:"dependencies,omitempty"`
+	OnError      string                 `json:"on_error,omitempty"`
 }
 
 // CreatePluginFromDefinition creates a plugin from a JSON/YAML definition
@@ -113,7 +113,7 @@ func (p *DefinitionBasedPlugin) ValidateInput(input map[string]interface{}) erro
 }
 
 // Execute executes the plugin workflow
-func (p *DefinitionBasedPlugin) Execute(ctx context.Context, input map[string]interface{}) (*PluginResult, error) {
+func (p *DefinitionBasedPlugin) Execute(_ context.Context, input map[string]interface{}) (*PluginResult, error) {
 	// Apply optional input defaults
 	processedInput := make(map[string]interface{})
 	for k, v := range input {

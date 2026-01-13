@@ -16,9 +16,9 @@ type mockPlugin struct {
 
 func (m *mockPlugin) Metadata() PluginMetadata {
 	return PluginMetadata{
-		Name:        m.name,
-		Version:     "1.0.0",
-		Description: "Test plugin",
+		Name:           m.name,
+		Version:        "1.0.0",
+		Description:    "Test plugin",
 		RequiredInputs: []string{"input"},
 	}
 }
@@ -30,7 +30,7 @@ func (m *mockPlugin) ValidateInput(input map[string]interface{}) error {
 	return nil
 }
 
-func (m *mockPlugin) Execute(ctx context.Context, input map[string]interface{}) (*PluginResult, error) {
+func (m *mockPlugin) Execute(_ context.Context, input map[string]interface{}) (*PluginResult, error) {
 	return &PluginResult{
 		Success: true,
 		Data:    input,
@@ -40,7 +40,7 @@ func (m *mockPlugin) Execute(ctx context.Context, input map[string]interface{}) 
 func TestRegistry_RegisterWithContext(t *testing.T) {
 	registry := NewRegistry()
 	logger := zerolog.Nop()
-	llmHandler := func(ctx context.Context, model string, messages []map[string]interface{}, options map[string]interface{}) (map[string]interface{}, error) {
+	llmHandler := func(_ context.Context, _ string, _ []map[string]interface{}, _ map[string]interface{}) (map[string]interface{}, error) {
 		return map[string]interface{}{}, nil
 	}
 	config := map[string]interface{}{"key": "value"}

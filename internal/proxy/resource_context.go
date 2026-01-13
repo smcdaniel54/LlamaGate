@@ -12,7 +12,10 @@ import (
 )
 
 // injectMCPResourceContext processes messages and injects MCP resource content
-// where mcp:// URIs are found
+// where mcp:// URIs are found.
+// Errors are handled internally, so this always returns nil error.
+//
+//nolint:unparam // Error is always nil by design - errors are logged and ignored
 func (p *Proxy) injectMCPResourceContext(ctx context.Context, requestID string, messages []Message) ([]Message, error) {
 	if p.serverManager == nil || p.toolManager == nil {
 		// No MCP support, return messages as-is

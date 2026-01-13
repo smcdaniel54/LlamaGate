@@ -12,7 +12,7 @@ import (
 // This is only called when ENABLE_TEST_PLUGINS=true
 func RegisterTestPlugins(registry *plugins.Registry) error {
 	log.Info().Msg("Registering test plugins for use case testing")
-	
+
 	testPlugins := testplugins.CreateTestPlugins()
 	for _, plugin := range testPlugins {
 		if err := registry.Register(plugin); err != nil {
@@ -20,7 +20,7 @@ func RegisterTestPlugins(registry *plugins.Registry) error {
 		}
 		log.Info().Str("plugin", plugin.Metadata().Name).Msg("Registered test plugin")
 	}
-	
+
 	log.Info().Int("count", len(testPlugins)).Msg("All test plugins registered successfully")
 	return nil
 }

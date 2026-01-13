@@ -20,4 +20,3 @@ func parseDurationWithDefault(key, defaultValue string) (time.Duration, error) {
 	}
 	return duration, nil
 }
-

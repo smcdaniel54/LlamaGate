@@ -6,9 +6,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// requestIDContextKeyType is a custom type for context keys to avoid collisions
+type requestIDContextKeyType string
+
 // RequestIDContextKey is the key used to store request ID in context
-// Using a string constant allows cross-package access
-const RequestIDContextKey = "request_id"
+// Using a custom type prevents collisions with other context values
+const RequestIDContextKey requestIDContextKeyType = "request_id"
 
 // GetRequestID extracts the request ID from the Gin context with a fallback
 // Returns the request ID if present, or an empty string if not found

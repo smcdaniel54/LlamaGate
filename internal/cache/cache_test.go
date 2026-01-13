@@ -7,7 +7,7 @@ import (
 func TestCache_GetSet(t *testing.T) {
 	c := New()
 
-	params := CacheKeyParams{
+	params := KeyParams{
 		Model: "llama2",
 		Messages: []map[string]interface{}{
 			{"role": "user", "content": "Hello"},
@@ -44,11 +44,11 @@ func TestCache_DifferentModels(t *testing.T) {
 		{"role": "user", "content": "Hello"},
 	}
 
-	params1 := CacheKeyParams{
+	params1 := KeyParams{
 		Model:    "llama2",
 		Messages: messages,
 	}
-	params2 := CacheKeyParams{
+	params2 := KeyParams{
 		Model:    "mistral",
 		Messages: messages,
 	}
@@ -87,11 +87,11 @@ func TestCache_DifferentMessages(t *testing.T) {
 		{"role": "user", "content": "Goodbye"},
 	}
 
-	params1 := CacheKeyParams{
+	params1 := KeyParams{
 		Model:    model,
 		Messages: messages1,
 	}
-	params2 := CacheKeyParams{
+	params2 := KeyParams{
 		Model:    model,
 		Messages: messages2,
 	}
@@ -122,7 +122,7 @@ func TestCache_DifferentMessages(t *testing.T) {
 func TestCache_Clear(t *testing.T) {
 	c := New()
 
-	params := CacheKeyParams{
+	params := KeyParams{
 		Model: "llama2",
 		Messages: []map[string]interface{}{
 			{"role": "user", "content": "Hello"},
@@ -154,7 +154,7 @@ func TestCache_Clear(t *testing.T) {
 func TestCache_DifferentParameters(t *testing.T) {
 	c := New()
 
-	baseParams := CacheKeyParams{
+	baseParams := KeyParams{
 		Model: "llama2",
 		Messages: []map[string]interface{}{
 			{"role": "user", "content": "Hello"},
@@ -198,7 +198,7 @@ func TestCache_DifferentParameters(t *testing.T) {
 func TestCache_IdenticalParameters(t *testing.T) {
 	c := New()
 
-	params := CacheKeyParams{
+	params := KeyParams{
 		Model:       "llama2",
 		Temperature: 0.7,
 		MaxTokens:   100,
@@ -218,7 +218,7 @@ func TestCache_IdenticalParameters(t *testing.T) {
 	}
 
 	// Create identical params (should hit cache)
-	identicalParams := CacheKeyParams{
+	identicalParams := KeyParams{
 		Model:       "llama2",
 		Temperature: 0.7,
 		MaxTokens:   100,

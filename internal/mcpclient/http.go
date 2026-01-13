@@ -172,4 +172,3 @@ func (t *HTTPTransport) IsClosed() bool {
 	defer t.mu.RUnlock()
 	return t.closed
 }
-

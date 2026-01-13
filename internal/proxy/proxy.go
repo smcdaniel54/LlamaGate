@@ -208,7 +208,7 @@ func (p *Proxy) HandleChatCompletions(c *gin.Context) {
 	// Check cache for non-streaming requests using final messages (with tool context if applicable)
 	// Cache key includes all parameters that affect the response
 	if !req.Stream {
-		cacheParams := cache.CacheKeyParams{
+		cacheParams := cache.KeyParams{
 			Model:       req.Model,
 			Messages:    finalMessages,
 			Temperature: req.Temperature,
@@ -277,7 +277,7 @@ func (p *Proxy) HandleChatCompletions(c *gin.Context) {
 		p.handleStreamingResponse(c, httpReq, requestID, startTime, req.Model)
 	} else {
 		// Build cache params for storing response
-		cacheParams := cache.CacheKeyParams{
+		cacheParams := cache.KeyParams{
 			Model:       req.Model,
 			Messages:    finalMessages,
 			Temperature: req.Temperature,
@@ -467,7 +467,7 @@ func (p *Proxy) handleStreamingResponse(c *gin.Context, httpReq *http.Request, r
 // convertOllamaStreamChunkToOpenAI converts an Ollama streaming chunk to OpenAI-compatible format
 func convertOllamaStreamChunkToOpenAI(ollamaChunk map[string]interface{}, model, chunkID string, created int64, isFinal bool) map[string]interface{} {
 	var deltaContent string
-	var finishReason interface{} = nil
+	var finishReason interface{}
 
 	if message, ok := ollamaChunk["message"].(map[string]interface{}); ok {
 		if content, ok := message["content"].(string); ok {
@@ -501,7 +501,7 @@ func convertOllamaStreamChunkToOpenAI(ollamaChunk map[string]interface{}, model,
 }
 
 // handleNonStreamingResponse handles non-streaming responses from Ollama
-func (p *Proxy) handleNonStreamingResponse(c *gin.Context, httpReq *http.Request, requestID string, startTime time.Time, cacheParams cache.CacheKeyParams) {
+func (p *Proxy) handleNonStreamingResponse(c *gin.Context, httpReq *http.Request, requestID string, startTime time.Time, cacheParams cache.KeyParams) {
 	resp, err := p.client.Do(httpReq)
 	if err != nil {
 		log.Error().

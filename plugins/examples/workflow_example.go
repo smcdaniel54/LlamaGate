@@ -104,7 +104,7 @@ func (p *ExampleWorkflowPlugin) Execute(ctx context.Context, input map[string]in
 
 	// Build result
 	result := map[string]interface{}{
-		"final_result":  finalResult,
+		"final_result":   finalResult,
 		"workflow_steps": stepResults,
 	}
 
@@ -139,7 +139,7 @@ func (p *ExampleWorkflowPlugin) buildWorkflow(input map[string]interface{}) *plu
 				Description: "Use LLM to analyze the user query",
 				Type:        "llm_call",
 				Config: map[string]interface{}{
-					"model": model,
+					"model":  model,
 					"prompt": fmt.Sprintf("Analyze the following query and determine what action is needed: %s", input["query"]),
 				},
 			},
@@ -173,7 +173,7 @@ func (p *ExampleWorkflowPlugin) buildWorkflow(input map[string]interface{}) *plu
 				Description: "Use LLM to synthesize the final result",
 				Type:        "llm_call",
 				Config: map[string]interface{}{
-					"model": model,
+					"model":  model,
 					"prompt": "Based on the analysis and tool results, provide a comprehensive answer.",
 				},
 				Dependencies: []string{"step3_execute"},

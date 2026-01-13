@@ -10,13 +10,13 @@ import (
 
 func TestPluginContext_CallLLM(t *testing.T) {
 	tests := []struct {
-		name      string
+		name       string
 		llmHandler LLMHandlerFunc
-		expectErr bool
+		expectErr  bool
 	}{
 		{
 			name: "successful LLM call",
-			llmHandler: func(ctx context.Context, model string, messages []map[string]interface{}, options map[string]interface{}) (map[string]interface{}, error) {
+			llmHandler: func(_ context.Context, _ string, _ []map[string]interface{}, _ map[string]interface{}) (map[string]interface{}, error) {
 				return map[string]interface{}{
 					"choices": []interface{}{
 						map[string]interface{}{
@@ -30,13 +30,13 @@ func TestPluginContext_CallLLM(t *testing.T) {
 			expectErr: false,
 		},
 		{
-			name:      "no LLM handler",
+			name:       "no LLM handler",
 			llmHandler: nil,
-			expectErr: true,
+			expectErr:  true,
 		},
 		{
 			name: "LLM handler error",
-			llmHandler: func(ctx context.Context, model string, messages []map[string]interface{}, options map[string]interface{}) (map[string]interface{}, error) {
+			llmHandler: func(_ context.Context, _ string, _ []map[string]interface{}, _ map[string]interface{}) (map[string]interface{}, error) {
 				return nil, assert.AnError
 			},
 			expectErr: true,

@@ -123,7 +123,7 @@ func TestServerManager_HealthMonitoring(t *testing.T) {
 
 	// Create a mock client with successful health check
 	transport := newMockTransport()
-	transport.responseFunc = func(method string, params interface{}) (*JSONRPCResponse, error) {
+	transport.responseFunc = func(method string, _ interface{}) (*JSONRPCResponse, error) {
 		if method == "tools/list" {
 			result := ToolsListResult{Tools: []Tool{}}
 			resultJSON, _ := json.Marshal(result)

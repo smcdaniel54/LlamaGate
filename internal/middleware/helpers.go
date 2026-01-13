@@ -15,4 +15,3 @@ func isHealthEndpoint(path string) bool {
 	normalized := strings.TrimRight(path, "/")
 	return normalized == HealthEndpointPath
 }
-

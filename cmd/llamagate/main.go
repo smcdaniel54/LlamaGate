@@ -162,15 +162,15 @@ func main() {
 
 		// Plugin system endpoints
 		pluginRegistry := plugins.NewRegistry()
-		
+
 		// Create LLM handler for plugins
 		llmHandler := proxyInstance.CreatePluginLLMHandler()
-		
+
 		// Register Alexa Skill plugin with context
 		if err := setup.RegisterAlexaPlugin(pluginRegistry, proxyInstance, llmHandler, cfg); err != nil {
 			log.Warn().Err(err).Msg("Failed to register Alexa Skill plugin")
 		}
-		
+
 		// Register test plugins if explicitly enabled
 		// In production, plugins would be registered via configuration or discovery
 		if os.Getenv("ENABLE_TEST_PLUGINS") == "true" {
@@ -180,7 +180,7 @@ func main() {
 				log.Info().Msg("Test plugins registration attempted (see setup/plugins.go)")
 			}
 		}
-		
+
 		// Register plugin API endpoints
 		pluginHandler := api.NewPluginHandler(pluginRegistry)
 		pluginsGroup := v1.Group("/plugins")
@@ -189,7 +189,7 @@ func main() {
 			pluginsGroup.GET("/:name", pluginHandler.GetPlugin)
 			pluginsGroup.POST("/:name/execute", pluginHandler.ExecutePlugin)
 		}
-		
+
 		// Register custom plugin routes (for ExtendedPlugin with custom endpoints)
 		api.RegisterPluginRoutes(v1, pluginRegistry)
 	}
@@ -276,7 +276,7 @@ func main() {
 	log.Info().
 		Dur("timeout", shutdownTimeout).
 		Msg("Starting graceful shutdown - stopping new requests, allowing in-flight requests to complete")
-	
+
 	ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 	defer cancel()
 

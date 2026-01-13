@@ -64,7 +64,7 @@ func TestHealthHandler_CheckHealth(t *testing.T) {
 
 			// Create mock Ollama server
 			if !tt.ollamaError {
-				ollamaServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				ollamaServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 					w.WriteHeader(tt.ollamaStatus)
 					w.Write([]byte(`{"models":[]}`))
 				}))

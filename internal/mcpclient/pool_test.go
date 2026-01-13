@@ -37,11 +37,11 @@ func TestConnectionPool_Acquire(t *testing.T) {
 		callCount++
 		transport := newMockTransport()
 		client := &Client{
-			name:      "test",
-			transport:  transport,
-			toolsMap:   make(map[string]*Tool),
+			name:         "test",
+			transport:    transport,
+			toolsMap:     make(map[string]*Tool),
 			resourcesMap: make(map[string]*Resource),
-			promptsMap: make(map[string]*Prompt),
+			promptsMap:   make(map[string]*Prompt),
 		}
 		return client, nil
 	}
@@ -95,11 +95,11 @@ func TestConnectionPool_MaxConnections(t *testing.T) {
 		callCount++
 		transport := newMockTransport()
 		client := &Client{
-			name:      "test",
-			transport:  transport,
-			toolsMap:   make(map[string]*Tool),
+			name:         "test",
+			transport:    transport,
+			toolsMap:     make(map[string]*Tool),
 			resourcesMap: make(map[string]*Resource),
-			promptsMap: make(map[string]*Prompt),
+			promptsMap:   make(map[string]*Prompt),
 		}
 		return client, nil
 	}
@@ -136,11 +136,11 @@ func TestConnectionPool_Remove(t *testing.T) {
 	factory := func() (*Client, error) {
 		transport := newMockTransport()
 		client := &Client{
-			name:      "test",
-			transport:  transport,
-			toolsMap:   make(map[string]*Tool),
+			name:         "test",
+			transport:    transport,
+			toolsMap:     make(map[string]*Tool),
 			resourcesMap: make(map[string]*Resource),
-			promptsMap: make(map[string]*Prompt),
+			promptsMap:   make(map[string]*Prompt),
 		}
 		return client, nil
 	}
@@ -167,11 +167,11 @@ func TestConnectionPool_Close(t *testing.T) {
 	factory := func() (*Client, error) {
 		transport := newMockTransport()
 		client := &Client{
-			name:      "test",
-			transport:  transport,
-			toolsMap:   make(map[string]*Tool),
+			name:         "test",
+			transport:    transport,
+			toolsMap:     make(map[string]*Tool),
 			resourcesMap: make(map[string]*Resource),
-			promptsMap: make(map[string]*Prompt),
+			promptsMap:   make(map[string]*Prompt),
 		}
 		return client, nil
 	}
@@ -212,11 +212,11 @@ func TestConnectionPool_Acquire_RaceCondition(t *testing.T) {
 		time.Sleep(10 * time.Millisecond)
 		transport := newMockTransport()
 		client := &Client{
-			name:        "test",
-			transport:   transport,
-			toolsMap:    make(map[string]*Tool),
+			name:         "test",
+			transport:    transport,
+			toolsMap:     make(map[string]*Tool),
 			resourcesMap: make(map[string]*Resource),
-			promptsMap:  make(map[string]*Prompt),
+			promptsMap:   make(map[string]*Prompt),
 		}
 		return client, nil
 	}

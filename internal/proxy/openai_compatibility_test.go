@@ -286,7 +286,7 @@ func TestOpenAICompatibility_ToolFunctionCalling(t *testing.T) {
 			ollamaResp := map[string]interface{}{
 				"model": "llama2",
 				"message": map[string]interface{}{
-					"role": "assistant",
+					"role":    "assistant",
 					"content": "",
 					"tool_calls": []interface{}{
 						map[string]interface{}{
@@ -313,13 +313,13 @@ func TestOpenAICompatibility_ToolFunctionCalling(t *testing.T) {
 	// Create tool manager and guardrails for tool calling
 	toolManager := tools.NewManager()
 	guardrails, err := tools.NewGuardrails(
-		[]string{}, // allow all
-		[]string{}, // deny none
-		10,         // max tool rounds
-		5,          // max calls per round
-		50,         // max total tool calls
+		[]string{},     // allow all
+		[]string{},     // deny none
+		10,             // max tool rounds
+		5,              // max calls per round
+		50,             // max total tool calls
 		30*time.Second, // default timeout
-		1024*1024,  // max result size 1MB
+		1024*1024,      // max result size 1MB
 	)
 	require.NoError(t, err, "Should create guardrails")
 	proxyInstance.SetToolManager(toolManager, guardrails)

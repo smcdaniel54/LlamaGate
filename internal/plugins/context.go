@@ -37,8 +37,8 @@ type LLMHandlerFunc func(ctx context.Context, model string, messages []map[strin
 func NewPluginContext(llmHandler LLMHandlerFunc, logger zerolog.Logger, config map[string]interface{}) *PluginContext {
 	return &PluginContext{
 		LLMHandler: llmHandler,
-		Logger:      logger,
-		Config:      config,
+		Logger:     logger,
+		Config:     config,
 		HTTPClient: &http.Client{
 			Timeout: 5 * time.Minute,
 		},
@@ -50,11 +50,11 @@ func NewPluginContext(llmHandler LLMHandlerFunc, logger zerolog.Logger, config m
 func NewPluginContextWithName(pluginName string, llmHandler LLMHandlerFunc, logger zerolog.Logger, config map[string]interface{}) *PluginContext {
 	// Add plugin name to logger context
 	logger = logger.With().Str("plugin", pluginName).Logger()
-	
+
 	return &PluginContext{
 		LLMHandler: llmHandler,
-		Logger:      logger,
-		Config:      config,
+		Logger:     logger,
+		Config:     config,
 		HTTPClient: &http.Client{
 			Timeout: 5 * time.Minute,
 		},

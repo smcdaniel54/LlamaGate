@@ -156,4 +156,3 @@ func ConfigureProxy(p *proxy.Proxy, components *MCPComponents, mcpConfig *config
 		p.SetResourceFetchTimeout(mcpConfig.ResourceFetchTimeout)
 	}
 }
-

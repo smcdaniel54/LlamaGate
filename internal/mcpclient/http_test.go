@@ -246,7 +246,7 @@ func TestHTTPTransport_ErrorHandling(t *testing.T) {
 	}{
 		{
 			name: "HTTP 500 error",
-			serverHandler: func(w http.ResponseWriter, r *http.Request) {
+			serverHandler: func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusInternalServerError)
 				w.Write([]byte("Internal Server Error"))
 			},
@@ -254,7 +254,7 @@ func TestHTTPTransport_ErrorHandling(t *testing.T) {
 		},
 		{
 			name: "JSON-RPC error",
-			serverHandler: func(w http.ResponseWriter, r *http.Request) {
+			serverHandler: func(w http.ResponseWriter, _ *http.Request) {
 				resp := JSONRPCResponse{
 					JSONRPC: JSONRPCVersion,
 					ID:      1,
@@ -270,7 +270,7 @@ func TestHTTPTransport_ErrorHandling(t *testing.T) {
 		},
 		{
 			name: "invalid JSON response",
-			serverHandler: func(w http.ResponseWriter, r *http.Request) {
+			serverHandler: func(w http.ResponseWriter, _ *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
 				w.Write([]byte("invalid json"))
 			},
@@ -311,7 +311,7 @@ func TestHTTPTransport_Close(t *testing.T) {
 
 func TestHTTPTransport_ContextTimeout(t *testing.T) {
 	// Create a slow server
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		time.Sleep(2 * time.Second)
 		resp := JSONRPCResponse{
 			JSONRPC: JSONRPCVersion,

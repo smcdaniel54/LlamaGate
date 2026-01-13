@@ -11,8 +11,7 @@ import (
 type ServerManagerInterface interface {
 	// GetServer gets server information by name
 	GetServer(name string) (*mcpclient.ManagedServer, error)
-	
+
 	// GetClient gets a client for a server (with pooling for HTTP)
 	GetClient(ctx context.Context, name string) (*mcpclient.Client, error)
 }
-

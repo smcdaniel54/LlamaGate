@@ -48,7 +48,7 @@ func TestHealthMonitor_CheckHealth(t *testing.T) {
 
 	transport := newMockTransport()
 	// Set up transport to return successful response
-	transport.responseFunc = func(method string, params interface{}) (*JSONRPCResponse, error) {
+	transport.responseFunc = func(method string, _ interface{}) (*JSONRPCResponse, error) {
 		if method == "tools/list" {
 			result := ToolsListResult{Tools: []Tool{}}
 			resultJSON, _ := json.Marshal(result)
