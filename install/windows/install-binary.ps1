@@ -23,9 +23,9 @@ Write-Host "  URL: $latestReleaseUrl" -ForegroundColor Gray
 try {
     # Download the binary
     Invoke-WebRequest -Uri $latestReleaseUrl -OutFile $targetPath -UseBasicParsing
-    Write-Host "  ✓ Download complete" -ForegroundColor Green
+    Write-Host "  [OK] Download complete" -ForegroundColor Green
 } catch {
-    Write-Host "  ✗ Download failed: $_" -ForegroundColor Red
+    Write-Host "  [ERROR] Download failed: $_" -ForegroundColor Red
     Write-Host ""
     Write-Host "Please download manually from:" -ForegroundColor Yellow
     Write-Host "  https://github.com/llamagate/llamagate/releases/latest" -ForegroundColor Cyan
@@ -36,9 +36,9 @@ Write-Host ""
 Write-Host "[2/3] Verifying binary..." -ForegroundColor Yellow
 if (Test-Path $targetPath) {
     $fileSize = (Get-Item $targetPath).Length
-    Write-Host "  ✓ Binary verified ($([math]::Round($fileSize/1MB, 2)) MB)" -ForegroundColor Green
+    Write-Host "  [OK] Binary verified ($([math]::Round($fileSize/1MB, 2)) MB)" -ForegroundColor Green
 } else {
-    Write-Host "  ✗ Binary not found" -ForegroundColor Red
+    Write-Host "  [ERROR] Binary not found" -ForegroundColor Red
     exit 1
 }
 
@@ -69,9 +69,9 @@ PORT=11435
 LOG_FILE=
 "@
     $envContent | Out-File -FilePath $envFile -Encoding UTF8
-    Write-Host "  ✓ Created .env file with defaults" -ForegroundColor Green
+    Write-Host "  [OK] Created .env file with defaults" -ForegroundColor Green
 } else {
-    Write-Host "  ⚠ .env file already exists, skipping" -ForegroundColor Yellow
+    Write-Host "  [SKIP] .env file already exists, skipping" -ForegroundColor Yellow
 }
 
 Write-Host ""
@@ -86,6 +86,6 @@ Write-Host "  cd $(Split-Path $targetPath -Parent)" -ForegroundColor Cyan
 Write-Host "  .\$targetName" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "Or use the run script:" -ForegroundColor Yellow
-Write-Host "  scripts\windows\run.cmd" -ForegroundColor Cyan
+Write-Host '  scripts\windows\run.cmd' -ForegroundColor Cyan
 Write-Host ""
 
