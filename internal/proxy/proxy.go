@@ -62,6 +62,17 @@ func (p *Proxy) SetResourceFetchTimeout(timeout time.Duration) {
 	p.resourceFetchTimeout = timeout
 }
 
+// Close closes all connections and cleans up resources
+// This should be called during graceful shutdown
+func (p *Proxy) Close() {
+	// Close idle HTTP client connections
+	if p.client != nil && p.client.Transport != nil {
+		if transport, ok := p.client.Transport.(*http.Transport); ok {
+			transport.CloseIdleConnections()
+		}
+	}
+}
+
 // ChatCompletionRequest represents an OpenAI-compatible chat completion request
 type ChatCompletionRequest struct {
 	Model       string           `json:"model"`

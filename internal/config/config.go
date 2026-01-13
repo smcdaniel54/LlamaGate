@@ -22,6 +22,7 @@ type Config struct {
 	LogFile            string
 	Timeout            time.Duration // HTTP client timeout
 	HealthCheckTimeout time.Duration // Timeout for /health endpoint
+	ShutdownTimeout    time.Duration // Timeout for graceful shutdown
 	MCP                *MCPConfig    // MCP configuration (optional)
 	Plugins            *PluginsConfig // Plugin configuration (optional)
 	// TLS/HTTPS configuration
@@ -102,6 +103,7 @@ func Load() (*Config, error) {
 	viper.SetDefault("LOG_FILE", "")
 	viper.SetDefault("TIMEOUT", "5m")              // 5 minutes default
 	viper.SetDefault("HEALTH_CHECK_TIMEOUT", "5s") // 5 seconds for health checks
+	viper.SetDefault("SHUTDOWN_TIMEOUT", "30s")    // 30 seconds for graceful shutdown
 	// TLS defaults
 	viper.SetDefault("TLS_ENABLED", false)
 	viper.SetDefault("TLS_CERT_FILE", "")
@@ -141,6 +143,13 @@ func Load() (*Config, error) {
 		return nil, err
 	}
 	cfg.HealthCheckTimeout = healthTimeout
+
+	// Parse shutdown timeout
+	shutdownTimeout, err := parseDurationWithDefault("SHUTDOWN_TIMEOUT", "30s")
+	if err != nil {
+		return nil, err
+	}
+	cfg.ShutdownTimeout = shutdownTimeout
 
 	// Load MCP configuration
 	mcpConfig, err := loadMCPConfig()

@@ -234,8 +234,17 @@ func main() {
 
 	log.Info().Msg("Shutting down server...")
 
+	// Stop accepting new requests immediately
+	// http.Server.Shutdown() will handle this, but we log it here for clarity
+	log.Info().Msg("Stopping acceptance of new requests")
+
 	// Stop cache cleanup goroutine
 	cacheInstance.StopCleanup()
+
+	// Close downstream connections cleanly
+	// Close Ollama HTTP client connections
+	proxyInstance.Close()
+	log.Info().Msg("Ollama HTTP client connections closed")
 
 	// Close MCP clients
 	if mcpComponents != nil {
@@ -255,15 +264,32 @@ func main() {
 		}
 	}
 
-	// Graceful shutdown with timeout
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	// Note: Plugin HTTP clients are managed per-request and don't need explicit cleanup
+	// They will be garbage collected when the server shuts down
+
+	// Graceful shutdown with configurable timeout
+	// Stop accepting new requests and allow in-flight requests to complete
+	shutdownTimeout := cfg.ShutdownTimeout
+	if shutdownTimeout <= 0 {
+		shutdownTimeout = 30 * time.Second // Default fallback
+	}
+	log.Info().
+		Dur("timeout", shutdownTimeout).
+		Msg("Starting graceful shutdown - stopping new requests, allowing in-flight requests to complete")
+	
+	ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 	defer cancel()
 
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Error().Err(err).Msg("Server forced to shutdown")
+		log.Error().
+			Err(err).
+			Dur("timeout", shutdownTimeout).
+			Msg("Server forced to shutdown - some requests may have been interrupted")
 		cancel() // Ensure cancel is called before exit
 		os.Exit(1)
 	}
+
+	log.Info().Msg("All in-flight requests completed")
 
 	// Close log file handle to prevent file descriptor leak
 	logger.Close()

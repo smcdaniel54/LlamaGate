@@ -602,6 +602,51 @@ LlamaGate automatically redacts sensitive values from logs to prevent secret lea
 
 Notice that the API key is not present in the log, even though it was sent in the request headers.
 
+## Graceful Shutdown
+
+LlamaGate implements graceful shutdown to ensure clean termination without dropping in-flight requests.
+
+### Shutdown Behavior
+
+When LlamaGate receives `SIGINT` or `SIGTERM`:
+
+1. **Stop accepting new requests**: The server immediately stops accepting new connections
+2. **Allow in-flight requests to complete**: Active requests are allowed to finish up to a configurable timeout
+3. **Close downstream connections cleanly**:
+   - Ollama HTTP client connections are closed
+   - MCP server connections are closed
+   - Cache cleanup goroutines are stopped
+4. **Handle streaming responses safely**: Streaming responses check for context cancellation and stop gracefully when the server shuts down
+
+### Configuration
+
+The shutdown timeout is configurable via the `SHUTDOWN_TIMEOUT` environment variable:
+
+```bash
+# Default: 30 seconds
+SHUTDOWN_TIMEOUT=30s
+
+# Examples:
+SHUTDOWN_TIMEOUT=10s   # 10 seconds
+SHUTDOWN_TIMEOUT=1m     # 1 minute
+SHUTDOWN_TIMEOUT=2m30s  # 2 minutes 30 seconds
+```
+
+**Timeout Behavior:**
+- If all in-flight requests complete before the timeout: Clean shutdown
+- If the timeout is reached: Remaining requests are terminated, and the server exits
+
+### Shutdown Process
+
+1. Signal received (`SIGINT` or `SIGTERM`)
+2. Server stops accepting new requests
+3. Cache cleanup goroutines stopped
+4. Downstream connections closed (Ollama, MCP)
+5. In-flight requests allowed to complete (up to timeout)
+6. Server exits gracefully
+
+**Note:** Streaming responses automatically detect server shutdown via context cancellation and stop gracefully, preventing abrupt connection resets.
+
 ## HTTPS/SSL Support
 
 LlamaGate supports native HTTPS/TLS encryption. To enable HTTPS:
