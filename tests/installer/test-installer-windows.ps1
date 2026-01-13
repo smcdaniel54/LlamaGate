@@ -32,7 +32,7 @@ if (Test-Path "install\windows\install-binary.ps1") {
 }
 
 # Test 2b: Validate PowerShell syntax for source installer
-Write-Host "[3/7] Validating source installer PowerShell syntax..." -ForegroundColor Yellow
+Write-Host "[3/8] Validating source installer PowerShell syntax..." -ForegroundColor Yellow
 if (Test-Path "install\windows\install.ps1") {
     try {
         $content = Get-Content "install\windows\install.ps1" -Raw -ErrorAction Stop
@@ -46,8 +46,33 @@ if (Test-Path "install\windows\install.ps1") {
     Write-Host "  [WARN] Source installer file not found (optional)" -ForegroundColor Yellow
 }
 
-# Test 4: Check for required functions
-Write-Host "[4/7] Checking required functions..." -ForegroundColor Yellow
+# Test 2c: Validate repository URL in binary installer
+Write-Host "[4/8] Validating repository URL in binary installer..." -ForegroundColor Yellow
+if (Test-Path "install\windows\install-binary.ps1") {
+    $binaryContent = Get-Content "install\windows\install-binary.ps1" -Raw
+    $expectedRepo = "smcdaniel54/LlamaGate"
+    $wrongRepo = "llamagate/llamagate"
+    
+    if ($binaryContent -match "github\.com/([^/]+/[^/""']+)") {
+        $foundRepo = $matches[1]
+        if ($foundRepo -eq $expectedRepo) {
+            Write-Host "  [OK] Repository URL is correct: $expectedRepo" -ForegroundColor Green
+        } elseif ($foundRepo -eq $wrongRepo) {
+            Write-Host "  [FAIL] Repository URL is incorrect: $wrongRepo (should be $expectedRepo)" -ForegroundColor Red
+            $errors += "Binary installer uses wrong repository URL: $wrongRepo"
+        } else {
+            Write-Host "  [WARN] Repository URL found: $foundRepo (expected $expectedRepo)" -ForegroundColor Yellow
+        }
+    } else {
+        Write-Host "  [WARN] Could not extract repository URL from installer" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "  [FAIL] Binary installer file not found" -ForegroundColor Red
+    $errors += "install-binary.ps1 missing"
+}
+
+# Test 5: Check for required functions
+Write-Host "[5/8] Checking required functions..." -ForegroundColor Yellow
 $requiredFunctions = @("Test-Command", "Get-UserInput")
 $content = Get-Content "install\windows\install.ps1" -Raw
 $allFound = $true
@@ -63,16 +88,16 @@ if (-not $allFound) {
     $errors += "Missing required functions"
 }
 
-# Test 5: Check installer launcher
-Write-Host "[5/7] Checking installer launcher..." -ForegroundColor Yellow
+# Test 6: Check installer launcher
+Write-Host "[6/8] Checking installer launcher..." -ForegroundColor Yellow
 if (Test-Path "install\windows\install.cmd") {
     Write-Host "  [OK] Installer launcher exists" -ForegroundColor Green
 } else {
     Write-Host "  [WARN] Installer launcher not found (optional)" -ForegroundColor Yellow
 }
 
-# Test 6: Test one-liner binary installer download
-Write-Host "[6/7] Testing one-liner binary installer download..." -ForegroundColor Yellow
+# Test 7: Test one-liner binary installer download
+Write-Host "[7/8] Testing one-liner binary installer download..." -ForegroundColor Yellow
 $oneLinerUrl = "https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/windows/install-binary.ps1"
 try {
     $response = Invoke-WebRequest -Uri $oneLinerUrl -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
@@ -86,8 +111,8 @@ try {
     Write-Host "  This is expected in CI environments without internet access" -ForegroundColor Gray
 }
 
-# Test 7: Test one-liner source installer download
-Write-Host "[7/7] Testing one-liner source installer download..." -ForegroundColor Yellow
+# Test 8: Test one-liner source installer download
+Write-Host "[8/8] Testing one-liner source installer download..." -ForegroundColor Yellow
 $sourceInstallerUrl = "https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/windows/install.ps1"
 try {
     $response = Invoke-WebRequest -Uri $sourceInstallerUrl -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
