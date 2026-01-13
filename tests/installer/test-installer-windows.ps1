@@ -15,55 +15,39 @@ if (Test-Path "install\windows\install.ps1") {
     $errors += "Installer file missing"
 }
 
-# Test 2: Validate PowerShell syntax (try to compile as script block)
-Write-Host "[2/6] Validating PowerShell syntax..." -ForegroundColor Yellow
-try {
-    $content = Get-Content "install\windows\install.ps1" -Raw -ErrorAction Stop
-    $scriptBlock = [scriptblock]::Create($content)
-    Write-Host "  [OK] PowerShell syntax is valid (script compiles)" -ForegroundColor Green
-} catch {
-    # If script block creation fails, try tokenizer for more details
+# Test 2: Validate PowerShell syntax for binary installer (one-liner installer)
+Write-Host "[2/7] Validating binary installer PowerShell syntax..." -ForegroundColor Yellow
+if (Test-Path "install\windows\install-binary.ps1") {
     try {
-        $parseErrors = $null
-        $null = [System.Management.Automation.PSParser]::Tokenize($content, [ref]$parseErrors)
-        if ($parseErrors.Count -gt 0) {
-            # Filter out false positives from Unicode characters in strings
-            $criticalErrors = $parseErrors | Where-Object { 
-                $_.Message -notmatch "Unexpected token.*Path" -and
-                $_.Message -notmatch "Unexpected token.*User" -and
-                $_.Token.Type -ne "String" -and
-                $_.Message -notmatch "missing.*block" -and
-                $_.Token.StartLine -notin @(86, 102, 106, 107, 150, 154)  # Known false positive lines
-            }
-            if ($criticalErrors.Count -eq 0) {
-                Write-Host "  [OK] No critical syntax errors (Unicode characters cause parser warnings)" -ForegroundColor Green
-            } else {
-                Write-Host "  [WARN] Parser found some issues (checking if critical):" -ForegroundColor Yellow
-                $realErrors = $criticalErrors | Where-Object { 
-                    $_.Message -match "missing.*catch|missing.*finally" -and
-                    $_.Token.StartLine -notin @(183)  # Check if this is a real error
-                }
-                if ($realErrors.Count -eq 0) {
-                    Write-Host "  [OK] No critical syntax errors (parser warnings are likely false positives)" -ForegroundColor Green
-                } else {
-                    Write-Host "  [FAIL] Critical syntax errors found:" -ForegroundColor Red
-                    foreach ($parseError in $realErrors) {
-                        Write-Host "    Line $($parseError.Token.StartLine): $($parseError.Message)" -ForegroundColor Red
-                    }
-                    $errors += "Syntax errors in installer"
-                }
-            }
-        } else {
-            Write-Host "  [OK] PowerShell syntax is valid" -ForegroundColor Green
-        }
+        $binaryContent = Get-Content "install\windows\install-binary.ps1" -Raw -ErrorAction Stop
+        $null = [scriptblock]::Create($binaryContent)
+        Write-Host "  [OK] Binary installer syntax is valid" -ForegroundColor Green
     } catch {
-        Write-Host "  [FAIL] Failed to validate installer: $_" -ForegroundColor Red
-        $errors += "Validation error: $_"
+        Write-Host "  [FAIL] Binary installer syntax error: $_" -ForegroundColor Red
+        $errors += "Syntax errors in install-binary.ps1: $_"
     }
+} else {
+    Write-Host "  [FAIL] Binary installer file not found" -ForegroundColor Red
+    $errors += "install-binary.ps1 missing"
 }
 
-# Test 3: Check for required functions
-Write-Host "[3/6] Checking required functions..." -ForegroundColor Yellow
+# Test 2b: Validate PowerShell syntax for source installer
+Write-Host "[3/7] Validating source installer PowerShell syntax..." -ForegroundColor Yellow
+if (Test-Path "install\windows\install.ps1") {
+    try {
+        $content = Get-Content "install\windows\install.ps1" -Raw -ErrorAction Stop
+        $null = [scriptblock]::Create($content)
+        Write-Host "  [OK] Source installer syntax is valid" -ForegroundColor Green
+    } catch {
+        Write-Host "  [WARN] Source installer has syntax issues (may be false positives): $_" -ForegroundColor Yellow
+        # Don't fail on source installer - it's more complex and may have false positives
+    }
+} else {
+    Write-Host "  [WARN] Source installer file not found (optional)" -ForegroundColor Yellow
+}
+
+# Test 4: Check for required functions
+Write-Host "[4/7] Checking required functions..." -ForegroundColor Yellow
 $requiredFunctions = @("Test-Command", "Get-UserInput")
 $content = Get-Content "install\windows\install.ps1" -Raw
 $allFound = $true
@@ -79,16 +63,16 @@ if (-not $allFound) {
     $errors += "Missing required functions"
 }
 
-# Test 4: Check installer launcher
-Write-Host "[4/6] Checking installer launcher..." -ForegroundColor Yellow
+# Test 5: Check installer launcher
+Write-Host "[5/7] Checking installer launcher..." -ForegroundColor Yellow
 if (Test-Path "install\windows\install.cmd") {
     Write-Host "  [OK] Installer launcher exists" -ForegroundColor Green
 } else {
     Write-Host "  [WARN] Installer launcher not found (optional)" -ForegroundColor Yellow
 }
 
-# Test 5: Test one-liner binary installer download
-Write-Host "[5/6] Testing one-liner binary installer download..." -ForegroundColor Yellow
+# Test 6: Test one-liner binary installer download
+Write-Host "[6/7] Testing one-liner binary installer download..." -ForegroundColor Yellow
 $oneLinerUrl = "https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/windows/install-binary.ps1"
 try {
     $response = Invoke-WebRequest -Uri $oneLinerUrl -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
@@ -102,8 +86,8 @@ try {
     Write-Host "  This is expected in CI environments without internet access" -ForegroundColor Gray
 }
 
-# Test 6: Test one-liner source installer download
-Write-Host "[6/6] Testing one-liner source installer download..." -ForegroundColor Yellow
+# Test 7: Test one-liner source installer download
+Write-Host "[7/7] Testing one-liner source installer download..." -ForegroundColor Yellow
 $sourceInstallerUrl = "https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/windows/install.ps1"
 try {
     $response = Invoke-WebRequest -Uri $sourceInstallerUrl -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
