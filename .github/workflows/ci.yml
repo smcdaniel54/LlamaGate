@@ -55,7 +55,10 @@ jobs:
     - name: Run tests with race detector
       timeout-minutes: 15
       run: |
-        PACKAGES=$(go list ./... | grep -v "^\.out$" || go list ./...)
+        PACKAGES=$(go list ./... 2>/dev/null | grep -v "^\.out$" || go list ./...)
+        if [ -z "$PACKAGES" ]; then
+          PACKAGES=$(go list ./...)
+        fi
         go test -race -coverprofile=coverage.out -covermode=atomic -timeout=10m $PACKAGES
     
     - name: Upload coverage reports
