@@ -16,13 +16,13 @@ fi
 # Check if golangci-lint is installed
 LINT_PATH="$GOPATH/bin/golangci-lint"
 if [ ! -f "$LINT_PATH" ]; then
-    echo "golangci-lint not found. Installing..."
-    # Use v2.x to match CI (golangci-lint-action uses 'latest' which resolves to v2.8.0+)
-    # This ensures compatibility with .golangci.yml version: 2
-    go install github.com/golangci/golangci-lint/cmd/golangci-lint@v2.8.0
+    echo "golangci-lint not found. Installing using official script (matches CI)..."
+    # Use official install script to match CI (golangci-lint-action uses 'latest')
+    # This ensures we get the same version CI uses
+    curl -sSfL https://golangci-lint.run/install.sh | sh -s -- -b "$GOPATH/bin" latest
     if [ $? -ne 0 ]; then
         echo "Failed to install golangci-lint. Please install manually:"
-        echo "  go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8"
+        echo "  curl -sSfL https://golangci-lint.run/install.sh | sh -s -- -b \$(go env GOPATH)/bin latest"
         exit 1
     fi
 fi
