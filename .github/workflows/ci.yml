@@ -113,7 +113,7 @@ jobs:
       run: go mod download
     
     - name: Run golangci-lint
-      uses: golangci/golangci-lint-action@v8
+      uses: golangci/golangci-lint-action@v9
       with:
         version: v2.8.0
         # Focus on production code - test files excluded via .golangci.yml skip-files
