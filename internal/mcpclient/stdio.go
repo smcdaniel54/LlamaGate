@@ -47,23 +47,23 @@ func NewStdioTransport(command string, args []string, env map[string]string) (*S
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		cancel()
-		stdin.Close()
+		_ = stdin.Close() // Ignore error - we're already returning an error
 		return nil, fmt.Errorf("failed to create stdout pipe: %w", err)
 	}
 
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
 		cancel()
-		stdin.Close()
-		stdout.Close()
+		_ = stdin.Close()   // Ignore error - we're already returning an error
+		_ = stdout.Close()   // Ignore error - we're already returning an error
 		return nil, fmt.Errorf("failed to create stderr pipe: %w", err)
 	}
 
 	if err := cmd.Start(); err != nil {
 		cancel()
-		stdin.Close()
-		stdout.Close()
-		stderr.Close()
+		_ = stdin.Close()   // Ignore error - we're already returning an error
+		_ = stdout.Close()  // Ignore error - we're already returning an error
+		_ = stderr.Close()  // Ignore error - we're already returning an error
 		return nil, fmt.Errorf("failed to start command: %w", err)
 	}
 
@@ -231,7 +231,7 @@ func (t *StdioTransport) Close() error {
 
 	// Close stdin to signal shutdown
 	if t.stdin != nil {
-		t.stdin.Close()
+		_ = t.stdin.Close() // Ignore error - we're shutting down
 	}
 
 	// Wait for process to exit with timeout
@@ -255,10 +255,10 @@ func (t *StdioTransport) Close() error {
 
 	// Close pipes
 	if t.stdout != nil {
-		t.stdout.Close()
+		_ = t.stdout.Close() // Ignore error - we're shutting down
 	}
 	if t.stderr != nil {
-		t.stderr.Close()
+		_ = t.stderr.Close() // Ignore error - we're shutting down
 	}
 
 	return nil

@@ -126,13 +126,13 @@ func (p *ConnectionPool) Acquire(ctx context.Context, factory func() (*Client, e
 			p.mu.Lock()
 			if p.closed {
 				p.mu.Unlock()
-				client.Close()
+				_ = client.Close() // Ignore error - pool is closed
 				return nil, ErrPoolClosed
 			}
 			// Double-check: another goroutine might have filled the pool while we were creating the connection
 			if len(p.connections) >= p.config.MaxConnections {
 				p.mu.Unlock()
-				client.Close()
+				_ = client.Close() // Ignore error - pool is full
 				// Retry the loop to wait for an available connection
 				continue
 			}
@@ -182,7 +182,7 @@ func (p *ConnectionPool) Remove(conn *PooledConnection) {
 	for i, c := range p.connections {
 		if c == conn {
 			// Close the connection
-			conn.client.Close()
+			_ = conn.client.Close() // Ignore error - we're removing the connection
 
 			// Remove from slice
 			p.connections = append(p.connections[:i], p.connections[i+1:]...)
@@ -288,7 +288,7 @@ func (p *ConnectionPool) cleanup() {
 	for _, conn := range toRemove {
 		for i, c := range p.connections {
 			if c == conn {
-				conn.client.Close()
+				_ = conn.client.Close() // Ignore error - we're removing the connection
 				p.connections = append(p.connections[:i], p.connections[i+1:]...)
 				log.Debug().
 					Str("server", conn.client.GetName()).

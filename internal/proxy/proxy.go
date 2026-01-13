@@ -453,7 +453,7 @@ func (p *Proxy) handleStreamingResponse(c *gin.Context, httpReq *http.Request, r
 			},
 		}
 		errorJSON, _ := json.Marshal(errorChunk)
-		fmt.Fprintf(c.Writer, "data: %s\n\n", errorJSON)
+		_, _ = fmt.Fprintf(c.Writer, "data: %s\n\n", errorJSON) // Ignore error - streaming response
 		c.Writer.Flush()
 		return
 	}
