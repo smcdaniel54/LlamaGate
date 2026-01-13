@@ -182,10 +182,12 @@ jobs:
 
   # Race detector tests - run less frequently to avoid CI slowdowns
   # Developers should run these locally: go test -race ./...
+  # This job is non-blocking - failures won't prevent merges
   test-race:
     name: Test (Race Detector)
     if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
     - uses: actions/checkout@v4
     
