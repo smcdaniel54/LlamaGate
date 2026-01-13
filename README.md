@@ -1,10 +1,11 @@
 # LlamaGate
 
+[![CI](https://github.com/smcdaniel54/LlamaGate/workflows/CI/badge.svg)](https://github.com/smcdaniel54/LlamaGate/actions/workflows/ci.yml)
 [![Go Version](https://img.shields.io/badge/go-1.23+-00ADD8?style=flat&logo=go)](https://go.dev/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey)](README.md)
 
-LlamaGate is a production-ready, OpenAI-compatible HTTP proxy/gateway for local Ollama instances. It's a lightweight, single-binary tool that forwards requests to Ollama with added features like caching, authentication, rate limiting, and structured logging.
+LlamaGate is a production-ready, OpenAI-compatible API gateway for local LLMs (Ollama). It lets you point existing OpenAI SDKs (Python, Node, etc.) at local models as a drop-in replacement, while adding production features like streaming, tool/function calling guardrails, authentication, rate limiting, caching, and structured logging.
 
 > 🚀 **New to LlamaGate?**  
 > **[Quick Start Guide](QUICKSTART.md)** - Get running in 2 minutes
@@ -12,17 +13,14 @@ LlamaGate is a production-ready, OpenAI-compatible HTTP proxy/gateway for local 
 ## Features
 
 - ✅ **OpenAI-Compatible API**: Drop-in replacement for OpenAI API endpoints
-- ✅ **MCP Client Support**: Connect to MCP servers and expose their tools to models ([MCP Guide](docs/MCP.md) | [Quick Start](docs/MCP_QUICKSTART.md))
-- ✅ **Plugin System**: Create reusable plugins and agentic workflows ([Plugin Guide](docs/PLUGINS.md) | [Quick Start](docs/PLUGIN_QUICKSTART.md))
-- ✅ **Caching**: In-memory caching for identical prompts to reduce Ollama load
+- ✅ **Streaming Chat Completions**: Full support for Server-Sent Events (SSE) streaming
+- ✅ **Tool / Function Calling**: Execute MCP tools in multi-round loops with safety limits (round limits, call limits, timeouts, size limits, allow/deny lists)
 - ✅ **Authentication**: Optional API key authentication via headers
 - ✅ **Rate Limiting**: Configurable rate limiting using leaky bucket algorithm
-- ✅ **Structured Logging**: JSON logging with request IDs using Zerolog
-- ✅ **Streaming Support**: Full support for streaming chat completions
-- ✅ **Tool/Function Calling**: Execute MCP tools in multi-round loops
-- ✅ **Graceful Shutdown**: Clean shutdown on SIGINT/SIGTERM
-- ✅ **Single Binary**: Lightweight, easy to deploy
-- ✅ **Docker Support**: Multi-stage Dockerfile for minimal image size
+- ✅ **Request Correlation & Structured Logging**: JSON logging with request IDs using Zerolog
+- ✅ **Caching**: In-memory caching for identical prompts to reduce Ollama load
+- ✅ **MCP Client Support**: Connect to MCP servers and expose their tools to models ([MCP Guide](docs/MCP.md) | [Quick Start](docs/MCP_QUICKSTART.md))
+- ✅ **Plugin System**: Create reusable plugins and agentic workflows ([Plugin Guide](docs/PLUGINS.md) | [Quick Start](docs/PLUGIN_QUICKSTART.md))
 
 ## Documentation
 
