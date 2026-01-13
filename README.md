@@ -37,9 +37,33 @@ LlamaGate is a production-ready, OpenAI-compatible API gateway for local LLMs (O
 
 ## Installation
 
-### ⚡ One-Click Install (Easiest - Recommended!)
+### ⚡ One-Liner Install (Fastest - Recommended!)
 
-**Automatically downloads the correct binary for your platform - no Go required!**
+**Download and run directly from GitHub - no cloning required!**
+
+**Windows (PowerShell):**
+```powershell
+# Download and run binary installer
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/windows/install-binary.ps1" -OutFile install-binary.ps1; .\install-binary.ps1
+```
+
+**Unix/Linux/macOS:**
+```bash
+# Download and run binary installer
+curl -fsSL https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/unix/install-binary.sh | bash
+```
+
+This will:
+- ✅ Automatically detect your platform
+- ✅ Download the correct binary from GitHub releases
+- ✅ Set up the executable
+- ✅ Create a default `.env` configuration file
+
+**That's it!** You're ready to run LlamaGate.
+
+### 🔧 One-Click Install (From Cloned Repo)
+
+**If you've already cloned the repository:**
 
 **Windows:**
 ```cmd
@@ -51,14 +75,6 @@ install\windows\install-binary.cmd
 chmod +x install/unix/install-binary.sh
 ./install/unix/install-binary.sh
 ```
-
-This will:
-- ✅ Automatically detect your platform
-- ✅ Download the correct binary
-- ✅ Set up the executable
-- ✅ Create a default `.env` configuration file
-
-**That's it!** You're ready to run LlamaGate.
 
 ### 🚀 Manual Download (Also Easy - No Go Required!)
 
@@ -90,22 +106,40 @@ chmod +x llamagate-darwin-amd64
 
 **All platforms:** See [Releases](https://github.com/llamagate/llamagate/releases) for all available binaries (amd64, arm64, etc.).
 
-### Build from Source (For Developers)
+### 🔨 Build from Source (For Developers)
 
 If you prefer to build from source or need custom builds:
 
-**Windows:**
+**One-liner (download and run):**
 
+**Windows (PowerShell):**
+```powershell
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/windows/install.ps1" -OutFile install.ps1; .\install.ps1
+```
+
+**Unix/Linux/macOS:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/unix/install.sh | bash
+```
+
+**From cloned repository:**
+
+**Windows:**
 ```cmd
 install\windows\install.cmd
 ```
 
 **Unix/Linux/macOS:**
-
 ```bash
 chmod +x install/unix/install.sh
 ./install/unix/install.sh
 ```
+
+The full installer will:
+- ✅ Check for Go and install it if needed
+- ✅ Check for Ollama and guide you to install it
+- ✅ Build LlamaGate from source
+- ✅ Create a `.env` configuration file
 
 **The installer will:**
 
