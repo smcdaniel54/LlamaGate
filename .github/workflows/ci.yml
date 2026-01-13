@@ -131,6 +131,12 @@ jobs:
       shell: pwsh
       run: |
         .\tests\installer\test-installer-windows.ps1
+    
+    - name: Test One-Liners
+      if: matrix.installer_type == 'windows'
+      shell: pwsh
+      run: |
+        .\tests\installer\test-one-liners.ps1
 
   security:
     name: Security Scan
