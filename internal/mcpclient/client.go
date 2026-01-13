@@ -108,6 +108,7 @@ func NewClientWithSSE(name, url string, headers map[string]string) (*Client, err
 	// Initialize the client (MCP handshake)
 	ctx := context.Background()
 	if err := client.initialize(ctx); err != nil {
+		transport.Close()
 		return nil, fmt.Errorf("failed to initialize client: %w", err)
 	}
 
