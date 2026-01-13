@@ -3,6 +3,8 @@ package mcpclient
 import (
 	"context"
 	"encoding/json"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 	"time"
 
@@ -84,29 +86,61 @@ func TestServerManager_HTTPTransportWithPool(t *testing.T) {
 	manager := NewServerManager(config)
 	defer manager.Close()
 
-	// Create a mock HTTP client
-	transport := newMockTransport()
-	client := &Client{
-		name:         "http-server",
-		transport:    transport,
-		toolsMap:     make(map[string]*Tool),
-		resourcesMap: make(map[string]*Resource),
-		promptsMap:   make(map[string]*Prompt),
-	}
+	// Create a mock HTTP server for testing
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var req JSONRPCRequest
+		json.NewDecoder(r.Body).Decode(&req)
+		resp := JSONRPCResponse{
+			JSONRPC: JSONRPCVersion,
+			ID:      req.ID,
+			Result:  json.RawMessage(`{"protocolVersion":"2024-11-05","capabilities":{},"serverInfo":{"name":"test-server","version":"1.0.0"}}`),
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(resp)
+	}))
+	defer server.Close()
+
+	// Create HTTP client with real HTTPTransport
+	client, err := NewClientWithHTTP("http-server", server.URL, nil, 30*time.Second)
+	require.NoError(t, err)
 
 	// Add HTTP server (should create pool)
-	err := manager.AddServer("http-server", client, "http")
+	err = manager.AddServer("http-server", client, "http")
 	require.NoError(t, err)
 
 	serverInfo, err := manager.GetServer("http-server")
 	require.NoError(t, err)
 	assert.NotNil(t, serverInfo.Pool) // HTTP should have a pool
 
-	// Test getting client (should use pool)
+	// Test getting client (should use pool and create new client instances)
 	ctx := context.Background()
-	acquiredClient, err := manager.GetClient(ctx, "http-server")
+	acquiredClient1, err := manager.GetClient(ctx, "http-server")
 	require.NoError(t, err)
-	assert.Equal(t, client, acquiredClient)
+	assert.NotNil(t, acquiredClient1)
+	// Verify it's a different instance (not the same pointer) - pool should create new clients
+	// Compare pointers explicitly to ensure they're different instances
+	assert.NotSame(t, client, acquiredClient1, "Pool should return a new client instance, not reuse the same one")
+	
+	// Release the first client
+	manager.ReleaseClient("http-server", acquiredClient1)
+	
+	// Get another client - pool might reuse the released one or create a new one
+	acquiredClient2, err := manager.GetClient(ctx, "http-server")
+	require.NoError(t, err)
+	assert.NotNil(t, acquiredClient2)
+	// Should be different from original client (the one passed to AddServer)
+	assert.NotSame(t, client, acquiredClient2, "Pool should not return the original client instance")
+	
+	// Get multiple clients concurrently to verify pool creates multiple instances
+	acquiredClient3, err := manager.GetClient(ctx, "http-server")
+	require.NoError(t, err)
+	assert.NotNil(t, acquiredClient3)
+	assert.NotSame(t, client, acquiredClient3, "Pool should not return the original client instance")
+	
+	// Verify at least one of the acquired clients is different from the others
+	// (proving the pool is creating new instances, not always returning the same one)
+	allDifferent := acquiredClient1 != acquiredClient2 || acquiredClient1 != acquiredClient3 || acquiredClient2 != acquiredClient3
+	assert.True(t, allDifferent, "Pool should create multiple different client instances when needed")
 }
 
 func TestServerManager_HealthMonitoring(t *testing.T) {

@@ -191,3 +191,28 @@ func (t *HTTPTransport) IsClosed() bool {
 	defer t.mu.RUnlock()
 	return t.closed
 }
+
+// GetURL returns the transport URL
+func (t *HTTPTransport) GetURL() string {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+	return t.url
+}
+
+// GetHeaders returns a copy of the transport headers
+func (t *HTTPTransport) GetHeaders() map[string]string {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+	headers := make(map[string]string, len(t.headers))
+	for k, v := range t.headers {
+		headers[k] = v
+	}
+	return headers
+}
+
+// GetTimeout returns the HTTP client timeout
+func (t *HTTPTransport) GetTimeout() time.Duration {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+	return t.httpClient.Timeout
+}

@@ -191,10 +191,28 @@ func (sm *ServerManager) GetClient(ctx context.Context, name string) (*Client, e
 	// For HTTP transport, use connection pool
 	if serverInfo.Pool != nil {
 		pooledConn, err := serverInfo.Pool.Acquire(ctx, func() (*Client, error) {
-			// Factory function to create new client
-			// For now, we'll reuse the existing client
-			// In a real implementation, you'd create a new connection here
-			return serverInfo.Client, nil
+			// Factory function to create new client instance
+			// Extract connection info from the original client's transport
+			httpTransport, ok := serverInfo.Client.transport.(*HTTPTransport)
+			if !ok {
+				// Fallback: if transport is not HTTPTransport, return original client
+				// This shouldn't happen for HTTP transport, but handle gracefully
+				return serverInfo.Client, nil
+			}
+			
+			// Get connection parameters from the original transport
+			url := httpTransport.GetURL()
+			headers := httpTransport.GetHeaders()
+			timeout := httpTransport.GetTimeout()
+			
+			// Create a new client with the same configuration
+			// NewClientWithHTTP handles context creation internally
+			newClient, err := NewClientWithHTTP(serverInfo.Client.name, url, headers, timeout)
+			if err != nil {
+				return nil, fmt.Errorf("failed to create new pooled client: %w", err)
+			}
+			
+			return newClient, nil
 		})
 		if err != nil {
 			return nil, fmt.Errorf("failed to acquire connection from pool: %w", err)
