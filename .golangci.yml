@@ -16,6 +16,7 @@ run:
 linters:
   # Enable specific linters (disabled some slower ones for CI performance)
   # Note: gosimple is merged into staticcheck in v2.x
+  # Note: gofmt and goimports are formatters, not linters in v2.x - use 'go fmt' and 'goimports' commands directly
   enable:
     - errcheck
     - govet
@@ -29,12 +30,6 @@ linters:
   # Disabled gocritic for now due to performance - can re-enable if needed
   disable:
     - gocritic
-
-# Formatters (not linters in v2.x)
-formatters:
-  enable:
-    - gofmt
-    - goimports
 
 issues:
   # The maximum number of issues per one linter. Set to 0 to disable. Default is 50.
