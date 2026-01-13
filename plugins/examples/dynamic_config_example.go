@@ -1,3 +1,5 @@
+// Package examples provides example plugin implementations demonstrating
+// various LlamaGate plugin capabilities and patterns.
 package examples
 
 import (
@@ -233,7 +235,7 @@ func (p *DynamicConfigPlugin) getConfiguration(input map[string]interface{}) map
 
 // calculateTimeout calculates timeout based on configuration
 func (p *DynamicConfigPlugin) calculateTimeout(env string, maxDepth int) time.Duration {
-	baseTimeout := 10 * time.Second
+	var baseTimeout time.Duration
 
 	// Adjust based on environment
 	switch env {

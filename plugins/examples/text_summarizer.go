@@ -124,7 +124,7 @@ func (p *TextSummarizerPlugin) ValidateInput(input map[string]interface{}) error
 }
 
 // Execute runs the text summarization workflow
-func (p *TextSummarizerPlugin) Execute(ctx context.Context, input map[string]interface{}) (*plugins.PluginResult, error) {
+func (p *TextSummarizerPlugin) Execute(_ context.Context, input map[string]interface{}) (*plugins.PluginResult, error) {
 	startTime := time.Now()
 
 	// Extract and validate inputs
@@ -184,7 +184,7 @@ func (p *TextSummarizerPlugin) preprocessText(text string) string {
 }
 
 // extractKeySentences extracts the most important sentences
-func (p *TextSummarizerPlugin) extractKeySentences(text string, maxLength int, style string) []string {
+func (p *TextSummarizerPlugin) extractKeySentences(text string, maxLength int, _ string) []string {
 	// Split into sentences (simple approach - can be enhanced)
 	sentences := strings.Split(text, ".")
 

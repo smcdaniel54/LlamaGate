@@ -405,11 +405,12 @@ func (s *MCPServerConfig) Validate() error {
 		return fmt.Errorf("invalid transport: %s (must be stdio, http, or sse)", s.Transport)
 	}
 
-	if s.Transport == "stdio" {
+	switch s.Transport {
+	case "stdio":
 		if s.Command == "" {
 			return fmt.Errorf("command is required for stdio transport")
 		}
-	} else if s.Transport == "http" || s.Transport == "sse" {
+	case "http", "sse":
 		if s.URL == "" {
 			return fmt.Errorf("URL is required for %s transport", s.Transport)
 		}

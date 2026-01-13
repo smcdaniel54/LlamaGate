@@ -1,3 +1,4 @@
+//nolint:revive // "api" is a meaningful package name for API handlers
 package api
 
 import (
