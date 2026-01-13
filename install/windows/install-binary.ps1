@@ -14,7 +14,7 @@ $binaryName = "llamagate-windows-amd64.exe"
 $targetName = "llamagate.exe"
 
 # Get latest release URL
-$latestReleaseUrl = "https://github.com/llamagate/llamagate/releases/latest/download/$binaryName"
+$latestReleaseUrl = "https://github.com/smcdaniel54/LlamaGate/releases/latest/download/$binaryName"
 $targetPath = Join-Path $PSScriptRoot "..\..\$targetName"
 
 Write-Host "[1/3] Downloading LlamaGate binary..." -ForegroundColor Yellow
@@ -28,7 +28,7 @@ try {
     Write-Host "  [ERROR] Download failed: $_" -ForegroundColor Red
     Write-Host ""
     Write-Host "Please download manually from:" -ForegroundColor Yellow
-    Write-Host "  https://github.com/llamagate/llamagate/releases/latest" -ForegroundColor Cyan
+    Write-Host "  https://github.com/smcdaniel54/LlamaGate/releases/latest" -ForegroundColor Cyan
     exit 1
 }
 

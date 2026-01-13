@@ -41,7 +41,7 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 TARGET_PATH="$PROJECT_ROOT/$TARGET_NAME"
 
 # Latest release URL
-LATEST_RELEASE_URL="https://github.com/llamagate/llamagate/releases/latest/download/$BINARY_NAME"
+LATEST_RELEASE_URL="https://github.com/smcdaniel54/LlamaGate/releases/latest/download/$BINARY_NAME"
 
 echo "========================================"
 echo -e "${CYAN}LlamaGate Binary Installer${NC}"
@@ -72,7 +72,7 @@ else
     echo -e "${RED}✗${NC} Download failed"
     echo ""
     echo "Please download manually from:"
-    echo -e "${CYAN}  https://github.com/llamagate/llamagate/releases/latest${NC}"
+    echo -e "${CYAN}  https://github.com/smcdaniel54/LlamaGate/releases/latest${NC}"
     exit 1
 fi
 
