@@ -1,6 +1,6 @@
 # LlamaGate
 
-[![CI](https://github.com/smcdaniel54/LlamaGate/workflows/CI/badge.svg)](https://github.com/smcdaniel54/LlamaGate/actions/workflows/ci.yml)
+[![CI](https://github.com/smcdaniel54/LlamaGate/actions/workflows/ci.yml/badge.svg)](https://github.com/smcdaniel54/LlamaGate/actions/workflows/ci.yml)
 [![Go Version](https://img.shields.io/badge/go-1.23+-00ADD8?style=flat&logo=go)](https://go.dev/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey)](README.md)
