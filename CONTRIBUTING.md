@@ -35,6 +35,10 @@ Feature suggestions are welcome! Please open an issue describing:
    go test ./...
    go build ./cmd/llamagate
    ```
+   For concurrent code, also run race detector tests:
+   ```bash
+   CGO_ENABLED=1 go test -race ./...
+   ```
 5. **Commit your changes:**
    ```bash
    git commit -m "Add: description of your changes"

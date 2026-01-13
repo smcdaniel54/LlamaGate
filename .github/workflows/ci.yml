@@ -52,17 +52,15 @@ jobs:
         rm -rf coverage .out 2>/dev/null || true
       shell: bash
     
-    - name: Run tests with race detector
-      timeout-minutes: 15
+    - name: Run tests
+      timeout-minutes: 10
       shell: bash
-      env:
-        CGO_ENABLED: 1
       run: |
         PACKAGES=$(go list ./... 2>/dev/null | grep -v "^\.out$" || go list ./...)
         if [ -z "$PACKAGES" ]; then
           PACKAGES=$(go list ./...)
         fi
-        go test -race -coverprofile=coverage.out -covermode=atomic -timeout=10m $PACKAGES
+        go test -coverprofile=coverage.out -covermode=atomic -timeout=5m $PACKAGES
     
     - name: Upload coverage reports
       uses: codecov/codecov-action@v4
@@ -181,3 +179,32 @@ jobs:
       run: |
         go install golang.org/x/vuln/cmd/govulncheck@latest
         govulncheck ./...
+
+  # Race detector tests - run less frequently to avoid CI slowdowns
+  # Developers should run these locally: go test -race ./...
+  test-race:
+    name: Test (Race Detector)
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.24'
+        cache-dependency-path: go.sum
+    
+    - name: Download dependencies
+      run: go mod download
+    
+    - name: Run tests with race detector
+      timeout-minutes: 20
+      env:
+        CGO_ENABLED: 1
+      run: |
+        PACKAGES=$(go list ./... 2>/dev/null | grep -v "^\.out$" || go list ./...)
+        if [ -z "$PACKAGES" ]; then
+          PACKAGES=$(go list ./...)
+        fi
+        go test -race -timeout=10m $PACKAGES
