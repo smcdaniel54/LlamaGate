@@ -195,8 +195,18 @@ func (p *Proxy) HandleChatCompletions(c *gin.Context) {
 	}
 
 	// Check cache for non-streaming requests using final messages (with tool context if applicable)
+	// Cache key includes all parameters that affect the response
 	if !req.Stream {
-		if cached, found := p.cache.Get(req.Model, finalMessages); found {
+		cacheParams := cache.CacheKeyParams{
+			Model:       req.Model,
+			Messages:    finalMessages,
+			Temperature: req.Temperature,
+			MaxTokens:   req.MaxTokens,
+			Tools:       req.Tools,
+			Functions:   req.Functions,
+			ToolChoice:  req.ToolChoice,
+		}
+		if cached, found := p.cache.Get(cacheParams); found {
 			log.Info().
 				Str("request_id", requestID).
 				Str("model", req.Model).
@@ -255,7 +265,17 @@ func (p *Proxy) HandleChatCompletions(c *gin.Context) {
 	if req.Stream {
 		p.handleStreamingResponse(c, httpReq, requestID, startTime, req.Model)
 	} else {
-		p.handleNonStreamingResponse(c, httpReq, requestID, startTime, req.Model, finalMessages)
+		// Build cache params for storing response
+		cacheParams := cache.CacheKeyParams{
+			Model:       req.Model,
+			Messages:    finalMessages,
+			Temperature: req.Temperature,
+			MaxTokens:   req.MaxTokens,
+			Tools:       req.Tools,
+			Functions:   req.Functions,
+			ToolChoice:  req.ToolChoice,
+		}
+		p.handleNonStreamingResponse(c, httpReq, requestID, startTime, cacheParams)
 	}
 }
 
@@ -470,7 +490,7 @@ func convertOllamaStreamChunkToOpenAI(ollamaChunk map[string]interface{}, model,
 }
 
 // handleNonStreamingResponse handles non-streaming responses from Ollama
-func (p *Proxy) handleNonStreamingResponse(c *gin.Context, httpReq *http.Request, requestID string, startTime time.Time, model string, messages []Message) {
+func (p *Proxy) handleNonStreamingResponse(c *gin.Context, httpReq *http.Request, requestID string, startTime time.Time, cacheParams cache.CacheKeyParams) {
 	resp, err := p.client.Do(httpReq)
 	if err != nil {
 		log.Error().
@@ -515,7 +535,7 @@ func (p *Proxy) handleNonStreamingResponse(c *gin.Context, httpReq *http.Request
 		}
 
 		// Convert to OpenAI format
-		openAIResp := convertOllamaToOpenAIFormat(ollamaResp, model)
+		openAIResp := convertOllamaToOpenAIFormat(ollamaResp, cacheParams.Model)
 
 		// Marshal to JSON
 		responseBody, err = json.Marshal(openAIResp)
@@ -529,7 +549,7 @@ func (p *Proxy) handleNonStreamingResponse(c *gin.Context, httpReq *http.Request
 		}
 
 		// Cache the converted OpenAI-format response
-		if err := p.cache.Set(model, messages, responseBody); err != nil {
+		if err := p.cache.Set(cacheParams, responseBody); err != nil {
 			log.Warn().
 				Str("request_id", requestID).
 				Err(err).

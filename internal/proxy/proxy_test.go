@@ -248,11 +248,22 @@ func TestProxy_HandleChatCompletions_CacheHit(t *testing.T) {
 	proxyInstance := New("http://localhost:11434", cacheInstance)
 
 	// Pre-populate cache
+	// Use the same message format and parameters that will be in the request
+	// The request will have zero values for optional params, so we match that
 	messages := []Message{
 		{Role: "user", Content: "Hello"},
 	}
 	cachedResponse := []byte(`{"model":"llama2","choices":[{"message":{"role":"assistant","content":"Cached response"}}]}`)
-	cacheInstance.Set("llama2", messages, cachedResponse)
+	cacheParams := cache.CacheKeyParams{
+		Model:       "llama2",
+		Messages:    messages,
+		Temperature: 0, // Zero value to match request without temperature
+		MaxTokens:   0, // Zero value to match request
+		Tools:       nil,
+		Functions:   nil,
+		ToolChoice:  nil,
+	}
+	cacheInstance.Set(cacheParams, cachedResponse)
 
 	gin.SetMode(gin.TestMode)
 	router := gin.New()

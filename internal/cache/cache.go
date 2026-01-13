@@ -62,19 +62,21 @@ func NewWithOptions(opts CacheOptions) *Cache {
 	return c
 }
 
-// hashRequest creates a SHA256 hash of the model and messages for use as a cache key
-func hashRequest(model string, messages interface{}) (string, error) {
-	// Create a struct to hash
-	keyData := struct {
-		Model    string      `json:"model"`
-		Messages interface{} `json:"messages"`
-	}{
-		Model:    model,
-		Messages: messages,
-	}
+// CacheKeyParams holds all parameters that affect the cache key
+type CacheKeyParams struct {
+	Model       string      `json:"model"`
+	Messages    interface{} `json:"messages"`
+	Temperature float64    `json:"temperature,omitempty"`
+	MaxTokens   int         `json:"max_tokens,omitempty"`
+	Tools      interface{} `json:"tools,omitempty"`      // Tool definitions
+	Functions   interface{} `json:"functions,omitempty"` // Function definitions (legacy)
+	ToolChoice  interface{} `json:"tool_choice,omitempty"`
+}
 
+// hashRequest creates a SHA256 hash of all cache key parameters
+func hashRequest(params CacheKeyParams) (string, error) {
 	// Marshal to JSON
-	jsonData, err := json.Marshal(keyData)
+	jsonData, err := json.Marshal(params)
 	if err != nil {
 		return "", err
 	}
@@ -85,8 +87,8 @@ func hashRequest(model string, messages interface{}) (string, error) {
 }
 
 // Get retrieves a cached response if it exists and is not expired
-func (c *Cache) Get(model string, messages interface{}) ([]byte, bool) {
-	key, err := hashRequest(model, messages)
+func (c *Cache) Get(params CacheKeyParams) ([]byte, bool) {
+	key, err := hashRequest(params)
 	if err != nil {
 		return nil, false
 	}
@@ -136,8 +138,8 @@ func (c *Cache) Get(model string, messages interface{}) ([]byte, bool) {
 }
 
 // Set stores a response in the cache, evicting old entries if size limit is reached
-func (c *Cache) Set(model string, messages interface{}, response []byte) error {
-	key, err := hashRequest(model, messages)
+func (c *Cache) Set(params CacheKeyParams, response []byte) error {
+	key, err := hashRequest(params)
 	if err != nil {
 		return err
 	}
