@@ -58,7 +58,7 @@ jobs:
           -o ${{ matrix.binary_name }} ./cmd/llamagate
     
     - name: Upload artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: ${{ matrix.binary_name }}
         path: ${{ matrix.binary_name }}
