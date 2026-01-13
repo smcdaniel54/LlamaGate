@@ -49,7 +49,7 @@ func InitializeMCP(cfg *config.MCPConfig) (*MCPComponents, error) {
 		cfg.MaxToolResultSize,
 	)
 	if err != nil {
-		serverManager.Close()
+		_ = serverManager.Close() // Ignore error - we're cleaning up after initialization failure
 		return nil, fmt.Errorf("failed to create MCP guardrails: %w", err)
 	}
 
@@ -77,7 +77,7 @@ func InitializeMCP(cfg *config.MCPConfig) (*MCPComponents, error) {
 				Str("server", serverCfg.Name).
 				Err(err).
 				Msg("Failed to add MCP client to tool manager")
-			client.Close()
+			_ = client.Close() // Ignore error - we're cleaning up after AddClient failure
 			continue
 		}
 
