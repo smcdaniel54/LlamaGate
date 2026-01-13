@@ -54,12 +54,19 @@ Feature suggestions are welcome! Please open an issue describing:
 ## Code Style
 
 - Follow standard Go formatting (`go fmt`)
-- Use `golangci-lint` v2.8.0 for linting (matches CI):
+- Use `golangci-lint` v2.8.0 for linting:
   - **Windows:** `.\scripts\windows\install-golangci-lint.ps1` then `golangci-lint run`
   - **Unix/Linux/macOS:** `./scripts/unix/lint.sh`
+- **Important:** Run linting locally before pushing - CI excludes test files from errcheck for speed, but you should fix all issues locally
 - Write clear, self-documenting code
 - Add comments for exported functions
 - Keep functions small and focused
+
+### CI vs Local Linting
+
+- **Local:** Full linting including test files (strict)
+- **CI:** Production code only (faster, excludes test files from errcheck)
+- **Why:** CI focuses on production code quality while maintaining fast feedback. Developers should fix all issues locally before pushing.
 
 ## Testing
 

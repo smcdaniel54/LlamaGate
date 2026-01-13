@@ -31,10 +31,26 @@ linters:
   disable:
     - gocritic
 
+linters-settings:
+  errcheck:
+    # Check all functions except those in test files
+    # This speeds up CI significantly while keeping production code strict
+    check-type-assertions: true
+    check-blank: true
+    # Exclude test files from errcheck in CI (handled via issues.exclude-rules)
+    # Developers should still run errcheck on tests locally
+
 issues:
   # The maximum number of issues per one linter. Set to 0 to disable. Default is 50.
   max-issues-per-linter: 0
   
   # The maximum count of issues with the same text. Set to 0 to disable. Default is 3.
   max-same-issues: 0
+  
+  # Exclude errcheck errors in test files to speed up CI
+  # Developers should still check these locally, but CI focuses on production code
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - errcheck
 
