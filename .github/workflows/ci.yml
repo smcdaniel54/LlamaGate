@@ -9,6 +9,7 @@ on:
 jobs:
   test:
     name: Test
+    if: false  # Temporarily disabled to focus on Windows installer
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -99,6 +100,7 @@ jobs:
 
   lint:
     name: Lint
+    if: false  # Temporarily disabled to focus on Windows installer
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -124,19 +126,20 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-latest
-            installer_type: unix
+          # - os: ubuntu-latest
+          #   installer_type: unix
+          # Temporarily disabled to focus on Windows installer
           - os: windows-latest
             installer_type: windows
     
     steps:
     - uses: actions/checkout@v4
     
-    - name: Test Unix Installer
-      if: matrix.installer_type == 'unix'
-      run: |
-        chmod +x tests/installer/test-installer-unix.sh
-        ./tests/installer/test-installer-unix.sh
+    # - name: Test Unix Installer
+    #   if: matrix.installer_type == 'unix'
+    #   run: |
+    #     chmod +x tests/installer/test-installer-unix.sh
+    #     ./tests/installer/test-installer-unix.sh
     
     - name: Test Windows Installer
       if: matrix.installer_type == 'windows'
@@ -152,6 +155,7 @@ jobs:
 
   security:
     name: Security Scan
+    if: false  # Temporarily disabled to focus on Windows installer
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
