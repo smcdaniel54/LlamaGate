@@ -12,17 +12,6 @@ run:
   
   # Build tags to use
   build-tags: []
-  
-  # Which dirs to exclude: issues from them won't be reported.
-  exclude-dirs:
-    - vendor
-    - scripts
-    - docs
-    - .git
-  
-  # Which files to exclude: they will be analyzed, but issues from them won't be reported.
-  exclude-files:
-    - ".*\\.pb\\.go$"
 
 linters:
   # Enable specific linters (disabled some slower ones for CI performance)
