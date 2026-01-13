@@ -27,8 +27,9 @@ if [ ! -f "$LINT_PATH" ]; then
     fi
 fi
 
-# Run the linter
-"$LINT_PATH" run --timeout=15m
+# Run the linter with test files enabled (stricter than CI)
+# CI uses tests: false for speed, but developers should lint everything locally
+"$LINT_PATH" run --timeout=15m --tests
 
 if [ $? -ne 0 ]; then
     echo "Linting failed!"

@@ -55,18 +55,21 @@ Feature suggestions are welcome! Please open an issue describing:
 
 - Follow standard Go formatting (`go fmt`)
 - Use `golangci-lint` v2.8.0 for linting:
-  - **Windows:** `.\scripts\windows\install-golangci-lint.ps1` then `golangci-lint run`
+  - **Windows:** `.\scripts\windows\install-golangci-lint.ps1` then `.\scripts\windows\lint.ps1`
   - **Unix/Linux/macOS:** `./scripts/unix/lint.sh`
-- **Important:** Run linting locally before pushing - CI excludes test files from errcheck for speed, but you should fix all issues locally
+- **Pre-commit hook:** Automatically runs linting on staged files before each commit
+  - **Windows:** `.\scripts\windows\setup-pre-commit.ps1` (one-time setup)
+  - **Unix/Linux/macOS:** Pre-commit hook is automatically created
+  - To skip: `git commit --no-verify`
 - Write clear, self-documenting code
 - Add comments for exported functions
 - Keep functions small and focused
 
 ### CI vs Local Linting
 
-- **Local:** Full linting including test files (strict)
-- **CI:** Production code only (faster, excludes test files from errcheck)
-- **Why:** CI focuses on production code quality while maintaining fast feedback. Developers should fix all issues locally before pushing.
+- **Local:** Full linting including test files (strict) - enforced by pre-commit hook
+- **CI:** Production code only (faster, `tests: false` in `.golangci.yml`)
+- **Why:** CI focuses on production code quality while maintaining fast feedback. Pre-commit hook ensures developers fix all issues locally before pushing.
 
 ## Testing
 

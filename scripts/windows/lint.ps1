@@ -31,8 +31,9 @@ if (-not (Test-Path $lintPath)) {
     }
 }
 
-# Run the linter
-& $lintPath run --timeout=15m
+# Run the linter with test files enabled (stricter than CI)
+# CI uses tests: false for speed, but developers should lint everything locally
+& $lintPath run --timeout=15m --tests
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Linting failed!" -ForegroundColor Red
