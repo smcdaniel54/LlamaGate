@@ -7,7 +7,7 @@ Write-Host ""
 $errors = @()
 
 # Test 1: Check if installer file exists
-Write-Host "[1/4] Checking installer file..." -ForegroundColor Yellow
+Write-Host "[1/6] Checking installer file..." -ForegroundColor Yellow
 if (Test-Path "install\windows\install.ps1") {
     Write-Host "  [OK] Installer file exists" -ForegroundColor Green
 } else {
@@ -16,7 +16,7 @@ if (Test-Path "install\windows\install.ps1") {
 }
 
 # Test 2: Validate PowerShell syntax (try to compile as script block)
-Write-Host "[2/4] Validating PowerShell syntax..." -ForegroundColor Yellow
+Write-Host "[2/6] Validating PowerShell syntax..." -ForegroundColor Yellow
 try {
     $content = Get-Content "install\windows\install.ps1" -Raw -ErrorAction Stop
     $scriptBlock = [scriptblock]::Create($content)
@@ -63,7 +63,7 @@ try {
 }
 
 # Test 3: Check for required functions
-Write-Host "[3/4] Checking required functions..." -ForegroundColor Yellow
+Write-Host "[3/6] Checking required functions..." -ForegroundColor Yellow
 $requiredFunctions = @("Test-Command", "Get-UserInput")
 $content = Get-Content "install\windows\install.ps1" -Raw
 $allFound = $true
@@ -80,7 +80,7 @@ if (-not $allFound) {
 }
 
 # Test 4: Check installer launcher
-Write-Host "[4/5] Checking installer launcher..." -ForegroundColor Yellow
+Write-Host "[4/6] Checking installer launcher..." -ForegroundColor Yellow
 if (Test-Path "install\windows\install.cmd") {
     Write-Host "  [OK] Installer launcher exists" -ForegroundColor Green
 } else {

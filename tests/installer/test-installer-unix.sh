@@ -10,7 +10,7 @@ echo ""
 ERRORS=0
 
 # Test 1: Check if installer file exists
-echo "[1/5] Checking installer file..."
+echo "[1/7] Checking installer file..."
 if [ -f "install/unix/install.sh" ]; then
     echo "  ✓ Installer file exists"
 else
@@ -19,7 +19,7 @@ else
 fi
 
 # Test 2: Validate bash syntax
-echo "[2/5] Validating bash syntax..."
+echo "[2/7] Validating bash syntax..."
 if bash -n install/unix/install.sh 2>&1; then
     echo "  ✓ Bash syntax is valid"
 else
@@ -28,7 +28,7 @@ else
 fi
 
 # Test 3: Check if file is executable
-echo "[3/5] Checking file permissions..."
+echo "[3/7] Checking file permissions..."
 if [ -x "install/unix/install.sh" ]; then
     echo "  ✓ File is executable"
 else
@@ -36,7 +36,7 @@ else
 fi
 
 # Test 4: Check for required functions
-echo "[4/5] Checking required functions..."
+echo "[4/7] Checking required functions..."
 REQUIRED_FUNCS=("command_exists" "prompt_user" "detect_os" "print_info" "print_success" "print_error")
 CONTENT=$(cat install/unix/install.sh)
 ALL_FOUND=true
@@ -55,7 +55,7 @@ if [ "$ALL_FOUND" = false ]; then
 fi
 
 # Test 5: Check for shebang
-echo "[5/6] Checking shebang..."
+echo "[5/7] Checking shebang..."
 if head -n 1 install/unix/install.sh | grep -q "^#!/bin/bash"; then
     echo "  ✓ Shebang is correct"
 else
