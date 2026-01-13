@@ -312,21 +312,166 @@ Authentication errors return HTTP `401 Unauthorized` with a JSON response in Ope
 
 > 🎯 **Want to see MCP in action?** Check out the [MCP Demo QuickStart](docs/MCP_DEMO_QUICKSTART.md) for a complete example with multiple document processing servers.
 
-### Health Check
+### Usage Examples
+
+All examples below assume:
+- **LlamaGate** running locally on `http://localhost:11435` (default port)
+- **Ollama** running locally on `http://localhost:11434` (default port)
+- **Default configuration** (no authentication unless specified)
+
+#### 1. Non-Streaming Request (curl)
 
 ```bash
-curl http://localhost:11435/health
+curl http://localhost:11435/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "llama2",
+    "messages": [
+      {"role": "user", "content": "Hello, how are you?"}
+    ]
+  }'
 ```
 
-### List Models
+**Response:**
+```json
+{
+  "id": "chatcmpl-...",
+  "object": "chat.completion",
+  "created": 1234567890,
+  "model": "llama2",
+  "choices": [{
+    "index": 0,
+    "message": {
+      "role": "assistant",
+      "content": "Hello! I'm doing well, thank you for asking..."
+    },
+    "finish_reason": "stop"
+  }]
+}
+```
+
+#### 2. Streaming Request (curl)
 
 ```bash
-curl http://localhost:11435/v1/models \
-  -H "X-API-Key: sk-llamagate"
+curl http://localhost:11435/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "llama2",
+    "messages": [
+      {"role": "user", "content": "Tell me a short story"}
+    ],
+    "stream": true
+  }'
 ```
 
-### Chat Completions (Non-Streaming)
+**Response (Server-Sent Events):**
+```
+data: {"id":"chatcmpl-...","object":"chat.completion.chunk","created":1234567890,"model":"llama2","choices":[{"index":0,"delta":{"content":"Once"},"finish_reason":null}]}
 
+data: {"id":"chatcmpl-...","object":"chat.completion.chunk","created":1234567890,"model":"llama2","choices":[{"index":0,"delta":{"content":" upon"},"finish_reason":null}]}
+
+data: [DONE]
+```
+
+#### 3. Using OpenAI Python SDK
+
+Point the OpenAI Python SDK to LlamaGate using a custom `base_url`:
+
+```python
+from openai import OpenAI
+
+# Configure client to use LlamaGate instead of OpenAI
+client = OpenAI(
+    base_url="http://localhost:11435/v1",  # LlamaGate endpoint
+    api_key="not-needed"  # Optional: only needed if API_KEY is set in LlamaGate
+)
+
+# Use it exactly like the OpenAI API
+response = client.chat.completions.create(
+    model="llama2",  # Use any model available in your local Ollama
+    messages=[
+        {"role": "user", "content": "Hello! How are you?"}
+    ]
+)
+
+print(response.choices[0].message.content)
+```
+
+**Streaming with Python SDK:**
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="http://localhost:11435/v1",
+    api_key="not-needed"
+)
+
+stream = client.chat.completions.create(
+    model="llama2",
+    messages=[
+        {"role": "user", "content": "Count to 5"}
+    ],
+    stream=True
+)
+
+for chunk in stream:
+    if chunk.choices[0].delta.content is not None:
+        print(chunk.choices[0].delta.content, end="", flush=True)
+```
+
+#### 4. Using OpenAI Node.js SDK
+
+Point the OpenAI Node.js SDK to LlamaGate using a custom `baseURL`:
+
+```javascript
+import OpenAI from 'openai';
+
+// Configure client to use LlamaGate instead of OpenAI
+const client = new OpenAI({
+  baseURL: 'http://localhost:11435/v1',  // LlamaGate endpoint
+  apiKey: 'not-needed'  // Optional: only needed if API_KEY is set in LlamaGate
+});
+
+// Use it exactly like the OpenAI API
+const response = await client.chat.completions.create({
+  model: 'llama2',  // Use any model available in your local Ollama
+  messages: [
+    { role: 'user', content: 'Hello! How are you?' }
+  ]
+});
+
+console.log(response.choices[0].message.content);
+```
+
+**Streaming with Node.js SDK:**
+```javascript
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  baseURL: 'http://localhost:11435/v1',
+  apiKey: 'not-needed'
+});
+
+const stream = await client.chat.completions.create({
+  model: 'llama2',
+  messages: [
+    { role: 'user', content: 'Count to 5' }
+  ],
+  stream: true
+});
+
+for await (const chunk of stream) {
+  if (chunk.choices[0]?.delta?.content) {
+    process.stdout.write(chunk.choices[0].delta.content);
+  }
+}
+```
+
+#### 5. Authentication Example (if enabled)
+
+If you've set `API_KEY` in your LlamaGate configuration, include it in requests:
+
+**curl with authentication:**
 ```bash
 curl http://localhost:11435/v1/chat/completions \
   -H "Content-Type: application/json" \
@@ -339,35 +484,15 @@ curl http://localhost:11435/v1/chat/completions \
   }'
 ```
 
-### Chat Completions (Streaming)
-
-```bash
-curl http://localhost:11435/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -H "X-API-Key: sk-llamagate" \
-  -d '{
-    "model": "llama2",
-    "messages": [
-      {"role": "user", "content": "Tell me a story"}
-    ],
-    "stream": true
-  }'
-```
-
-### Using OpenAI Python SDK
-
-LlamaGate is compatible with the OpenAI Python SDK:
-
+**Python SDK with authentication:**
 ```python
 from openai import OpenAI
 
-# Point to LlamaGate instead of OpenAI
 client = OpenAI(
     base_url="http://localhost:11435/v1",
-    api_key="sk-llamagate"  # Your API_KEY from env
+    api_key="sk-llamagate"  # Your API_KEY from LlamaGate config
 )
 
-# Use it like OpenAI
 response = client.chat.completions.create(
     model="llama2",
     messages=[
@@ -376,6 +501,39 @@ response = client.chat.completions.create(
 )
 
 print(response.choices[0].message.content)
+```
+
+**Node.js SDK with authentication:**
+```javascript
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  baseURL: 'http://localhost:11435/v1',
+  apiKey: 'sk-llamagate'  // Your API_KEY from LlamaGate config
+});
+
+const response = await client.chat.completions.create({
+  model: 'llama2',
+  messages: [
+    { role: 'user', content: 'Hello!' }
+  ]
+});
+
+console.log(response.choices[0].message.content);
+```
+
+**Note:** Authentication is optional. If `API_KEY` is not set in LlamaGate, you can omit the `api_key` parameter or use any value.
+
+### Health Check
+
+```bash
+curl http://localhost:11435/health
+```
+
+### List Models
+
+```bash
+curl http://localhost:11435/v1/models
 ```
 
 ### Using with LangChain
@@ -388,7 +546,7 @@ from langchain.chat_models import ChatOpenAI
 llm = ChatOpenAI(
     model="llama2",
     openai_api_base="http://localhost:11435/v1",
-    openai_api_key="sk-llamagate"
+    openai_api_key="not-needed"  # Optional: only if API_KEY is set
 )
 
 response = llm.invoke("Hello, how are you?")
