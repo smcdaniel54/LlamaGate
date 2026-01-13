@@ -48,17 +48,15 @@ jobs:
     
     - name: Clean up coverage files
       run: |
-        if [ -f coverage.out ]; then rm -f coverage.out; fi
-        if [ -d coverage ]; then rm -rf coverage; fi
-        if [ -d .out ]; then rm -rf .out; fi
-        find . -name "*.out" -type f -delete 2>/dev/null || true
-        find . -name ".out" -type d -exec rm -rf {} + 2>/dev/null || true
+        rm -f coverage.out 2>/dev/null || true
+        rm -rf coverage .out 2>/dev/null || true
       shell: bash
     
     - name: Run tests with race detector
+      timeout-minutes: 15
       run: |
         PACKAGES=$(go list ./... | grep -v "^\.out$" || go list ./...)
-        go test -race -coverprofile=coverage.out -covermode=atomic $PACKAGES
+        go test -race -coverprofile=coverage.out -covermode=atomic -timeout=10m $PACKAGES
     
     - name: Upload coverage reports
       uses: codecov/codecov-action@v4
