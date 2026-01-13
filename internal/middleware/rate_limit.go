@@ -40,7 +40,15 @@ func (rl *RateLimitMiddleware) Handler() gin.HandlerFunc {
 			return
 		}
 
-		// Check if request is allowed using Reserve to get retry time
+		// Check if request is allowed using Allow() for immediate checks
+		// This consumes a token if available, preventing reservation leaks
+		if rl.limiter.Allow() {
+			// Request is allowed - token was consumed by Allow()
+			c.Next()
+			return
+		}
+
+		// Request is rate limited - use Reserve() to get delay for Retry-After header
 		reservation := rl.limiter.Reserve()
 		if !reservation.OK() {
 			// Limiter is closed or invalid - should not happen in normal operation
@@ -55,38 +63,32 @@ func (rl *RateLimitMiddleware) Handler() gin.HandlerFunc {
 			return
 		}
 
-		// Check if reservation allows immediate access
+		// Get delay for Retry-After header
 		delay := reservation.Delay()
-		if delay > 0 {
-			// Request is rate limited
-			reservation.Cancel() // Cancel the reservation since we're rejecting the request
-			requestID := GetRequestID(c)
+		// Cancel the reservation since we're rejecting the request
+		// This returns the reserved token to the limiter
+		reservation.Cancel()
 
-			// Calculate Retry-After header value (in seconds, rounded up)
-			retryAfter := int(math.Ceil(delay.Seconds()))
-			if retryAfter < 1 {
-				retryAfter = 1 // Minimum 1 second
-			}
-			c.Header("Retry-After", strconv.Itoa(retryAfter))
+		requestID := GetRequestID(c)
 
-			// Log rate limit decision with structured fields
-			log.Warn().
-				Str("request_id", requestID).
-				Str("ip", c.ClientIP()).
-				Str("path", c.Request.URL.Path).
-				Dur("retry_after", delay).
-				Int("retry_after_seconds", retryAfter).
-				Str("limiter_decision", "rate_limited").
-				Msg("Rate limit exceeded")
-
-			response.RateLimitExceeded(c, "Rate limit exceeded", requestID)
-			c.Abort()
-			return
+		// Calculate Retry-After header value (in seconds, rounded up)
+		retryAfter := int(math.Ceil(delay.Seconds()))
+		if retryAfter < 1 {
+			retryAfter = 1 // Minimum 1 second
 		}
+		c.Header("Retry-After", strconv.Itoa(retryAfter))
 
-		// Request is allowed - reservation will be consumed when request completes
-		// We don't need to explicitly cancel it as it will be consumed naturally
+		// Log rate limit decision with structured fields
+		log.Warn().
+			Str("request_id", requestID).
+			Str("ip", c.ClientIP()).
+			Str("path", c.Request.URL.Path).
+			Dur("retry_after", delay).
+			Int("retry_after_seconds", retryAfter).
+			Str("limiter_decision", "rate_limited").
+			Msg("Rate limit exceeded")
 
-		c.Next()
+		response.RateLimitExceeded(c, "Rate limit exceeded", requestID)
+		c.Abort()
 	}
 }
