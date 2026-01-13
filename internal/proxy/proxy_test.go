@@ -244,26 +244,17 @@ func TestProxy_HandleChatCompletions_WithTemperature(t *testing.T) {
 }
 
 func TestProxy_HandleChatCompletions_CacheHit(t *testing.T) {
-	cacheInstance := cache.New()
-	proxyInstance := New("http://localhost:11434", cacheInstance)
+	// Create a mock Ollama server that returns a specific response
+	mockOllama := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/api/chat" {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(`{"model":"llama2","message":{"role":"assistant","content":"First response"}}`))
+		}
+	}))
+	defer mockOllama.Close()
 
-	// Pre-populate cache
-	// Use the same message format and parameters that will be in the request
-	// The request will have zero values for optional params, so we match that
-	messages := []Message{
-		{Role: "user", Content: "Hello"},
-	}
-	cachedResponse := []byte(`{"model":"llama2","choices":[{"message":{"role":"assistant","content":"Cached response"}}]}`)
-	cacheParams := cache.CacheKeyParams{
-		Model:       "llama2",
-		Messages:    messages,
-		Temperature: 0, // Zero value to match request without temperature
-		MaxTokens:   0, // Zero value to match request
-		Tools:       nil,
-		Functions:   nil,
-		ToolChoice:  nil,
-	}
-	cacheInstance.Set(cacheParams, cachedResponse)
+	cacheInstance := cache.New()
+	proxyInstance := New(mockOllama.URL, cacheInstance)
 
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
@@ -279,13 +270,29 @@ func TestProxy_HandleChatCompletions_CacheHit(t *testing.T) {
 		},
 	}
 	bodyBytes, _ := json.Marshal(reqBody)
-	req := httptest.NewRequest("POST", "/v1/chat/completions", bytes.NewReader(bodyBytes))
-	req.Header.Set("Content-Type", "application/json")
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
 
-	assert.Equal(t, http.StatusOK, w.Code)
-	assert.Equal(t, cachedResponse, w.Body.Bytes())
+	// First request - should hit Ollama and cache the response
+	req1 := httptest.NewRequest("POST", "/v1/chat/completions", bytes.NewReader(bodyBytes))
+	req1.Header.Set("Content-Type", "application/json")
+	w1 := httptest.NewRecorder()
+	router.ServeHTTP(w1, req1)
+
+	assert.Equal(t, http.StatusOK, w1.Code)
+	firstResponse := w1.Body.Bytes()
+
+	// Second request - should hit cache (mock server won't be called)
+	// Update mock to fail if called (proving cache was used)
+	mockOllama.Close() // Close the server to prove cache is used
+
+	req2 := httptest.NewRequest("POST", "/v1/chat/completions", bytes.NewReader(bodyBytes))
+	req2.Header.Set("Content-Type", "application/json")
+	w2 := httptest.NewRecorder()
+	router.ServeHTTP(w2, req2)
+
+	// Should still succeed from cache
+	assert.Equal(t, http.StatusOK, w2.Code)
+	// Response should match the first response (from cache)
+	assert.Equal(t, firstResponse, w2.Body.Bytes())
 }
 
 func TestProxy_HandleChatCompletions_OllamaError(t *testing.T) {
