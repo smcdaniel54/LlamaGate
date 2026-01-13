@@ -2,7 +2,29 @@
 
 LlamaGate can be installed in several ways, from easiest to most flexible:
 
-## 🚀 Method 1: Pre-built Binaries (Easiest - Recommended)
+## ⚡ Method 1: One-Liner Binary Installer (Fastest - Recommended!)
+
+**Download and run directly from GitHub - no cloning required!**
+
+### Windows (PowerShell):
+```powershell
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/windows/install-binary.ps1" -OutFile install-binary.ps1; .\install-binary.ps1
+```
+
+### Unix/Linux/macOS:
+```bash
+curl -fsSL https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/unix/install-binary.sh | bash
+```
+
+This will:
+- ✅ Automatically detect your platform
+- ✅ Download the correct binary from GitHub releases
+- ✅ Set up the executable
+- ✅ Create a default `.env` configuration file
+
+**That's it!** You're ready to run LlamaGate.
+
+## 🚀 Method 2: Manual Pre-built Binaries
 
 **No Go installation required!** Just download and run.
 
@@ -69,7 +91,7 @@ llamagate-windows-amd64.exe --help
 
 You should see usage information. If you get a "command not found" error, make sure the file is executable (Linux/macOS) and in your current directory.
 
-## 🔧 Method 2: Automated Installer
+## 🔧 Method 3: Automated Source Installer
 
 The installer script will:
 - Check for Go and install it if needed
@@ -95,7 +117,7 @@ chmod +x install/unix/install.sh
 ./install/unix/install.sh --silent
 ```
 
-## 💻 Method 3: Build from Source
+## 💻 Method 4: Build from Source
 
 If you have Go installed and want to build yourself:
 
@@ -111,7 +133,7 @@ go build -o llamagate ./cmd/llamagate
 ./llamagate
 ```
 
-## 📦 Method 4: Using Go Install
+## 📦 Method 5: Using Go Install
 
 If you have Go installed:
 
@@ -121,7 +143,7 @@ go install github.com/llamagate/llamagate/cmd/llamagate@latest
 
 This installs to `$GOPATH/bin` (or `$HOME/go/bin` by default).
 
-## 🐳 Method 5: Docker
+## 🐳 Method 6: Docker
 
 ```bash
 # Build

@@ -63,8 +63,12 @@ chmod +x install/unix/install.sh
 ## What Gets Tested
 
 ### Syntax Validation
-- PowerShell syntax (Windows)
-- Bash syntax (Unix)
+- **Binary installer syntax** (one-liner installers):
+  - `install/windows/install-binary.ps1` - PowerShell syntax validation
+  - `install/unix/install-binary.sh` - Bash syntax validation
+- **Source installer syntax**:
+  - `install/windows/install.ps1` - PowerShell syntax validation
+  - `install/unix/install.sh` - Bash syntax validation
 - Function definitions
 - File structure
 
@@ -76,13 +80,16 @@ chmod +x install/unix/install.sh
 
 ## Test Checklist
 
-- [ ] Windows installer syntax is valid
-- [ ] Unix installer syntax is valid
-- [ ] Both installers handle missing dependencies
-- [ ] Both installers create .env file correctly
-- [ ] Both installers build the binary
-- [ ] Silent mode works for both
-- [ ] Skip flags work correctly
+- [ ] Windows binary installer (`install-binary.ps1`) syntax is valid
+- [ ] Unix binary installer (`install-binary.sh`) syntax is valid
+- [ ] Windows source installer (`install.ps1`) syntax is valid
+- [ ] Unix source installer (`install.sh`) syntax is valid
+- [ ] Binary installers download and execute correctly
+- [ ] Source installers handle missing dependencies
+- [ ] Source installers create .env file correctly
+- [ ] Source installers build the binary
+- [ ] Silent mode works for source installers
+- [ ] Skip flags work correctly for source installers
 
 ## Troubleshooting
 
