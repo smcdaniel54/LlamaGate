@@ -148,10 +148,29 @@ func (t *HTTPTransport) SendRequest(ctx context.Context, method string, params i
 	}
 
 	// Verify request ID matches
-	if jsonRPCResp.ID != requestID {
+	// Convert both to float64 for comparison since JSON unmarshalling converts numbers to float64
+	var receivedID float64
+	switch v := jsonRPCResp.ID.(type) {
+	case float64:
+		receivedID = v
+	case int64:
+		receivedID = float64(v)
+	case int:
+		receivedID = float64(v)
+	default:
+		// If ID is not a number, log warning
 		log.Warn().
 			Interface("expected_id", requestID).
 			Interface("received_id", jsonRPCResp.ID).
+			Msg("Request ID mismatch in HTTP transport response (non-numeric ID)")
+		return &jsonRPCResp, nil
+	}
+	
+	expectedID := float64(requestID)
+	if receivedID != expectedID {
+		log.Warn().
+			Float64("expected_id", expectedID).
+			Float64("received_id", receivedID).
 			Msg("Request ID mismatch in HTTP transport response")
 	}
 
