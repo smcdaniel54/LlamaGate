@@ -78,15 +78,15 @@ chmod +x install/unix/install-binary.sh
 
 ### 🚀 Manual Download (Also Easy - No Go Required!)
 
-**Prefer to download manually?** Get pre-built binaries from [Releases](https://github.com/llamagate/llamagate/releases/latest):
+**Prefer to download manually?** Get pre-built binaries from [Releases](https://github.com/smcdaniel54/LlamaGate/releases/latest):
 
 **Windows:**
-1. Download [llamagate-windows-amd64.exe](https://github.com/llamagate/llamagate/releases/latest/download/llamagate-windows-amd64.exe)
+1. Download [llamagate-windows-amd64.exe](https://github.com/smcdaniel54/LlamaGate/releases/latest/download/llamagate-windows-amd64.exe)
 2. Run: `.\llamagate-windows-amd64.exe`
 
 **Linux:**
 ```bash
-curl -LO https://github.com/llamagate/llamagate/releases/latest/download/llamagate-linux-amd64
+curl -LO https://github.com/smcdaniel54/LlamaGate/releases/latest/download/llamagate-linux-amd64
 chmod +x llamagate-linux-amd64
 ./llamagate-linux-amd64
 ```
@@ -94,17 +94,17 @@ chmod +x llamagate-linux-amd64
 **macOS:**
 ```bash
 # Apple Silicon (M1/M2/M3)
-curl -LO https://github.com/llamagate/llamagate/releases/latest/download/llamagate-darwin-arm64
+curl -LO https://github.com/smcdaniel54/LlamaGate/releases/latest/download/llamagate-darwin-arm64
 chmod +x llamagate-darwin-arm64
 ./llamagate-darwin-arm64
 
 # Intel Mac
-curl -LO https://github.com/llamagate/llamagate/releases/latest/download/llamagate-darwin-amd64
+curl -LO https://github.com/smcdaniel54/LlamaGate/releases/latest/download/llamagate-darwin-amd64
 chmod +x llamagate-darwin-amd64
 ./llamagate-darwin-amd64
 ```
 
-**All platforms:** See [Releases](https://github.com/llamagate/llamagate/releases) for all available binaries (amd64, arm64, etc.).
+**All platforms:** See [Releases](https://github.com/smcdaniel54/LlamaGate/releases) for all available binaries (amd64, arm64, etc.).
 
 ### 🔨 Build from Source (For Developers)
 
@@ -154,7 +154,7 @@ The full installer will:
 ### From Source
 
 ```bash
-go install github.com/llamagate/llamagate/cmd/llamagate@latest
+go install github.com/smcdaniel54/LlamaGate/cmd/llamagate@latest
 ```
 
 ### Windows Quick Start
