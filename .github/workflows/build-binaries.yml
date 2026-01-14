@@ -1,0 +1,169 @@
+name: Build Binaries
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  build:
+    name: Build Binaries
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            goos: linux
+            goarch: amd64
+            binary_name: llamagate-linux-amd64
+          - os: ubuntu-latest
+            goos: linux
+            goarch: arm64
+            binary_name: llamagate-linux-arm64
+          - os: windows-latest
+            goos: windows
+            goarch: amd64
+            binary_name: llamagate-windows-amd64.exe
+          - os: macos-latest
+            goos: darwin
+            goarch: amd64
+            binary_name: llamagate-darwin-amd64
+          - os: macos-latest
+            goos: darwin
+            goarch: arm64
+            binary_name: llamagate-darwin-arm64
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.24'
+        cache-dependency-path: go.sum
+    
+    - name: Download dependencies
+      run: go mod download
+    
+    - name: Build binary
+      env:
+        GOOS: ${{ matrix.goos }}
+        GOARCH: ${{ matrix.goarch }}
+        CGO_ENABLED: 0
+      shell: bash
+      run: |
+        go build -ldflags="-s -w" -o ${{ matrix.binary_name }} ./cmd/llamagate
+    
+    - name: Verify binary (Linux/macOS)
+      if: matrix.goos != 'windows'
+      run: |
+        chmod +x ${{ matrix.binary_name }}
+        file ${{ matrix.binary_name }}
+        test -f ${{ matrix.binary_name }} && test -s ${{ matrix.binary_name }} && echo "Binary verification passed"
+    
+    - name: Verify binary (Windows)
+      if: matrix.goos == 'windows'
+      shell: pwsh
+      run: |
+        $binary = Get-Item ${{ matrix.binary_name }}
+        if ($binary.Length -gt 0) {
+          Write-Host "Binary verification passed: $($binary.Name) ($($binary.Length) bytes)"
+        } else {
+          Write-Error "Binary is empty or missing"
+        }
+    
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.binary_name }}
+        path: ${{ matrix.binary_name }}
+        retention-days: 30
+
+  publish:
+    name: Publish to Latest Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+    
+    - name: Create checksums
+      run: |
+        cd artifacts
+        find . -type f -name 'llamagate*' -exec sha256sum {} \; > checksums.txt
+    
+    - name: Get latest release
+      id: get_release
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { data: releases } = await github.rest.repos.listReleases({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            per_page: 1
+          });
+          
+          if (releases.length > 0) {
+            core.setOutput('release_id', releases[0].id);
+            core.setOutput('release_tag', releases[0].tag_name);
+            core.setOutput('exists', 'true');
+          } else {
+            core.setOutput('exists', 'false');
+          }
+    
+    - name: Create or update latest release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: latest
+        name: Latest Build
+        body: |
+          ## Latest Build
+          
+          This is an automatically updated release with the latest binaries from the main branch.
+          
+          **For versioned releases, see the [Releases page](https://github.com/${{ github.repository }}/releases).**
+          
+          ### Downloads
+          
+          **Windows:**
+          - [llamagate-windows-amd64.exe](https://github.com/${{ github.repository }}/releases/download/latest/llamagate-windows-amd64.exe)
+          
+          **Linux:**
+          - [llamagate-linux-amd64](https://github.com/${{ github.repository }}/releases/download/latest/llamagate-linux-amd64)
+          - [llamagate-linux-arm64](https://github.com/${{ github.repository }}/releases/download/latest/llamagate-linux-arm64)
+          
+          **macOS:**
+          - [llamagate-darwin-amd64](https://github.com/${{ github.repository }}/releases/download/latest/llamagate-darwin-amd64) (Intel)
+          - [llamagate-darwin-arm64](https://github.com/${{ github.repository }}/releases/download/latest/llamagate-darwin-arm64) (Apple Silicon)
+          
+          ### Installation
+          
+          Use the one-liner installer:
+          
+          **Windows:**
+          ```powershell
+          Invoke-WebRequest -Uri "https://raw.githubusercontent.com/${{ github.repository }}/main/install/windows/install-binary.ps1" -OutFile install-binary.ps1; .\install-binary.ps1
+          ```
+          
+          **Unix/Linux/macOS:**
+          ```bash
+          curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/install/unix/install-binary.sh | bash
+          ```
+          
+          ### Checksums
+          
+          See checksums.txt file for SHA256 hashes.
+        files: |
+          artifacts/*
+        draft: false
+        prerelease: true
+        overwrite: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
