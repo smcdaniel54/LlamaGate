@@ -8,10 +8,13 @@ This document describes the organized structure of LlamaGate, with OS-specific i
 LlamaGate/
 ├── install/                    # Installation scripts organized by OS
 │   ├── windows/                # Windows installers
-│   │   ├── install.cmd        # Windows installer launcher
-│   │   └── install.ps1        # Windows PowerShell installer
+│   │   ├── install-binary.cmd # Binary installer launcher (downloads pre-built)
+│   │   ├── install-binary.ps1 # Binary installer script (downloads pre-built)
+│   │   ├── install.cmd        # Source installer launcher (builds from source)
+│   │   └── install.ps1         # Source installer script (builds from source)
 │   └── unix/                  # Unix/Linux/macOS installers
-│       └── install.sh         # Unix/Linux/macOS installer
+│       ├── install-binary.sh  # Binary installer (downloads pre-built)
+│       └── install.sh         # Source installer (builds from source)
 │
 ├── scripts/                    # Runtime scripts organized by OS
 │   ├── windows/               # Windows scripts

@@ -98,9 +98,25 @@ The source installer will:
 - ✅ Build the LlamaGate binary from source
 - ✅ Create a `.env` configuration file
 
-### 🔨 Method 3: Build from Source Manually (For Developers)
+### 🔨 Method 3: Build from Source (For Developers)
 
-If you already have Go installed and want to build manually:
+If you need to build from source, you have two options:
+
+**Option A: One-Line Command (Downloads Source Installer)**
+
+**Windows (PowerShell):**
+```powershell
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/windows/install.ps1" -OutFile install.ps1; .\install.ps1
+```
+
+**Unix/Linux/macOS:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/unix/install.sh | bash
+```
+
+This downloads and runs the source installer, which handles Go installation and builds from source.
+
+**Option B: Manual Build (If You Have Go Installed)**
 
 ```bash
 # Clone the repository
@@ -112,18 +128,6 @@ go build -o llamagate ./cmd/llamagate
 
 # Or install to $GOPATH/bin
 go install ./cmd/llamagate
-```
-
-**One-line command for source build (downloads source installer):**
-
-**Windows (PowerShell):**
-```powershell
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/windows/install.ps1" -OutFile install.ps1; .\install.ps1
-```
-
-**Unix/Linux/macOS:**
-```bash
-curl -fsSL https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/unix/install.sh | bash
 ```
 
 ### Windows Quick Start
