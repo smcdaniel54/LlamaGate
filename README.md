@@ -37,31 +37,29 @@ LlamaGate is a production-ready, OpenAI-compatible API gateway for local LLMs (O
 
 ## Installation
 
-### ⚡ One-Liner Install (Fastest - Recommended!)
+### ⚡ Option 1: Use Installers (Recommended)
 
 **Download and run directly from GitHub - no cloning required!**
 
 **Windows (PowerShell):**
 ```powershell
-# Download and run binary installer
+# Binary installer (downloads pre-built binary)
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/windows/install-binary.ps1" -OutFile install-binary.ps1; .\install-binary.ps1
 ```
 
 **Unix/Linux/macOS:**
 ```bash
-# Download and run binary installer
+# Binary installer (downloads pre-built binary)
 curl -fsSL https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/unix/install-binary.sh | bash
 ```
 
-This will:
+The installer will:
 - ✅ Automatically detect your platform
 - ✅ Download the correct binary from GitHub releases
 - ✅ Set up the executable
 - ✅ Create a default `.env` configuration file
 
 **That's it!** You're ready to run LlamaGate.
-
-### 🔧 One-Click Install (From Cloned Repo)
 
 **If you've already cloned the repository:**
 
@@ -76,41 +74,11 @@ chmod +x install/unix/install-binary.sh
 ./install/unix/install-binary.sh
 ```
 
-### 🚀 Manual Download (Also Easy - No Go Required!)
+### 🔨 Option 2: Build from Source (For Developers)
 
-**Prefer to download manually?** Get pre-built binaries from [Releases](https://github.com/smcdaniel54/LlamaGate/releases/latest):
+If you need to build from source or want to customize the build:
 
-**Windows:**
-1. Download [llamagate-windows-amd64.exe](https://github.com/smcdaniel54/LlamaGate/releases/latest/download/llamagate-windows-amd64.exe)
-2. Run: `.\llamagate-windows-amd64.exe`
-
-**Linux:**
-```bash
-curl -LO https://github.com/smcdaniel54/LlamaGate/releases/latest/download/llamagate-linux-amd64
-chmod +x llamagate-linux-amd64
-./llamagate-linux-amd64
-```
-
-**macOS:**
-```bash
-# Apple Silicon (M1/M2/M3)
-curl -LO https://github.com/smcdaniel54/LlamaGate/releases/latest/download/llamagate-darwin-arm64
-chmod +x llamagate-darwin-arm64
-./llamagate-darwin-arm64
-
-# Intel Mac
-curl -LO https://github.com/smcdaniel54/LlamaGate/releases/latest/download/llamagate-darwin-amd64
-chmod +x llamagate-darwin-amd64
-./llamagate-darwin-amd64
-```
-
-**All platforms:** See [Releases](https://github.com/smcdaniel54/LlamaGate/releases) for all available binaries (amd64, arm64, etc.).
-
-### 🔨 Build from Source (For Developers)
-
-If you prefer to build from source or need custom builds:
-
-**One-liner (download and run):**
+**One-liner (download and run installer):**
 
 **Windows (PowerShell):**
 ```powershell
@@ -135,26 +103,25 @@ chmod +x install/unix/install.sh
 ./install/unix/install.sh
 ```
 
-The full installer will:
+The source installer will:
 - ✅ Check for Go and install it if needed
 - ✅ Check for Ollama and guide you to install it
-- ✅ Build LlamaGate from source
+- ✅ Install all Go dependencies
+- ✅ Build the LlamaGate binary from source
 - ✅ Create a `.env` configuration file
 
-**The installer will:**
-
-- Check for Go and install it if needed
-- Check for Ollama and guide you to install it
-- Install all Go dependencies
-- Build the LlamaGate binary
-- Create a `.env` configuration file
-
-**Follow the prompts** to configure your installation
-
-### From Source
+**Manual build (if you already have Go installed):**
 
 ```bash
-go install github.com/smcdaniel54/LlamaGate/cmd/llamagate@latest
+# Clone the repository
+git clone https://github.com/smcdaniel54/LlamaGate.git
+cd LlamaGate
+
+# Build
+go build -o llamagate ./cmd/llamagate
+
+# Or install to $GOPATH/bin
+go install ./cmd/llamagate
 ```
 
 ### Windows Quick Start
@@ -181,12 +148,6 @@ set RATE_LIMIT_RPS=20
 scripts\windows\run.cmd
 ```
 
-### From Docker
-
-```bash
-docker build -t llamagate .
-docker run -p 11435:11435 llamagate
-```
 
 ## Configuration
 
