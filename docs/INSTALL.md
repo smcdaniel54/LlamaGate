@@ -2,19 +2,17 @@
 
 LlamaGate can be installed in two ways:
 
-## ⚡ Option 1: Use Installers (Recommended)
+## ⚡ Option 1: One-Line Installer (Recommended)
 
-**Download and run directly from GitHub - no cloning required!**
+**Copy and paste one command - downloads installer and runs it automatically!**
 
 **Windows (PowerShell):**
 ```powershell
-# Binary installer (downloads pre-built binary)
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/windows/install-binary.ps1" -OutFile install-binary.ps1; .\install-binary.ps1
 ```
 
 **Unix/Linux/macOS:**
 ```bash
-# Binary installer (downloads pre-built binary)
 curl -fsSL https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/unix/install-binary.sh | bash
 ```
 
@@ -43,7 +41,7 @@ chmod +x install/unix/install-binary.sh
 
 If you need to build from source or want to customize the build:
 
-**One-liner (download and run installer):**
+**One-line installer (downloads and runs source installer):**
 
 **Windows (PowerShell):**
 ```powershell
