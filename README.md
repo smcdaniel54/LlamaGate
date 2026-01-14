@@ -34,6 +34,7 @@ LlamaGate is a production-ready, OpenAI-compatible API gateway for local LLMs (O
 - ⚡ **[Plugin Quick Start](docs/PLUGIN_QUICKSTART.md)** - Get started with plugins in 5 minutes
 - 🧪 **[Testing Guide](docs/TESTING.md)** - Testing your setup
 - 📦 **[Installation Guide](docs/INSTALL.md)** - Detailed installation instructions
+- ✅ **[Manual Acceptance Test](docs/ACCEPTANCE_TEST.md)** - Comprehensive acceptance test checklist for human verification
 
 ## Installation
 
