@@ -1,22 +1,31 @@
 # Test Windows Installer Syntax and Structure
-# This script validates the Windows installer without running it fully
+# This script validates both installers (binary and source) to match the 2-option installation docs
 
-Write-Host "=== Testing Windows Installer ===" -ForegroundColor Cyan
+Write-Host "=== Testing Windows Installers ===" -ForegroundColor Cyan
+Write-Host "Testing Option 1 (Binary Installer) and Option 2 (Source Installer)" -ForegroundColor Gray
 Write-Host ""
 
 $errors = @()
 
-# Test 1: Check if installer file exists
-Write-Host "[1/6] Checking installer file..." -ForegroundColor Yellow
-if (Test-Path "install\windows\install.ps1") {
-    Write-Host "  [OK] Installer file exists" -ForegroundColor Green
+# Test 1: Check if binary installer exists (Option 1 - Recommended)
+Write-Host "[1/8] Checking binary installer file (Option 1)..." -ForegroundColor Yellow
+if (Test-Path "install\windows\install-binary.ps1") {
+    Write-Host "  [OK] Binary installer file exists" -ForegroundColor Green
 } else {
-    Write-Host "  [FAIL] Installer file not found" -ForegroundColor Red
-    $errors += "Installer file missing"
+    Write-Host "  [FAIL] Binary installer file not found" -ForegroundColor Red
+    $errors += "Binary installer file missing (install-binary.ps1)"
 }
 
-# Test 2: Validate PowerShell syntax for binary installer (one-liner installer)
-Write-Host "[2/7] Validating binary installer PowerShell syntax..." -ForegroundColor Yellow
+# Test 1b: Check if source installer exists (Option 2 - For Developers)
+Write-Host "[1b/8] Checking source installer file (Option 2)..." -ForegroundColor Yellow
+if (Test-Path "install\windows\install.ps1") {
+    Write-Host "  [OK] Source installer file exists" -ForegroundColor Green
+} else {
+    Write-Host "  [WARN] Source installer file not found (optional)" -ForegroundColor Yellow
+}
+
+# Test 2: Validate PowerShell syntax for binary installer (Option 1 - one-liner installer)
+Write-Host "[2/8] Validating binary installer PowerShell syntax (Option 1)..." -ForegroundColor Yellow
 if (Test-Path "install\windows\install-binary.ps1") {
     try {
         $binaryContent = Get-Content "install\windows\install-binary.ps1" -Raw -ErrorAction Stop
@@ -31,8 +40,8 @@ if (Test-Path "install\windows\install-binary.ps1") {
     $errors += "install-binary.ps1 missing"
 }
 
-# Test 2b: Validate PowerShell syntax for source installer
-Write-Host "[3/8] Validating source installer PowerShell syntax..." -ForegroundColor Yellow
+# Test 3: Validate PowerShell syntax for source installer (Option 2 - for developers)
+Write-Host "[3/8] Validating source installer PowerShell syntax (Option 2)..." -ForegroundColor Yellow
 if (Test-Path "install\windows\install.ps1") {
     try {
         $content = Get-Content "install\windows\install.ps1" -Raw -ErrorAction Stop
@@ -46,7 +55,7 @@ if (Test-Path "install\windows\install.ps1") {
     Write-Host "  [WARN] Source installer file not found (optional)" -ForegroundColor Yellow
 }
 
-# Test 2c: Validate repository URL in binary installer
+# Test 4: Validate repository URL in binary installer
 Write-Host "[4/8] Validating repository URL in binary installer..." -ForegroundColor Yellow
 if (Test-Path "install\windows\install-binary.ps1") {
     $binaryContent = Get-Content "install\windows\install-binary.ps1" -Raw
@@ -71,8 +80,8 @@ if (Test-Path "install\windows\install-binary.ps1") {
     $errors += "install-binary.ps1 missing"
 }
 
-# Test 5: Check for required functions
-Write-Host "[5/8] Checking required functions..." -ForegroundColor Yellow
+# Test 5: Check for required functions in source installer
+Write-Host "[5/8] Checking required functions in source installer..." -ForegroundColor Yellow
 $requiredFunctions = @("Test-Command", "Get-UserInput")
 $content = Get-Content "install\windows\install.ps1" -Raw
 $allFound = $true
@@ -88,16 +97,21 @@ if (-not $allFound) {
     $errors += "Missing required functions"
 }
 
-# Test 6: Check installer launcher
-Write-Host "[6/8] Checking installer launcher..." -ForegroundColor Yellow
-if (Test-Path "install\windows\install.cmd") {
-    Write-Host "  [OK] Installer launcher exists" -ForegroundColor Green
+# Test 6: Check installer launchers (for cloned repo option)
+Write-Host "[6/8] Checking installer launchers (for cloned repo)..." -ForegroundColor Yellow
+if (Test-Path "install\windows\install-binary.cmd") {
+    Write-Host "  [OK] Binary installer launcher exists (install-binary.cmd)" -ForegroundColor Green
 } else {
-    Write-Host "  [WARN] Installer launcher not found (optional)" -ForegroundColor Yellow
+    Write-Host "  [WARN] Binary installer launcher not found (optional)" -ForegroundColor Yellow
+}
+if (Test-Path "install\windows\install.cmd") {
+    Write-Host "  [OK] Source installer launcher exists (install.cmd)" -ForegroundColor Green
+} else {
+    Write-Host "  [WARN] Source installer launcher not found (optional)" -ForegroundColor Yellow
 }
 
-# Test 7: Test one-liner binary installer download
-Write-Host "[7/8] Testing one-liner binary installer download..." -ForegroundColor Yellow
+# Test 7: Test one-liner binary installer download (Option 1)
+Write-Host "[7/8] Testing one-liner binary installer download (Option 1)..." -ForegroundColor Yellow
 $oneLinerUrl = "https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/windows/install-binary.ps1"
 try {
     $response = Invoke-WebRequest -Uri $oneLinerUrl -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
@@ -111,8 +125,8 @@ try {
     Write-Host "  This is expected in CI environments without internet access" -ForegroundColor Gray
 }
 
-# Test 8: Test one-liner source installer download
-Write-Host "[8/8] Testing one-liner source installer download..." -ForegroundColor Yellow
+# Test 8: Test one-liner source installer download (Option 2)
+Write-Host "[8/8] Testing one-liner source installer download (Option 2)..." -ForegroundColor Yellow
 $sourceInstallerUrl = "https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/windows/install.ps1"
 try {
     $response = Invoke-WebRequest -Uri $sourceInstallerUrl -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
