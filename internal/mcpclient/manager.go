@@ -195,9 +195,9 @@ func (sm *ServerManager) GetClient(ctx context.Context, name string) (*Client, e
 			// Extract connection info from the original client's transport
 			httpTransport, ok := serverInfo.Client.transport.(*HTTPTransport)
 			if !ok {
-				// Fallback: if transport is not HTTPTransport, return original client
-				// This shouldn't happen for HTTP transport, but handle gracefully
-				return serverInfo.Client, nil
+				// This should never happen for HTTP transport - if pool exists, transport should be HTTPTransport
+				// Returning the same client would cause data races with concurrent pool acquires
+				return nil, fmt.Errorf("expected HTTPTransport for pooled connection, got %T", serverInfo.Client.transport)
 			}
 
 			// Get connection parameters from the original transport
@@ -207,6 +207,7 @@ func (sm *ServerManager) GetClient(ctx context.Context, name string) (*Client, e
 
 			// Create a new client with the same configuration
 			// NewClientWithHTTP handles context creation internally
+			// This ensures each pool acquire gets a unique client instance
 			newClient, err := NewClientWithHTTP(serverInfo.Client.name, url, headers, timeout)
 			if err != nil {
 				return nil, fmt.Errorf("failed to create new pooled client: %w", err)

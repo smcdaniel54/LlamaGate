@@ -299,12 +299,21 @@ func main() {
 
 // checkPortAvailability checks if the specified port is available for binding.
 // Returns an error if the port is already in use, indicating another instance may be running.
+// Note: There's a small time window between this check and actual server binding where
+// another process could acquire the port, but the server will fail to start in that case.
 func checkPortAvailability(port string) error {
 	addr := ":" + port
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
 		return fmt.Errorf("port %s is already in use - another LlamaGate instance may be running. Only one instance should run per machine. Multiple apps can connect to the same LlamaGate instance", port)
 	}
-	_ = ln.Close() // Ignore error - we're just checking if port is available
+	// Properly handle Close error - log it if it occurs
+	if err := ln.Close(); err != nil {
+		log.Warn().
+			Str("port", port).
+			Err(err).
+			Msg("Error closing port availability check listener")
+		// Don't fail the check - the port was available, Close error is non-critical
+	}
 	return nil
 }
