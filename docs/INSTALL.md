@@ -1,10 +1,12 @@
 # Installation Guide
 
-LlamaGate can be installed in two ways:
+LlamaGate can be installed using three methods:
 
-## ⚡ Option 1: One-Line Installer (Recommended)
+## ⚡ Method 1: One-Line Command (Recommended)
 
-**Copy and paste one command - downloads installer and runs it automatically!**
+**Copy and paste one command - it downloads the installer and runs it automatically!**
+
+This method downloads a pre-built binary (no Go required):
 
 **Windows (PowerShell):**
 ```powershell
@@ -16,15 +18,19 @@ Invoke-WebRequest -Uri "https://raw.githubusercontent.com/smcdaniel54/LlamaGate/
 curl -fsSL https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/unix/install-binary.sh | bash
 ```
 
-The installer will:
-- ✅ Automatically detect your platform
-- ✅ Download the correct binary from GitHub releases
-- ✅ Set up the executable
-- ✅ Create a default `.env` configuration file
+**What happens:**
+1. Downloads the installer script from GitHub
+2. Runs the installer automatically
+3. Installer downloads the pre-built binary for your platform
+4. Sets up the executable and creates `.env` configuration file
 
 **That's it!** You're ready to run LlamaGate.
 
-**If you've already cloned the repository:**
+## 🔧 Method 2: Run Installer Directly (If You've Cloned the Repo)
+
+If you've already cloned the repository, you can run the installer directly:
+
+**Binary installer (downloads pre-built binary):**
 
 **Windows:**
 ```cmd
@@ -37,23 +43,7 @@ chmod +x install/unix/install-binary.sh
 ./install/unix/install-binary.sh
 ```
 
-## 🔨 Option 2: Build from Source (For Developers)
-
-If you need to build from source or want to customize the build:
-
-**One-line installer (downloads and runs source installer):**
-
-**Windows (PowerShell):**
-```powershell
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/windows/install.ps1" -OutFile install.ps1; .\install.ps1
-```
-
-**Unix/Linux/macOS:**
-```bash
-curl -fsSL https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/unix/install.sh | bash
-```
-
-**From cloned repository:**
+**Source installer (builds from source):**
 
 **Windows:**
 ```cmd
@@ -73,7 +63,9 @@ The source installer will:
 - ✅ Build the LlamaGate binary from source
 - ✅ Create a `.env` configuration file
 
-**Manual build (if you already have Go installed):**
+## 🔨 Method 3: Build from Source Manually (For Developers)
+
+If you already have Go installed and want to build manually:
 
 ```bash
 # Clone the repository
@@ -85,6 +77,18 @@ go build -o llamagate ./cmd/llamagate
 
 # Or install to $GOPATH/bin
 go install ./cmd/llamagate
+```
+
+**One-line command for source build (downloads source installer):**
+
+**Windows (PowerShell):**
+```powershell
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/windows/install.ps1" -OutFile install.ps1; .\install.ps1
+```
+
+**Unix/Linux/macOS:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/unix/install.sh | bash
 ```
 
 ## Configuration
