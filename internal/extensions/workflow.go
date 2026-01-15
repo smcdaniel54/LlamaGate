@@ -7,18 +7,16 @@ import (
 	"path/filepath"
 	"strings"
 	"text/template"
-
-	"github.com/llamagate/llamagate/internal/plugins"
 )
 
 // WorkflowExecutor executes extension workflows
 type WorkflowExecutor struct {
-	llmHandler plugins.LLMHandlerFunc
+	llmHandler LLMHandlerFunc
 	baseDir    string
 }
 
 // NewWorkflowExecutor creates a new workflow executor
-func NewWorkflowExecutor(llmHandler plugins.LLMHandlerFunc, baseDir string) *WorkflowExecutor {
+func NewWorkflowExecutor(llmHandler LLMHandlerFunc, baseDir string) *WorkflowExecutor {
 	return &WorkflowExecutor{
 		llmHandler: llmHandler,
 		baseDir:    baseDir,

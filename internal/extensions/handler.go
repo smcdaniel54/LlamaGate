@@ -9,7 +9,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/llamagate/llamagate/internal/middleware"
-	"github.com/llamagate/llamagate/internal/plugins"
 	"github.com/llamagate/llamagate/internal/response"
 	"github.com/rs/zerolog/log"
 )
@@ -21,7 +20,7 @@ type Handler struct {
 }
 
 // NewHandler creates a new extension handler
-func NewHandler(registry *Registry, llmHandler plugins.LLMHandlerFunc, baseDir string) *Handler {
+func NewHandler(registry *Registry, llmHandler LLMHandlerFunc, baseDir string) *Handler {
 	return &Handler{
 		registry:        registry,
 		workflowExecutor: NewWorkflowExecutor(llmHandler, baseDir),

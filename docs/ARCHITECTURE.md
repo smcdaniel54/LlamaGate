@@ -23,14 +23,14 @@ LlamaGate is a **single-binary HTTP proxy/gateway** that sits between clients an
 - Request caching
 - Authentication and rate limiting
 - MCP (Model Context Protocol) client integration
-- Plugin system for extensibility
+- Extension system for extensibility
 - Structured logging
 
 **Architecture Principles:**
 - **Single Binary**: Everything compiled into one executable
 - **Stateless**: No persistent state (except in-memory cache)
 - **Layered**: Clear separation of concerns
-- **Extensible**: Plugin system for custom functionality
+- **Extensible**: Extension system for custom functionality
 
 ## System Architecture
 
@@ -52,7 +52,7 @@ LlamaGate is a **single-binary HTTP proxy/gateway** that sits between clients an
 │  │  │ Middleware   │  │ API Handlers │  │  Routes   │  │  │
 │  │  │ - Auth       │  │ - Health     │  │ - /v1/*   │  │  │
 │  │  │ - Rate Limit │  │ - MCP        │  │ - /health │  │  │
-│  │  │ - Request ID │  │ - Plugins    │  │           │  │  │
+│  │  │ - Request ID │  │ - Extensions │  │           │  │  │
 │  │  └──────────────┘  └──────────────┘  └───────────┘  │  │
 │  └──────────────────────────────────────────────────────┘  │
 │                        │                                     │
@@ -77,7 +77,7 @@ LlamaGate is a **single-binary HTTP proxy/gateway** that sits between clients an
 │                        │                                     │
 │                        ▼                                     │
 │  ┌──────────────────────────────────────────────────────┐  │
-│  │         Plugin System (Optional)                     │  │
+│  │         Extension System (Optional)                   │  │
 │  │  ┌──────────────┐  ┌──────────────┐  ┌───────────┐  │  │
 │  │  │  Registry   │  │  Workflow   │  │  Context  │  │  │
 │  │  │             │  │  Executor   │  │           │  │  │
@@ -100,7 +100,7 @@ LlamaGate is a **single-binary HTTP proxy/gateway** that sits between clients an
 **Responsibilities:**
 - Load configuration
 - Initialize logger
-- Initialize components (cache, proxy, MCP, plugins)
+- Initialize components (cache, proxy, MCP, extensions)
 - Set up HTTP router and middleware
 - Register API routes
 - Start HTTP server
@@ -154,7 +154,7 @@ LlamaGate is a **single-binary HTTP proxy/gateway** that sits between clients an
 #### API Handlers (`internal/api/`)
 - **HealthHandler** - Health check endpoint
 - **MCPHandler** - MCP server management endpoints
-- **PluginHandler** - Plugin management endpoints
+- **ExtensionHandler** - Extension management endpoints
 
 ### 4. Proxy Layer (`internal/proxy/`)
 
@@ -171,7 +171,7 @@ LlamaGate is a **single-binary HTTP proxy/gateway** that sits between clients an
 - **ToolLoop** - Multi-round tool execution
 - **ResourceContext** - MCP resource injection
 - **Validation** - Request validation
-- **PluginHandler** - LLM handler for plugins
+- **ExtensionLLMHandler** - LLM handler for extensions
 
 **Request Flow:**
 1. Receive OpenAI-format request
@@ -245,25 +245,26 @@ LlamaGate is a **single-binary HTTP proxy/gateway** that sits between clients an
 - Tools are namespaced: `mcp.<serverName>.<toolName>`
 - Prevents collisions between servers
 
-### 8. Plugin System (`internal/plugins/`)
+### 8. Extension System (`internal/extensions/`)
 
 **Responsibilities:**
-- Plugin registration and management
+- Extension discovery and registration
 - Workflow execution
-- Agent definitions
-- Custom API endpoints
-- Plugin context management
+- Middleware hooks
+- Observer hooks
+- Extension manifest management
 
 **Key Components:**
-- **Registry** - Plugin registration
+- **Registry** - Extension registration
 - **WorkflowExecutor** - Execute agentic workflows
-- **PluginContext** - Provide services to plugins
-- **Types** - Core plugin interfaces
+- **HookManager** - Middleware and observer hooks
+- **Manifest** - YAML-based extension definitions
+- **Types** - Core extension types (LLMHandlerFunc, etc.)
 
-**Plugin Types:**
-- **Basic Plugin** - Simple input/output processing
-- **Extended Plugin** - Custom API endpoints
-- **Agent Plugin** - Agentic workflows with LLM
+**Extension Types:**
+- **Workflow Extension** - Agentic workflows with LLM calls
+- **Middleware Extension** - Request/response middleware hooks
+- **Observer Extension** - Response observation hooks
 
 ### 9. Logging (`internal/logger/`)
 
@@ -347,28 +348,28 @@ LlamaGate is a **single-binary HTTP proxy/gateway** that sits between clients an
    └─> Return to client
 ```
 
-### Plugin Execution Flow
+### Extension Execution Flow
 
 ```
 1. Client Request
-   └─> POST /v1/plugins/:name/execute
+   └─> POST /v1/extensions/:name/execute
        └─> Body: { input: {...} }
 
-2. Plugin Handler
-   └─> Get plugin from registry
+2. Extension Handler
+   └─> Get extension from registry
    └─> Validate input
-   └─> Execute plugin
+   └─> Execute extension
 
-3. Plugin Execution
-   └─> Execute workflow (if agentic)
-       ├─> Step 1: LLM call (via PluginContext)
-       ├─> Step 2: Tool call (via MCP)
-       ├─> Step 3: Transform data
+3. Extension Execution
+   └─> Execute workflow (if workflow type)
+       ├─> Step 1: LLM call (via LLMHandler)
+       ├─> Step 2: Template render
+       ├─> Step 3: File write
        └─> Step N: Final result
    └─> Return result
 
 4. Response
-   └─> Format plugin result
+   └─> Format extension result
    └─> Return to client
 ```
 
@@ -472,8 +473,10 @@ main.go
   │   ├─> Sets tool manager
   │   └─> Sets guardrails
   │
-  └─> plugins.NewRegistry()
-      └─> Creates plugin registry
+  └─> extensions.NewRegistry()
+      └─> Creates extension registry
+      └─> extensions.DiscoverExtensions()
+          └─> Discovers extensions from extensions/ directory
 ```
 
 ### Component Communication
@@ -488,10 +491,10 @@ main.go
 - Proxy uses ToolManager to execute tools
 - ToolManager uses MCP clients to execute tools
 
-**Proxy ↔ Plugins:**
-- Proxy provides LLM handler to plugins
-- Plugins can make LLM calls through proxy
-- Plugins can access MCP tools via registry
+**Proxy ↔ Extensions:**
+- Proxy provides LLM handler to extensions
+- Extensions can make LLM calls through proxy
+- Extensions can access MCP tools via workflow steps
 
 **MCP ↔ Tools:**
 - MCP clients discover tools from servers
@@ -505,7 +508,7 @@ main.go
 **Layers:**
 1. **HTTP Layer** - Request/response handling
 2. **Proxy Layer** - Business logic, format conversion
-3. **Service Layer** - MCP, plugins, tools
+3. **Service Layer** - MCP, extensions, tools
 4. **Transport Layer** - HTTP client, MCP transports
 
 **Benefits:**
@@ -534,7 +537,7 @@ proxy := proxy.NewWithTimeout(ollamaHost, cache, timeout)
 
 **Examples:**
 - `Transport` interface (stdio, HTTP, SSE)
-- `Plugin` interface
+- `LLMHandlerFunc` interface (for extensions)
 - `ServerManagerInterface` (for proxy)
 
 ### 4. Registry Pattern
@@ -545,7 +548,7 @@ proxy := proxy.NewWithTimeout(ollamaHost, cache, timeout)
 - Plugin and tool registries
 
 **Examples:**
-- `PluginRegistry` - Plugin registration
+- `ExtensionRegistry` - Extension registration
 - `ToolManager` - Tool registration
 - `ServerManager` - MCP server registration
 
@@ -578,7 +581,7 @@ proxy := proxy.NewWithTimeout(ollamaHost, cache, timeout)
 
 **Mutexes:**
 - Cache operations (read/write locks)
-- Plugin registry (read/write locks)
+- Extension registry (read/write locks)
 - MCP server manager (read/write locks)
 - Connection pool (mutex for pool operations)
 
@@ -605,7 +608,7 @@ proxy := proxy.NewWithTimeout(ollamaHost, cache, timeout)
 **Error Types:**
 - `ValidationError` - Invalid input
 - `InternalError` - Server errors
-- `ServiceUnavailable` - MCP/plugin system unavailable
+- `ServiceUnavailable` - MCP/extension system unavailable
 - `NotFound` - Resource not found
 - `RateLimitError` - Rate limit exceeded
 
@@ -697,14 +700,15 @@ type Config struct {
 - Only enable when needed
 - Faster startup without MCP
 
-### 4. Plugin System
+### 4. Extension System
 
-**Decision:** Extensible plugin system for custom functionality
+**Decision:** YAML-based extension system for custom functionality
 
 **Rationale:**
 - Allows customization without modifying core
 - Enables agentic workflows
-- Model-friendly (JSON/YAML definitions)
+- Model-friendly (YAML manifest definitions)
+- No compilation required
 
 ### 5. OpenAI Compatibility
 
@@ -765,20 +769,21 @@ type Config struct {
 
 ## Extension Points
 
-### 1. Plugins
+### 1. Extensions
 
 **How to Extend:**
-- Implement `Plugin` interface
-- Register with `PluginRegistry`
-- Access LLM via `PluginContext`
-- Access MCP tools via registry
+- Create `manifest.yaml` in `extensions/` directory
+- Define workflow steps, middleware hooks, or observer hooks
+- Extensions are auto-discovered at startup
+- Access LLM via `LLMHandlerFunc` in workflow steps
+- Access MCP tools via workflow steps
 
-### 2. Custom API Endpoints
+### 2. Custom Workflows
 
 **How to Extend:**
-- Implement `ExtendedPlugin` interface
-- Define custom endpoints
-- Register with router automatically
+- Create workflow extension with `manifest.yaml`
+- Define steps: template.load, template.render, llm.chat, file.write
+- Extensions execute via `POST /v1/extensions/:name/execute`
 
 ### 3. MCP Servers
 
@@ -820,7 +825,7 @@ type Config struct {
 
 - [Project Structure](STRUCTURE.md) - Directory structure
 - [MCP Integration](MCP.md) - MCP client details
-- [Plugin System](PLUGINS.md) - Plugin system details
+- [Extension System](EXTENSIONS_SPEC_V0.9.1.md) - Extension system details
 - [API Reference](API.md) - HTTP API details
 - [Configuration Guide](../README.md#configuration) - Configuration options
 

@@ -50,53 +50,56 @@ This guide explains how to test LlamaGate to ensure everything is working correc
    scripts\windows\test.cmd
    ```
 
-## Plugin System Testing
+## Extensions System Testing
 
-The plugin system includes comprehensive tests for plugin registration, validation, and execution.
+The extensions system includes comprehensive tests for extension discovery, validation, and execution.
 
 ### Quick Test
 
+Extensions are automatically discovered from the `extensions/` directory. Test extensions by:
+
 **Windows:**
 ```cmd
-scripts\windows\test-plugins.cmd
+scripts\windows\test.cmd
 ```
 
 **Unix/Linux/macOS:**
 ```bash
-chmod +x scripts/unix/test-plugins.sh
-./scripts/unix/test-plugins.sh
+chmod +x scripts/unix/test.sh
+./scripts/unix/test.sh
 ```
 
 ### What Gets Tested
 
-1. **Plugin Discovery**
-   - `GET /v1/plugins` - List all registered plugins
-   - `GET /v1/plugins/:name` - Get plugin metadata
+1. **Extension Discovery**
+   - `GET /v1/extensions` - List all registered extensions
+   - `GET /v1/extensions/:name` - Get extension metadata
 
 2. **Input Validation**
    - Required inputs validated
    - Type validation
    - Error messages clear
 
-3. **Plugin Execution**
-   - `POST /v1/plugins/:name/execute` - Execute plugin
+3. **Extension Execution**
+   - `POST /v1/extensions/:name/execute` - Execute workflow extension
    - Valid inputs return 200 OK
    - Invalid inputs return 400 Bad Request
 
-### Test Plugins
+### Test Extensions
 
-Test plugins are defined in `tests/plugins/test_plugins.go`. To enable them:
+Test extensions are created by placing `manifest.yaml` files in the `extensions/` directory. See `docs/EXTENSION_QUICKSTART.md` for examples.
 
-1. Set `ENABLE_TEST_PLUGINS=true` in `.env`
-2. Start LlamaGate
-3. Run test scripts
+1. Create extension directory: `extensions/my_test_extension/`
+2. Add `manifest.yaml` with required fields
+3. Restart LlamaGate
+4. Extension is automatically discovered and registered
 
 ### Expected Results
 
-- ✅ Plugin discovery returns list of plugins
+- ✅ Extension discovery returns list of extensions
 - ✅ Valid execution returns HTTP 200 with results
 - ✅ Invalid inputs return HTTP 400 with error details
-- ✅ Execution metadata included in responses
+- ✅ Extension metadata included in responses
 
 ## Manual Testing
 

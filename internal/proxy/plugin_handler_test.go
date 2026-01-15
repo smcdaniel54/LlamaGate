@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestProxy_CreatePluginLLMHandler(t *testing.T) {
+func TestProxy_CreateExtensionLLMHandler(t *testing.T) {
 	// Create a mock Ollama server
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "POST" {
@@ -44,7 +44,7 @@ func TestProxy_CreatePluginLLMHandler(t *testing.T) {
 	proxyInstance := NewWithTimeout(mockServer.URL, cacheInstance, 0)
 
 	// Create LLM handler
-	llmHandler := proxyInstance.CreatePluginLLMHandler()
+	llmHandler := proxyInstance.CreateExtensionLLMHandler()
 	require.NotNil(t, llmHandler)
 
 	// Test LLM call

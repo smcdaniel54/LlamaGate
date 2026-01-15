@@ -9,12 +9,12 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/llamagate/llamagate/internal/plugins"
+	"github.com/llamagate/llamagate/internal/extensions"
 )
 
-// CreatePluginLLMHandler creates an LLM handler function for plugins
-// This allows plugins to make LLM calls without circular dependencies
-func (p *Proxy) CreatePluginLLMHandler() plugins.LLMHandlerFunc {
+// CreateExtensionLLMHandler creates an LLM handler function for extensions
+// This allows extensions to make LLM calls without circular dependencies
+func (p *Proxy) CreateExtensionLLMHandler() extensions.LLMHandlerFunc {
 	return func(ctx context.Context, model string, messages []map[string]interface{}, options map[string]interface{}) (map[string]interface{}, error) {
 		// Convert messages to proxy.Message format
 		proxyMessages := make([]Message, 0, len(messages))

@@ -1,12 +1,42 @@
 # Changelog
 
-## [Unreleased]
+All notable changes to LlamaGate will be documented in this file.
+
+## [0.9.1] - 2026-01-15
+
+### Breaking Changes
+
+- **Plugin System Removed**: The Go-based plugin system has been completely removed and replaced with the YAML-based extension system. This is a **breaking change** requiring migration.
+
+  **Migration Required:**
+  - `/v1/plugins` endpoints → `/v1/extensions` endpoints
+  - `plugins/` directory → `extensions/` directory
+  - Go plugin code → YAML manifest files
+  - `PLUGINS_ENABLED` env var → Extensions auto-discovered (no config needed)
+  - `PluginsConfig` → Removed (extensions use YAML manifests)
+
+  **What Changed:**
+  - All plugin code in `internal/plugins/` has been removed
+  - All plugin code in `plugins/` directory has been removed
+  - Plugin API endpoints (`/v1/plugins/*`) have been removed
+  - Plugin configuration (`PluginsConfig`) has been removed
+  - Extension system is now the only extensibility mechanism
+
+  **Migration Guide:** See `docs/MIGRATION_STATUS.md` for details.
+
+### Added
+
+- **Extension System v0.9.1**: YAML-based extension system for workflows, middleware, and observability
+  - Auto-discovery from `extensions/` directory
+  - YAML manifest-based definitions (no compilation required)
+  - Support for workflow, middleware, and observer extension types
+  - Enable/disable functionality via manifest or environment variables
+  - Comprehensive extension API endpoints (`/v1/extensions/*`)
+  - Example extensions included: prompt-template-executor, request-inspector, cost-usage-reporter
 
 ### Changed
+
 - **Default port changed from 8080 to 11435**: The default server port has been changed from `8080` to `11435` to avoid conflicts with common services like Jenkins, Tomcat, and development servers. Port 11435 follows Ollama's port pattern (11434 + 1) and is easy to remember. Existing installations with `.env` files will continue using their configured port. New installations will use port 11435 by default. You can override the port using the `PORT` environment variable.
-
-
-All notable changes to LlamaGate will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -93,5 +123,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Missing request IDs in error responses
 - Cache lookup using incorrect message context (tool injection)
 
-[Unreleased]: https://github.com/llamagate/llamagate/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/llamagate/llamagate/compare/v0.9.1...HEAD
+[0.9.1]: https://github.com/llamagate/llamagate/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/llamagate/llamagate/releases/tag/v0.9.0

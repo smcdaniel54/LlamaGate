@@ -18,7 +18,6 @@ import (
 	"github.com/llamagate/llamagate/internal/logger"
 	"github.com/llamagate/llamagate/internal/middleware"
 	"github.com/llamagate/llamagate/internal/extensions"
-	"github.com/llamagate/llamagate/internal/plugins"
 	"github.com/llamagate/llamagate/internal/proxy"
 	"github.com/llamagate/llamagate/internal/setup"
 	"github.com/rs/zerolog/log"
@@ -194,40 +193,9 @@ func main() {
 			}
 		}
 
-		// Plugin system endpoints
-		pluginRegistry := plugins.NewRegistry()
-
-		// Create LLM handler for plugins and extensions
-		llmHandler := proxyInstance.CreatePluginLLMHandler()
-
-		// Register Alexa Skill plugin with context
-		if err := setup.RegisterAlexaPlugin(pluginRegistry, proxyInstance, llmHandler, cfg); err != nil {
-			log.Warn().Err(err).Msg("Failed to register Alexa Skill plugin")
-		}
-
-		// Register test plugins if explicitly enabled
-		// In production, plugins would be registered via configuration or discovery
-		if os.Getenv("ENABLE_TEST_PLUGINS") == "true" {
-			if err := setup.RegisterTestPlugins(pluginRegistry); err != nil {
-				log.Warn().Err(err).Msg("Failed to register test plugins")
-			} else {
-				log.Info().Msg("Test plugins registration attempted (see setup/plugins.go)")
-			}
-		}
-
-		// Register plugin API endpoints
-		pluginHandler := api.NewPluginHandler(pluginRegistry)
-		pluginsGroup := v1.Group("/plugins")
-		{
-			pluginsGroup.GET("", pluginHandler.ListPlugins)
-			pluginsGroup.GET("/:name", pluginHandler.GetPlugin)
-			pluginsGroup.POST("/:name/execute", pluginHandler.ExecutePlugin)
-		}
-
-		// Register custom plugin routes (for ExtendedPlugin with custom endpoints)
-		api.RegisterPluginRoutes(v1, pluginRegistry)
-
 		// Extension system endpoints
+		// Create LLM handler for extensions
+		llmHandler := proxyInstance.CreateExtensionLLMHandler()
 		extensionHandler := extensions.NewHandler(extensionRegistry, llmHandler, extensionBaseDir)
 		extensionsGroup := v1.Group("/extensions")
 		{
@@ -307,7 +275,7 @@ func main() {
 		}
 	}
 
-	// Note: Plugin HTTP clients are managed per-request and don't need explicit cleanup
+	// Note: Extension HTTP clients are managed per-request and don't need explicit cleanup
 	// They will be garbage collected when the server shuts down
 
 	// Graceful shutdown with configurable timeout

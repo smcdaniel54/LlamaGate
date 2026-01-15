@@ -24,17 +24,10 @@ type Config struct {
 	HealthCheckTimeout time.Duration  // Timeout for /health endpoint
 	ShutdownTimeout    time.Duration  // Timeout for graceful shutdown
 	MCP                *MCPConfig     // MCP configuration (optional)
-	Plugins            *PluginsConfig // Plugin configuration (optional)
 	// TLS/HTTPS configuration
 	TLSEnabled  bool   // Enable HTTPS/TLS
 	TLSCertFile string // Path to TLS certificate file
 	TLSKeyFile  string // Path to TLS private key file
-}
-
-// PluginsConfig holds plugin configuration
-type PluginsConfig struct {
-	Enabled bool                              // Enable plugin system
-	Configs map[string]map[string]interface{} // Plugin-specific configs
 }
 
 // MCPConfig holds MCP client configuration
@@ -158,53 +151,12 @@ func Load() (*Config, error) {
 	}
 	cfg.MCP = mcpConfig
 
-	// Load plugin configuration
-	pluginsConfig, err := loadPluginsConfig()
-	if err != nil {
-		return nil, fmt.Errorf("failed to load plugins config: %w", err)
-	}
-	cfg.Plugins = pluginsConfig
-
 	// Validate configuration
 	if err := cfg.Validate(); err != nil {
 		return nil, err
 	}
 
 	return cfg, nil
-}
-
-// loadPluginsConfig loads plugin configuration from viper
-func loadPluginsConfig() (*PluginsConfig, error) {
-	enabled := viper.GetBool("PLUGINS_ENABLED")
-	if !enabled {
-		// Check if plugin config exists in YAML/JSON
-		if viper.IsSet("plugins") {
-			enabled = true
-		} else {
-			return nil, nil // Plugins not explicitly configured
-		}
-	}
-
-	plugins := &PluginsConfig{
-		Enabled: enabled,
-		Configs: make(map[string]map[string]interface{}),
-	}
-
-	// Load plugin configs from YAML/JSON
-	if viper.IsSet("plugins.configs") {
-		var configs map[string]map[string]interface{}
-		if err := viper.UnmarshalKey("plugins.configs", &configs); err != nil {
-			return nil, fmt.Errorf("failed to unmarshal plugin configs: %w", err)
-		}
-		plugins.Configs = configs
-	}
-
-	// Load individual plugin configs from environment variables
-	// Format: PLUGIN_<PLUGIN_NAME>_<CONFIG_KEY>=value
-	// Example: PLUGIN_ALEXA_SKILL_WAKE_WORD=Smart Voice
-	// This is handled at plugin registration time
-
-	return plugins, nil
 }
 
 // loadMCPConfig loads MCP configuration from viper

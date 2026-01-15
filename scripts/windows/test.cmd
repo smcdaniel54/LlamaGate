@@ -148,28 +148,27 @@ if %ERRORLEVEL% EQU 0 (
 )
 echo.
 
-echo [8/9] Testing Plugin System (if enabled)...
+echo [8/9] Testing Extensions System...
 if "%API_KEY%"=="" (
     set AUTH_HEADER=
 ) else (
     set AUTH_HEADER=-H "X-API-Key: %API_KEY%"
 )
-echo Testing plugin discovery...
-curl -s %AUTH_HEADER% %BASE_URL%/v1/plugins >nul
+echo Testing extension discovery...
+curl -s %AUTH_HEADER% %BASE_URL%/v1/extensions
 if %ERRORLEVEL% EQU 0 (
     echo.
-    echo ✓ Plugin system is accessible
-    echo   Run scripts\windows\test-plugins.cmd for comprehensive plugin tests
+    echo ✓ Extensions system is accessible
+    echo   Extensions are auto-discovered from the extensions\ directory
 ) else (
     echo.
-    echo ℹ Plugin system test skipped (Plugin system may not be enabled)
+    echo ℹ Extensions system test skipped (Extensions may not be configured)
 )
 echo.
 
-echo [9/9] Testing Plugin Use Cases (if plugins registered)...
-echo Note: This requires test plugins to be registered
-echo       See scripts\windows\test-plugins.cmd for full plugin testing
-echo       Or set ENABLE_TEST_PLUGINS=true to enable test plugins
+echo [9/9] Testing Extensions (if extensions installed)...
+echo Note: Extensions are discovered from the extensions\ directory
+echo       See docs\EXTENSION_QUICKSTART.md for extension examples
 echo.
 
 :end

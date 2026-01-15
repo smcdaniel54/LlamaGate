@@ -156,32 +156,31 @@ else
 fi
 echo ""
 
-echo "[8/9] Testing Plugin System (if enabled)..."
+echo "[8/9] Testing Extensions System..."
 if [ -n "$API_KEY" ]; then
     AUTH_HEADER="-H \"X-API-Key: $API_KEY\""
 else
     AUTH_HEADER=""
 fi
-echo "Testing plugin discovery..."
+echo "Testing extension discovery..."
 if [ -n "$API_KEY" ]; then
-    curl -s -H "X-API-Key: $API_KEY" "$BASE_URL/v1/plugins" > /dev/null
+    curl -s -H "X-API-Key: $API_KEY" "$BASE_URL/v1/extensions" | jq '.' 2>/dev/null || curl -s -H "X-API-Key: $API_KEY" "$BASE_URL/v1/extensions"
 else
-    curl -s "$BASE_URL/v1/plugins" > /dev/null
+    curl -s "$BASE_URL/v1/extensions" | jq '.' 2>/dev/null || curl -s "$BASE_URL/v1/extensions"
 fi
 if [ $? -eq 0 ]; then
     echo ""
-    echo "✓ Plugin system is accessible"
-    echo "  Run scripts/unix/test-plugins.sh for comprehensive plugin tests"
+    echo "✓ Extensions system is accessible"
+    echo "  Extensions are auto-discovered from the extensions/ directory"
 else
     echo ""
-    echo "ℹ Plugin system test skipped (Plugin system may not be enabled)"
+    echo "ℹ Extensions system test skipped (Extensions may not be configured)"
 fi
 echo ""
 
-echo "[9/9] Testing Plugin Use Cases (if plugins registered)..."
-echo "Note: This requires test plugins to be registered"
-echo "      See scripts/unix/test-plugins.sh for full plugin testing"
-echo "      Or set ENABLE_TEST_PLUGINS=true to enable test plugins"
+echo "[9/9] Testing Extensions (if extensions installed)..."
+echo "Note: Extensions are discovered from the extensions/ directory"
+echo "      See docs/EXTENSION_QUICKSTART.md for extension examples"
 echo ""
 
 echo "========================================"
