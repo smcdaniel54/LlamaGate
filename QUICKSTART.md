@@ -107,7 +107,7 @@ print(response.choices[0].message.content)
    ```python
    # Pre-warm on startup
    client.chat.completions.create(
-       model="llama2",
+       model="mistral",
        messages=[{"role": "user", "content": "hi"}]
    )
    ```
@@ -277,7 +277,7 @@ response3 = client.chat.completions.create(
 
 ```bash
 # Install different models
-ollama pull llama2
+ollama pull mistral
 ollama pull mistral
 ollama pull codellama
 ollama pull phi
