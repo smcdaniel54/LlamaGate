@@ -36,6 +36,12 @@ LlamaGate is a production-ready, OpenAI-compatible API gateway for local LLMs (O
 - 📦 **[Installation Guide](docs/INSTALL.md)** - Detailed installation instructions
 - ✅ **[Manual Acceptance Test](docs/ACCEPTANCE_TEST.md)** - Comprehensive acceptance test checklist for human verification
 
+## Example Repositories
+
+- 📚 **[OpenAI SDK Examples](https://github.com/smcdaniel54/LlamaGate-openai-sdk-examples)** - Minimal examples showing how to use the OpenAI SDK with LlamaGate (streaming and non-streaming)
+- 🔧 **Extension Examples** - Coming soon
+- 🎯 **MCP Examples** - Coming soon
+
 ## Installation
 
 ### ⚡ Method 1: One-Line Command (Recommended)
@@ -331,6 +337,10 @@ Authentication errors return HTTP `401 Unauthorized` with a JSON response in Ope
 
 > 🎯 **Want to see MCP in action?** Check out the [MCP Demo QuickStart](docs/MCP_DEMO_QUICKSTART.md) for a complete example with multiple document processing servers.
 
+> 📚 **Looking for more examples?** Check out our example repositories:
+> - [OpenAI SDK Examples](https://github.com/smcdaniel54/LlamaGate-openai-sdk-examples) - Minimal examples showing how to use the OpenAI SDK with LlamaGate
+> - More example repositories coming soon: Extension examples, MCP examples
+
 ### Usage Examples
 
 All examples below assume:
@@ -542,6 +552,8 @@ console.log(response.choices[0].message.content);
 ```
 
 **Note:** Authentication is optional. If `API_KEY` is not set in LlamaGate, you can omit the `api_key` parameter or use any value.
+
+> 📚 **For more complete SDK examples**, see the [LlamaGate OpenAI SDK Examples repository](https://github.com/smcdaniel54/LlamaGate-openai-sdk-examples) which includes runnable examples for both streaming and non-streaming requests.
 
 ### Health Check
 

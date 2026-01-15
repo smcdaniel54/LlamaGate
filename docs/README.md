@@ -19,6 +19,11 @@ Welcome to the LlamaGate documentation! This directory contains detailed guides 
 - [Project Structure](STRUCTURE.md) - Understanding the codebase
 - [Installer Testing](INSTALLER_TESTING.md) - Testing installation scripts
 
+## Example Repositories
+- [OpenAI SDK Examples](https://github.com/smcdaniel54/LlamaGate-openai-sdk-examples) - Minimal examples showing how to use the OpenAI SDK with LlamaGate
+- Extension Examples - Coming soon
+- MCP Examples - Coming soon
+
 ## Main Documentation
 - [Main README](../README.md) - Complete feature reference
 - [Security Policy](../SECURITY.md) - Security best practices
