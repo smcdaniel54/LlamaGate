@@ -177,13 +177,13 @@ REM First request (slow)
 curl -w "\nTime: %{time_total}s\n" -X POST http://localhost:11435/v1/chat/completions ^
   -H "Content-Type: application/json" ^
   -H "X-API-Key: sk-llamagate" ^
-  -d "{\"model\":\"llama2\",\"messages\":[{\"role\":\"user\",\"content\":\"What is 2+2?\"}]}"
+  -d "{\"model\":\"mistral\",\"messages\":[{\"role\":\"user\",\"content\":\"What is 2+2?\"}]}"
 
 REM Second request (fast - cached)
 curl -w "\nTime: %{time_total}s\n" -X POST http://localhost:11435/v1/chat/completions ^
   -H "Content-Type: application/json" ^
   -H "X-API-Key: sk-llamagate" ^
-  -d "{\"model\":\"llama2\",\"messages\":[{\"role\":\"user\",\"content\":\"What is 2+2?\"}]}"
+  -d "{\"model\":\"mistral\",\"messages\":[{\"role\":\"user\",\"content\":\"What is 2+2?\"}]}"
 ```
 
 The second request should complete in milliseconds (cached) vs seconds (from Ollama).
@@ -494,3 +494,4 @@ For load testing, you can use tools like:
 - **Apache Bench (ab)**: `ab -n 100 -c 10 http://localhost:11435/health`
 - **wrk**: `wrk -t4 -c100 -d30s http://localhost:11435/health`
 - **k6**: Write a k6 script for more complex scenarios
+
