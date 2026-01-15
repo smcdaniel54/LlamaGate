@@ -279,7 +279,7 @@ You should see structured JSON logs with request information.
 Make rapid requests to test rate limiting:
 
 ```cmd
-for /L %i in (1,1,15) do @curl -s -X POST http://localhost:11435/v1/chat/completions -H "Content-Type: application/json" -H "X-API-Key: sk-llamagate" -d "{\"model\":\"llama2\",\"messages\":[{\"role\":\"user\",\"content\":\"Test\"}]}" >nul && echo Request %i
+for /L %i in (1,1,15) do @curl -s -X POST http://localhost:11435/v1/chat/completions -H "Content-Type: application/json" -H "X-API-Key: sk-llamagate" -d "{\"model\":\"mistral\",\"messages\":[{\"role\":\"user\",\"content\":\"Test\"}]}" >nul && echo Request %i
 ```
 
 After 50 requests (default `RATE_LIMIT_RPS=50`), you should start getting `429 Too Many Requests` responses.
