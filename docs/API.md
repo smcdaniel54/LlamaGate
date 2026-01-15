@@ -70,7 +70,7 @@ The same request ID will appear in:
 - Error responses (if any)
 - Downstream calls to Ollama (via `X-Request-ID` header)
 - Tool/function calls (via context)
-- MCP/plugin calls (via context and HTTP headers)
+- MCP tool calls (via context and HTTP headers)
 
 ### Sensitive Data Redaction
 

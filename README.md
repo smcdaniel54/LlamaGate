@@ -737,7 +737,7 @@ The request ID is:
 - Propagated to all downstream components:
   - Ollama upstream calls (via `X-Request-ID` header)
   - Tool/function calling (via context)
-  - MCP/plugin calls (via context and HTTP headers)
+  - MCP tool calls (via context and HTTP headers)
 - Included in all structured log entries for the request
 
 ### Sensitive Data Redaction
