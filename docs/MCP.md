@@ -194,7 +194,7 @@ client = OpenAI(
 
 # Tools are automatically available if MCP is enabled
 response = client.chat.completions.create(
-    model="llama2",
+    model="mistral",
     messages=[
         {"role": "user", "content": "Read the file /path/to/file.txt and summarize it"}
     ],

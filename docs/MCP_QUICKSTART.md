@@ -88,7 +88,7 @@ curl http://localhost:11435/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "X-API-Key: sk-llamagate" \
   -d '{
-    "model": "llama2",
+    "model": "mistral",
     "messages": [
       {
         "role": "user",
@@ -109,7 +109,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="llama2",
+    model="mistral",
     messages=[
         {
             "role": "user",
@@ -138,7 +138,7 @@ Test a multi-step flow (read → summarize → write):
 
 ```python
 response = client.chat.completions.create(
-    model="llama2",
+    model="mistral",
     messages=[
         {
             "role": "user",

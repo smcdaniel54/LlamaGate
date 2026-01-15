@@ -149,7 +149,7 @@ Test a simple chat completion:
 curl -X POST http://localhost:11435/v1/chat/completions ^
   -H "Content-Type: application/json" ^
   -H "X-API-Key: sk-llamagate" ^
-  -d "{\"model\":\"llama2\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello!\"}]}"
+  -d "{\"model\":\"mistral\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello!\"}]}"
 ```
 
 **Expected response:**
@@ -369,7 +369,7 @@ print(models)
 
 # Test chat completion
 response = client.chat.completions.create(
-    model="llama2",
+    model="mistral",
     messages=[
         {"role": "user", "content": "Hello!"}
     ]

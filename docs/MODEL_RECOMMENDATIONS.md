@@ -413,7 +413,7 @@ response = client.chat.completions.create(
 
 ### For Documentation Examples
 
-**Current:** Examples use `"llama2"`  
+**Current:** Examples use `"mistral"` (Mistral 7B) as default  
 **Recommended:** Update to use business-appropriate defaults:
 
 ```python
