@@ -199,7 +199,7 @@ const openai = new OpenAI({
 });
 
 const response = await openai.chat.completions.create({
-  model: 'llama2',  // ← Any Ollama model
+  model: 'mistral',  // Default: Mistral 7B (works on 8GB VRAM or CPU)
   messages: [
     { role: 'user', content: 'Write a haiku about coding' }
   ],
