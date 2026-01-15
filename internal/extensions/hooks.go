@@ -96,7 +96,7 @@ func (h *HookManager) executeHook(manifest *Manifest, hook HookDefinition, c *gi
 }
 
 // auditLog creates an audit log entry (for request-inspector)
-func (h *HookManager) auditLog(manifest *Manifest, c *gin.Context, responseData map[string]interface{}) error {
+func (h *HookManager) auditLog(manifest *Manifest, c *gin.Context, _ map[string]interface{}) error {
 	// Get config
 	config := manifest.Config
 	sampleRate := 1.0

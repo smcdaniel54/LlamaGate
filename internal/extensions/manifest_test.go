@@ -159,12 +159,12 @@ func TestDiscoverExtensions_InvalidManifest(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	extDir := filepath.Join(tmpDir, "invalid")
-	os.MkdirAll(extDir, 0755)
+	require.NoError(t, os.MkdirAll(extDir, 0755))
 
 	// Create invalid manifest (missing required fields)
 	invalidManifest := `name: invalid
 `
-	os.WriteFile(filepath.Join(extDir, "manifest.yaml"), []byte(invalidManifest), 0644)
+	require.NoError(t, os.WriteFile(filepath.Join(extDir, "manifest.yaml"), []byte(invalidManifest), 0644))
 
 	manifests, err := DiscoverExtensions(tmpDir)
 	// Should return error for invalid manifest

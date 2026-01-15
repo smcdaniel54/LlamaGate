@@ -91,7 +91,7 @@ func (e *WorkflowExecutor) resolveStepWith(with map[string]interface{}, state ma
 }
 
 // loadTemplate loads a template file
-func (e *WorkflowExecutor) loadTemplate(_ context.Context, step WorkflowStep, resolvedWith map[string]interface{}, state map[string]interface{}, manifest *Manifest) (map[string]interface{}, error) {
+func (e *WorkflowExecutor) loadTemplate(_ context.Context, _ WorkflowStep, resolvedWith map[string]interface{}, state map[string]interface{}, manifest *Manifest) (map[string]interface{}, error) {
 	templateID, ok := resolvedWith["template_id"].(string)
 	if !ok {
 		if tid, ok := state["template_id"].(string); ok {
@@ -117,7 +117,7 @@ func (e *WorkflowExecutor) loadTemplate(_ context.Context, step WorkflowStep, re
 }
 
 // renderTemplate renders a template with variables
-func (e *WorkflowExecutor) renderTemplate(_ context.Context, step WorkflowStep, resolvedWith map[string]interface{}, state map[string]interface{}, manifest *Manifest) (map[string]interface{}, error) {
+func (e *WorkflowExecutor) renderTemplate(_ context.Context, _ WorkflowStep, resolvedWith map[string]interface{}, state map[string]interface{}, manifest *Manifest) (map[string]interface{}, error) {
 	templateContent, ok := state["template_content"].(string)
 	if !ok {
 		return nil, fmt.Errorf("template_content not found in state")
@@ -195,7 +195,7 @@ func (e *WorkflowExecutor) callLLM(ctx context.Context, _ WorkflowStep, resolved
 }
 
 // writeFile writes output to a file
-func (e *WorkflowExecutor) writeFile(_ context.Context, step WorkflowStep, resolvedWith map[string]interface{}, state map[string]interface{}, manifest *Manifest) (map[string]interface{}, error) {
+func (e *WorkflowExecutor) writeFile(_ context.Context, _ WorkflowStep, resolvedWith map[string]interface{}, state map[string]interface{}, manifest *Manifest) (map[string]interface{}, error) {
 	// Get output path from resolvedWith or manifest outputs
 	outputPath := ""
 	if path, ok := resolvedWith["path"].(string); ok {

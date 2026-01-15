@@ -89,8 +89,8 @@ func TestRegistry_IsEnabled(t *testing.T) {
 		Enabled:     boolPtr(false),
 	}
 
-	registry.Register(enabled)
-	registry.Register(disabled)
+	require.NoError(t, registry.Register(enabled))
+	require.NoError(t, registry.Register(disabled))
 
 	if !registry.IsEnabled("enabled") {
 		t.Error("Expected 'enabled' extension to be enabled")
@@ -148,8 +148,8 @@ func TestRegistry_GetByType(t *testing.T) {
 		Enabled:     boolPtr(true),
 	}
 
-	registry.Register(workflow)
-	registry.Register(middleware)
+	require.NoError(t, registry.Register(workflow))
+	require.NoError(t, registry.Register(middleware))
 
 	workflows := registry.GetByType("workflow")
 	if len(workflows) != 1 {

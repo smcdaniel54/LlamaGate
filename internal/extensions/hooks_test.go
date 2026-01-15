@@ -32,7 +32,7 @@ func TestHookManager_AuditLog(t *testing.T) {
 		},
 	}
 
-	registry.Register(manifest)
+	require.NoError(t, registry.Register(manifest))
 
 	hookManager := NewHookManager(registry, tmpDir)
 
@@ -95,7 +95,7 @@ func TestHookManager_TrackUsage(t *testing.T) {
 		},
 	}
 
-	registry.Register(manifest)
+	require.NoError(t, registry.Register(manifest))
 
 	hookManager := NewHookManager(registry, tmpDir)
 

@@ -39,7 +39,7 @@ func TestWorkflowExecutor_Execute(t *testing.T) {
 	}
 
 	// Mock LLM handler
-	llmHandler := func(ctx context.Context, model string, messages []map[string]interface{}, options map[string]interface{}) (map[string]interface{}, error) {
+	llmHandler := func(_ context.Context, _ string, _ []map[string]interface{}, _ map[string]interface{}) (map[string]interface{}, error) {
 		return map[string]interface{}{
 			"choices": []interface{}{
 				map[string]interface{}{
@@ -132,7 +132,7 @@ func TestWorkflowExecutor_TemplateRender(t *testing.T) {
 }
 
 func TestWorkflowExecutor_CallLLM(t *testing.T) {
-	llmHandler := func(ctx context.Context, model string, messages []map[string]interface{}, options map[string]interface{}) (map[string]interface{}, error) {
+	llmHandler := func(_ context.Context, _ string, _ []map[string]interface{}, _ map[string]interface{}) (map[string]interface{}, error) {
 		return map[string]interface{}{
 			"choices": []interface{}{
 				map[string]interface{}{
