@@ -85,6 +85,7 @@ This downloads and runs the source installer, which handles Go installation and 
 
 If you already have Go installed and want to build manually:
 
+**Unix/Linux/macOS:**
 ```bash
 # Clone the repository
 git clone https://github.com/smcdaniel54/LlamaGate.git
@@ -96,6 +97,24 @@ go build -o llamagate ./cmd/llamagate
 # Or install to $GOPATH/bin
 go install ./cmd/llamagate
 ```
+
+**Windows (PowerShell):**
+```powershell
+# Clone the repository (handle stderr output)
+$ErrorActionPreference = "Continue"  # Git writes progress to stderr
+git clone https://github.com/smcdaniel54/LlamaGate.git
+$ErrorActionPreference = "Stop"  # Restore if needed
+
+cd LlamaGate
+
+# Build
+go build -o llamagate.exe ./cmd/llamagate
+
+# Or install to $GOPATH/bin
+go install ./cmd/llamagate
+```
+
+**Note:** Git writes progress messages to stderr even on success. In PowerShell with `$ErrorActionPreference = "Stop"`, this can cause failures. See [Troubleshooting](#troubleshooting) section below for details.
 
 ## Configuration
 
@@ -156,3 +175,46 @@ chmod +x llamagate
 If you need a different architecture than what's available:
 - Build from source (Method 3)
 - The installers automatically detect your platform
+
+### Git clone fails in PowerShell with "Stop" error action
+
+**Issue:** When using PowerShell with `$ErrorActionPreference = "Stop"`, `git clone` may fail even though the clone succeeds. This happens because Git writes progress messages to stderr, which PowerShell treats as errors.
+
+**Symptoms:**
+- Script fails with error even though `git clone` completes successfully
+- Error message appears but repository is actually cloned
+
+**Solution (PowerShell):**
+
+**Option 1: Temporarily change error action (Recommended)**
+```powershell
+# Save current setting
+$oldErrorAction = $ErrorActionPreference
+
+# Temporarily allow errors during git clone
+$ErrorActionPreference = "Continue"
+
+# Clone the repository
+git clone https://github.com/smcdaniel54/LlamaGate.git
+
+# Restore original setting
+$ErrorActionPreference = $oldErrorAction
+```
+
+**Option 2: Check exit code instead**
+```powershell
+# Clone and check exit code
+git clone https://github.com/smcdaniel54/LlamaGate.git 2>&1 | Out-Null
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "Git clone failed with exit code $LASTEXITCODE"
+    exit 1
+}
+```
+
+**Option 3: Redirect stderr**
+```powershell
+# Redirect stderr to null (suppress progress messages)
+git clone https://github.com/smcdaniel54/LlamaGate.git 2>$null
+```
+
+**Note:** This is a known Git behavior - progress messages go to stderr even on success. The installers handle this automatically, but manual `git clone` commands in PowerShell scripts need this workaround.
