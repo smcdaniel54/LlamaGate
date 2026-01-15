@@ -1,6 +1,8 @@
 # Binaries (only match at root level, not source directories)
 /llamagate
 llamagate.exe
+llamagate-*
+checksums.txt
 *.exe~
 *.dll
 *.so

@@ -85,7 +85,7 @@ Quick reference checklist for tracking migration progress.
 - [x] `extensions/README.md` exists
 - [x] Update main `README.md`
 - [x] Create `docs/MIGRATION_STATUS.md` (status report created)
-- [ ] Update `CHANGELOG.md` (needs v0.9.1 entry)
+- [x] Update `CHANGELOG.md` (v0.9.1 entry added)
 
 ---
 
@@ -133,19 +133,19 @@ Quick reference checklist for tracking migration progress.
 - [x] Test with invalid manifests (tests exist)
 - [x] Verify all documentation (main docs updated)
 - [x] Code review: No "plugin" references in code (only in legacy docs)
-- [ ] CHANGELOG updated (needs v0.9.1 entry)
+- [x] CHANGELOG updated (v0.9.1 entry added)
 - [x] Migration guide complete (MIGRATION_STATUS.md created)
 
 ---
 
 ## Final Sign-off
 
-- [ ] All phases complete
-- [ ] All tests passing
-- [ ] Documentation complete
-- [ ] Code review approved
-- [ ] Ready for merge
-- [ ] PR created and ready
+- [x] All phases complete (core migration 100%, optional items remain)
+- [x] All tests passing (10/10 packages)
+- [x] Documentation complete (main docs updated, legacy docs optional)
+- [x] Code review approved (no plugin references in core code)
+- [x] Ready for merge (merged to main)
+- [x] Release published (v0.9.1 released with binaries)
 
 ---
 
@@ -156,5 +156,6 @@ Quick reference checklist for tracking migration progress.
 - ✅ All plugin code removed
 - ✅ All tests passing (10/10 packages)
 - ✅ Build successful
-- ⚠️ CHANGELOG needs v0.9.1 entry
-- ⚠️ Legacy docs (PLUGINS.md, PLUGIN_QUICKSTART.md) can be removed
+- ✅ CHANGELOG updated (v0.9.1 entry added)
+- ✅ Release published (v0.9.1 with binaries)
+- ⚠️ Legacy docs (PLUGINS.md, PLUGIN_QUICKSTART.md) can be removed (optional)
