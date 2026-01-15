@@ -25,7 +25,7 @@ This document reviews the current examples in LlamaGate documentation and the [O
 ### ⚠️ Issues Found
 
 1. **Missing Model Parameter**: Line 439 in README.md - Python streaming example missing `model` parameter
-2. **Inconsistent Model Names**: Using "llama2" throughout - should use more current models or note version
+2. ~~**Inconsistent Model Names**: Using "llama2" throughout - should use more current models or note version~~ ✅ **FIXED**: All examples now use "mistral" (Mistral 7B) as default
 3. **Limited Error Handling**: Examples don't show error handling patterns
 4. **No Tool/Function Calling Examples**: Missing examples for MCP tool execution
 5. **No Extension Examples**: Extension system examples not yet available
@@ -57,7 +57,7 @@ stream = client.chat.completions.create(
 **Recommended Fix:**
 ```python
 stream = client.chat.completions.create(
-    model="llama2",  # Add missing model parameter
+    model="mistral",  # Default: Mistral 7B (works on 8GB VRAM or CPU)
     messages=[
         {"role": "user", "content": "Count to 5"}
     ],
@@ -114,7 +114,7 @@ client = OpenAI(
 
 try:
     response = client.chat.completions.create(
-        model="llama2",
+        model="mistral",
         messages=[{"role": "user", "content": "Hello!"}]
     )
     print(response.choices[0].message.content)
@@ -230,7 +230,7 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
 def chat_with_retry(messages):
     return client.chat.completions.create(
-        model="llama2",
+        model="mistral",
         messages=messages
     )
 ```
@@ -358,7 +358,7 @@ def chat_with_retry(messages):
 
 ### High Priority: 3
 - Error handling examples
-- Model name standardization
+- ✅ Model name standardization - **COMPLETE** (all examples use Mistral 7B)
 - Tool/function calling examples
 
 ### Medium Priority: 3

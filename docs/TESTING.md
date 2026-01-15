@@ -15,7 +15,7 @@ This guide explains how to test LlamaGate to ensure everything is working correc
 2. **At least one model available**
 
    ```cmd
-   ollama pull llama2
+   ollama pull mistral
    ```
 
    Or any other model you want to test with.
@@ -132,7 +132,7 @@ curl http://localhost:11435/v1/models -H "X-API-Key: sk-llamagate"
   "object": "list",
   "data": [
     {
-      "id": "llama2",
+      "id": "mistral",
       "object": "model",
       "created": 0,
       "owned_by": "ollama"
@@ -156,7 +156,7 @@ curl -X POST http://localhost:11435/v1/chat/completions ^
 
 ```json
 {
-  "model": "llama2",
+  "model": "mistral",
   "choices": [
     {
       "message": {
@@ -250,7 +250,7 @@ If MCP is enabled and you have servers with resources configured, you can test t
 curl -X POST http://localhost:11435/v1/chat/completions ^
   -H "Content-Type: application/json" ^
   -H "X-API-Key: sk-llamagate" ^
-  -d "{\"model\":\"llama2\",\"messages\":[{\"role\":\"user\",\"content\":\"Summarize mcp://filesystem/file:///docs/readme.txt\"}]}"
+  -d "{\"model\":\"mistral\",\"messages\":[{\"role\":\"user\",\"content\":\"Summarize mcp://filesystem/file:///docs/readme.txt\"}]}"
 ```
 
 **Expected behavior:**
@@ -292,7 +292,7 @@ Test streaming chat completions:
 curl -X POST http://localhost:11435/v1/chat/completions ^
   -H "Content-Type: application/json" ^
   -H "X-API-Key: sk-llamagate" ^
-  -d "{\"model\":\"llama2\",\"messages\":[{\"role\":\"user\",\"content\":\"Count to 5\"}],\"stream\":true}"
+  -d "{\"model\":\"mistral\",\"messages\":[{\"role\":\"user\",\"content\":\"Count to 5\"}],\"stream\":true}"
 ```
 
 **Expected:** Stream of data chunks (Server-Sent Events format)
@@ -399,7 +399,7 @@ You should see:
 ### "Model not found"
 
 - **Issue:** Model doesn't exist in Ollama
-- **Solution:** Pull the model: `ollama pull llama2`
+- **Solution:** Pull the model: `ollama pull mistral`
 
 ### "401 Unauthorized"
 
