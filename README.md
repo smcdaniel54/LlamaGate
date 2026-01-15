@@ -348,7 +348,7 @@ All examples below assume:
 - **Ollama** running locally on `http://localhost:11434` (default port)
 - **Default configuration** (no authentication unless specified)
 
-> 💡 **Model Names:** Replace `"llama2"` in examples with any model available in your Ollama installation (e.g., `llama3`, `llama3.2`, `mistral`, `codellama`, etc.). Check available models with: `curl http://localhost:11435/v1/models`
+> 💡 **Model Names:** Examples use `"mistral"` (Mistral 7B) as the default - works on most business hardware (8GB VRAM or CPU). See our [Top 5 Model Recommendations](docs/MODEL_RECOMMENDATIONS.md) for other options. Check available models with: `curl http://localhost:11435/v1/models`
 
 #### 1. Non-Streaming Request (curl)
 
@@ -356,7 +356,7 @@ All examples below assume:
 curl http://localhost:11435/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "llama2",
+    "model": "mistral",
     "messages": [
       {"role": "user", "content": "Hello, how are you?"}
     ]
@@ -369,7 +369,7 @@ curl http://localhost:11435/v1/chat/completions \
   "id": "chatcmpl-...",
   "object": "chat.completion",
   "created": 1234567890,
-  "model": "llama2",
+  "model": "mistral",
   "choices": [{
     "index": 0,
     "message": {
@@ -387,7 +387,7 @@ curl http://localhost:11435/v1/chat/completions \
 curl http://localhost:11435/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "llama2",
+    "model": "mistral",
     "messages": [
       {"role": "user", "content": "Tell me a short story"}
     ],
@@ -397,9 +397,9 @@ curl http://localhost:11435/v1/chat/completions \
 
 **Response (Server-Sent Events):**
 ```
-data: {"id":"chatcmpl-...","object":"chat.completion.chunk","created":1234567890,"model":"llama2","choices":[{"index":0,"delta":{"content":"Once"},"finish_reason":null}]}
+data: {"id":"chatcmpl-...","object":"chat.completion.chunk","created":1234567890,"model":"mistral","choices":[{"index":0,"delta":{"content":"Once"},"finish_reason":null}]}
 
-data: {"id":"chatcmpl-...","object":"chat.completion.chunk","created":1234567890,"model":"llama2","choices":[{"index":0,"delta":{"content":" upon"},"finish_reason":null}]}
+data: {"id":"chatcmpl-...","object":"chat.completion.chunk","created":1234567890,"model":"mistral","choices":[{"index":0,"delta":{"content":" upon"},"finish_reason":null}]}
 
 data: [DONE]
 ```
@@ -419,7 +419,7 @@ client = OpenAI(
 
 # Use it exactly like the OpenAI API
 response = client.chat.completions.create(
-    model="llama2",  # Use any model available in your local Ollama
+    model="mistral",  # Use any model available in your local Ollama
     messages=[
         {"role": "user", "content": "Hello! How are you?"}
     ]
@@ -438,7 +438,7 @@ client = OpenAI(
 )
 
 stream = client.chat.completions.create(
-    model="llama2",
+    model="mistral",
     messages=[
         {"role": "user", "content": "Count to 5"}
     ],
@@ -465,7 +465,7 @@ const client = new OpenAI({
 
 // Use it exactly like the OpenAI API
 const response = await client.chat.completions.create({
-  model: 'llama2',  // Use any model available in your local Ollama
+  model: 'mistral',  // Use any model available in your local Ollama
   messages: [
     { role: 'user', content: 'Hello! How are you?' }
   ]
@@ -484,7 +484,7 @@ const client = new OpenAI({
 });
 
 const stream = await client.chat.completions.create({
-  model: 'llama2',
+  model: 'mistral',
   messages: [
     { role: 'user', content: 'Count to 5' }
   ],
@@ -508,7 +508,7 @@ curl http://localhost:11435/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "X-API-Key: sk-llamagate" \
   -d '{
-    "model": "llama2",
+    "model": "mistral",
     "messages": [
       {"role": "user", "content": "Hello, how are you?"}
     ]
@@ -525,7 +525,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="llama2",
+    model="mistral",
     messages=[
         {"role": "user", "content": "Hello!"}
     ]
@@ -544,7 +544,7 @@ const client = new OpenAI({
 });
 
 const response = await client.chat.completions.create({
-  model: 'llama2',
+  model: 'mistral',
   messages: [
     { role: 'user', content: 'Hello!' }
   ]
@@ -576,7 +576,7 @@ from langchain_openai import ChatOpenAI
 
 # Use ChatOpenAI with LlamaGate endpoint
 llm = ChatOpenAI(
-    model="llama2",  # Replace with any model available in your Ollama installation
+    model="mistral",  # Default: Mistral 7B (works on 8GB VRAM or CPU)
     base_url="http://localhost:11435/v1",  # Use base_url instead of openai_api_base
     api_key="not-needed"  # Optional: only if API_KEY is set in LlamaGate
 )
@@ -597,7 +597,7 @@ OpenAI-compatible chat completions endpoint. Forwards requests to Ollama `/api/c
 
 ```json
 {
-  "model": "llama2",
+  "model": "mistral",
   "messages": [
     {"role": "user", "content": "Hello!"}
   ],

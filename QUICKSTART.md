@@ -81,7 +81,7 @@ client = OpenAI(
 
 # Everything else stays the same
 response = client.chat.completions.create(
-    model="llama2",  # Use any Ollama model
+    model="mistral",  # Default: Mistral 7B (works on 8GB VRAM or CPU)
     messages=[{"role": "user", "content": "Hello!"}]
 )
 
@@ -158,7 +158,7 @@ client = OpenAI(
 
 # Same code, different model!
 response = client.chat.completions.create(
-    model="llama2",  # ← Any Ollama model you have installed
+    model="mistral",  # Default: Mistral 7B (works on 8GB VRAM or CPU)
     messages=[
         {"role": "user", "content": "Hello! Explain quantum computing in one sentence."}
     ]
@@ -229,7 +229,7 @@ curl http://localhost:11435/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "X-API-Key: sk-llamagate" \
   -d '{
-    "model": "llama2",
+    "model": "mistral",
     "messages": [{"role": "user", "content": "Hello!"}]
   }'
 ```
@@ -238,7 +238,7 @@ curl http://localhost:11435/v1/chat/completions \
 
 1. URL: `https://api.openai.com/v1` → `http://localhost:11435/v1`
 2. Header: `Authorization: Bearer` → `X-API-Key` (or keep `Authorization: Bearer`)
-3. Model: `gpt-3.5-turbo` → `llama2` (or any Ollama model)
+3. Model: `gpt-3.5-turbo` → `mistral` (default: Mistral 7B, works on 8GB VRAM or CPU)
 
 ---
 
@@ -254,15 +254,15 @@ client = OpenAI(
     api_key="sk-llamagate"
 )
 
-# Use Llama 2
+# Use Mistral 7B (default)
 response1 = client.chat.completions.create(
-    model="llama2",
+    model="mistral",  # Default: Mistral 7B (works on 8GB VRAM or CPU)
     messages=[{"role": "user", "content": "Explain AI in simple terms"}]
 )
 
-# Switch to Mistral (if you have it installed)
+# Switch to Llama 3.2 (if you have it installed)
 response2 = client.chat.completions.create(
-    model="mistral",  # ← Just change the model name!
+    model="llama3.2:3b",  # ← Just change the model name!
     messages=[{"role": "user", "content": "Explain AI in simple terms"}]
 )
 
@@ -314,7 +314,7 @@ response = llm.invoke("What is machine learning?")
 from langchain.chat_models import ChatOpenAI
 
 llm = ChatOpenAI(
-    model="llama2",
+    model="mistral",  # Default: Mistral 7B (works on 8GB VRAM or CPU)
     openai_api_base="http://localhost:11435/v1",  # ← Add this
     openai_api_key="sk-llamagate"  # ← Add this
 )
@@ -357,7 +357,7 @@ client = OpenAI(
 @app.post("/chat")
 async def chat(message: str):
     response = client.chat.completions.create(
-        model="llama2",  # ← Change model name
+        model="mistral",  # Default: Mistral 7B (works on 8GB VRAM or CPU)
         messages=[{"role": "user", "content": message}]
     )
     return {"response": response.choices[0].message.content}
@@ -424,7 +424,7 @@ curl http://localhost:11434/api/tags
 ollama list
 
 # Install the model you need
-ollama pull llama2  # or mistral, codellama, etc.
+ollama pull mistral  # Default: Mistral 7B (or llama3.2:3b, qwen2.5:7b, etc.)
 ```
 
 ### Issue: "401 Unauthorized"

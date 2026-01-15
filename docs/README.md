@@ -5,6 +5,7 @@ Welcome to the LlamaGate documentation! This directory contains detailed guides 
 ## Getting Started
 - [Quick Start Guide](../QUICKSTART.md) - Get running in 2 minutes
 - [Installation Guide](INSTALL.md) - Detailed installation instructions
+- [Top 5 Model Recommendations](MODEL_RECOMMENDATIONS.md) - Best models for LlamaGate (default: Mistral 7B)
 
 ## Features & Integration
 - [MCP Client Documentation](MCP.md) - Complete MCP integration guide
