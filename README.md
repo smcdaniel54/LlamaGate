@@ -576,7 +576,7 @@ from langchain_openai import ChatOpenAI
 
 # Use ChatOpenAI with LlamaGate endpoint
 llm = ChatOpenAI(
-    model="mistral",  # Default: Mistral 7B (works on 8GB VRAM or CPU)
+    model="mistral",  # Default: Mistral 7B (CPU-only or 8GB VRAM)
     base_url="http://localhost:11435/v1",  # Use base_url instead of openai_api_base
     api_key="not-needed"  # Optional: only if API_KEY is set in LlamaGate
 )

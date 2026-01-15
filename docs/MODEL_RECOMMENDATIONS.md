@@ -26,7 +26,7 @@
 
 ## 🎯 Default Recommendations (Limited Resources)
 
-**For 90% of businesses** (32-64GB RAM, no GPU or 16GB VRAM):
+**For 90% of businesses** (32-64GB RAM, **CPU-only** or 16GB VRAM):
 
 ### ⭐ **1. Mistral 7B** - Default Choice for Most Businesses
 
@@ -38,9 +38,9 @@
 - 🔧 **Well-optimized** - Great quantization support
 
 **Hardware Requirements:**
-- **VRAM:** 8GB (quantized) or 14GB (full precision)
-- **CPU:** Works reasonably on CPU-only systems
-- **Best for:** 90% of businesses with limited resources
+- **CPU-only:** ✅ Works well (default assumption - most businesses)
+- **VRAM:** 8GB (quantized) or 14GB (full precision) - optional, faster if available
+- **Best for:** 90% of businesses with limited resources (CPU-only is most common)
 
 **Ollama Command:**
 ```bash
@@ -454,11 +454,12 @@ model="llama3.3:70b"
 5. **Llama 3.3 70B** - Best overall quality (high-end hardware only)
 
 **Quick Start for Most Businesses:**
-- **Limited resources (most common):** `ollama pull mistral`
+- **CPU-only (most common - 90% of businesses):** `ollama pull mistral` ⭐ **Default**
+- **If you have 8GB+ VRAM:** `ollama pull mistral` (same model, faster)
 - **If you have 16GB+ VRAM:** `ollama pull llama3.2:11b`
 - **Enterprise (rare):** `ollama pull llama3.3:70b`
 
-**Key Takeaway:** Most businesses should start with **Mistral 7B** or **Llama 3.2 3B** - they work on typical business hardware (32-64GB RAM, no GPU or 16GB VRAM).
+**Key Takeaway:** Most businesses should start with **Mistral 7B** or **Llama 3.2 3B** - they work on typical business hardware (32-64GB RAM, **CPU-only is the default assumption**).
 
 ---
 

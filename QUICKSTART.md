@@ -81,7 +81,7 @@ client = OpenAI(
 
 # Everything else stays the same
 response = client.chat.completions.create(
-    model="mistral",  # Default: Mistral 7B (works on 8GB VRAM or CPU)
+    model="mistral",  # Default: Mistral 7B (CPU-only or 8GB VRAM)
     messages=[{"role": "user", "content": "Hello!"}]
 )
 
@@ -158,7 +158,7 @@ client = OpenAI(
 
 # Same code, different model!
 response = client.chat.completions.create(
-    model="mistral",  # Default: Mistral 7B (works on 8GB VRAM or CPU)
+    model="mistral",  # Default: Mistral 7B (CPU-only or 8GB VRAM)
     messages=[
         {"role": "user", "content": "Hello! Explain quantum computing in one sentence."}
     ]
@@ -256,7 +256,7 @@ client = OpenAI(
 
 # Use Mistral 7B (default)
 response1 = client.chat.completions.create(
-    model="mistral",  # Default: Mistral 7B (works on 8GB VRAM or CPU)
+    model="mistral",  # Default: Mistral 7B (CPU-only or 8GB VRAM)
     messages=[{"role": "user", "content": "Explain AI in simple terms"}]
 )
 
@@ -314,7 +314,7 @@ response = llm.invoke("What is machine learning?")
 from langchain.chat_models import ChatOpenAI
 
 llm = ChatOpenAI(
-    model="mistral",  # Default: Mistral 7B (works on 8GB VRAM or CPU)
+    model="mistral",  # Default: Mistral 7B (CPU-only or 8GB VRAM)
     openai_api_base="http://localhost:11435/v1",  # ← Add this
     openai_api_key="sk-llamagate"  # ← Add this
 )
@@ -357,7 +357,7 @@ client = OpenAI(
 @app.post("/chat")
 async def chat(message: str):
     response = client.chat.completions.create(
-        model="mistral",  # Default: Mistral 7B (works on 8GB VRAM or CPU)
+        model="mistral",  # Default: Mistral 7B (CPU-only or 8GB VRAM)
         messages=[{"role": "user", "content": message}]
     )
     return {"response": response.choices[0].message.content}
