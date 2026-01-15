@@ -587,6 +587,151 @@ print(response.content)
 
 **Note:** This example uses `langchain_openai` (LangChain v0.1+). For older versions, use `from langchain.chat_models import ChatOpenAI` and `openai_api_base` parameter.
 
+### Error Handling
+
+Handle errors gracefully in your applications:
+
+```python
+from openai import OpenAI
+from openai import APIError
+
+client = OpenAI(
+    base_url="http://localhost:11435/v1",
+    api_key="not-needed"
+)
+
+try:
+    response = client.chat.completions.create(
+        model="mistral",
+        messages=[{"role": "user", "content": "Hello!"}]
+    )
+    print(response.choices[0].message.content)
+except APIError as e:
+    print(f"API Error: {e.status_code} - {e.message}")
+    if e.status_code == 401:
+        print("Authentication failed. Check your API key.")
+    elif e.status_code == 429:
+        print("Rate limit exceeded. Please retry later.")
+except Exception as e:
+    print(f"Unexpected error: {e}")
+```
+
+### Tool/Function Calling with MCP
+
+Use MCP tools for extended capabilities:
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="http://localhost:11435/v1",
+    api_key="not-needed"
+)
+
+# Request with tool calling enabled
+response = client.chat.completions.create(
+    model="mistral",
+    messages=[
+        {"role": "user", "content": "What files are in the /tmp directory?"}
+    ],
+    tools=[{
+        "type": "function",
+        "function": {
+            "name": "mcp.filesystem.list_files",
+            "description": "List files in a directory"
+        }
+    }],
+    tool_choice="auto"  # Let the model decide when to use tools
+)
+
+# Handle the response
+message = response.choices[0].message
+print(f"Content: {message.content}")
+
+# Check for tool calls
+if message.tool_calls:
+    for tool_call in message.tool_calls:
+        print(f"Tool: {tool_call.function.name}")
+        print(f"Arguments: {tool_call.function.arguments}")
+```
+
+**Note:** MCP must be enabled and configured in LlamaGate for tool calling to work. See [MCP Quick Start](docs/MCP_QUICKSTART.md) for setup instructions.
+
+### Environment Variable Configuration
+
+Configure the OpenAI client using environment variables:
+
+```python
+import os
+from openai import OpenAI
+
+# Set environment variables (or use .env file)
+os.environ["OPENAI_BASE_URL"] = "http://localhost:11435/v1"
+os.environ["OPENAI_API_KEY"] = os.getenv("LLAMAGATE_API_KEY", "not-needed")
+
+# Client automatically uses environment variables
+client = OpenAI()
+
+response = client.chat.completions.create(
+    model="mistral",
+    messages=[{"role": "user", "content": "Hello!"}]
+)
+print(response.choices[0].message.content)
+```
+
+**Environment Variables:**
+- `OPENAI_BASE_URL` - LlamaGate endpoint URL
+- `OPENAI_API_KEY` - API key (if authentication is enabled)
+
+### Production Patterns
+
+For production use, add retries, timeouts, and connection pooling:
+
+```python
+from openai import OpenAI
+import httpx
+from tenacity import retry, stop_after_attempt, wait_exponential
+
+# Configure HTTP client with timeouts and connection pooling
+client = OpenAI(
+    base_url="http://localhost:11435/v1",
+    api_key="not-needed",
+    http_client=httpx.Client(
+        timeout=httpx.Timeout(30.0, connect=5.0),
+        limits=httpx.Limits(max_keepalive_connections=5, max_connections=10)
+    )
+)
+
+# Add retry logic for transient failures
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=2, max=10)
+)
+def chat_with_retry(messages):
+    return client.chat.completions.create(
+        model="mistral",
+        messages=messages
+    )
+
+# Use the retry wrapper
+try:
+    response = chat_with_retry([
+        {"role": "user", "content": "Hello!"}
+    ])
+    print(response.choices[0].message.content)
+except Exception as e:
+    print(f"Failed after retries: {e}")
+```
+
+**Production Best Practices:**
+- Use connection pooling for better performance
+- Set appropriate timeouts (30s default, 5s connect)
+- Implement retry logic for transient failures
+- Monitor rate limits and adjust request patterns
+- Use structured logging for debugging
+
+📚 **See more examples:** [OpenAI SDK Examples Repository](https://github.com/smcdaniel54/LlamaGate-openai-sdk-examples)
+
 ## API Endpoints
 
 ### `POST /v1/chat/completions`
