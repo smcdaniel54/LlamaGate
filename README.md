@@ -348,6 +348,8 @@ All examples below assume:
 - **Ollama** running locally on `http://localhost:11434` (default port)
 - **Default configuration** (no authentication unless specified)
 
+> 💡 **Model Names:** Replace `"llama2"` in examples with any model available in your Ollama installation (e.g., `llama3`, `llama3.2`, `mistral`, `codellama`, etc.). Check available models with: `curl http://localhost:11435/v1/models`
+
 #### 1. Non-Streaming Request (curl)
 
 ```bash
@@ -570,19 +572,20 @@ curl http://localhost:11435/v1/models
 ### Using with LangChain
 
 ```python
-from langchain.llms import Ollama
-from langchain.chat_models import ChatOpenAI
+from langchain_openai import ChatOpenAI
 
 # Use ChatOpenAI with LlamaGate endpoint
 llm = ChatOpenAI(
-    model="llama2",
-    openai_api_base="http://localhost:11435/v1",
-    openai_api_key="not-needed"  # Optional: only if API_KEY is set
+    model="llama2",  # Replace with any model available in your Ollama installation
+    base_url="http://localhost:11435/v1",  # Use base_url instead of openai_api_base
+    api_key="not-needed"  # Optional: only if API_KEY is set in LlamaGate
 )
 
 response = llm.invoke("Hello, how are you?")
 print(response.content)
 ```
+
+**Note:** This example uses `langchain_openai` (LangChain v0.1+). For older versions, use `from langchain.chat_models import ChatOpenAI` and `openai_api_base` parameter.
 
 ## API Endpoints
 
