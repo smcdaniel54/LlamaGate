@@ -545,7 +545,7 @@ proxy := proxy.NewWithTimeout(ollamaHost, cache, timeout)
 **Pattern:**
 - Centralized registration and lookup
 - Thread-safe access
-- Plugin and tool registries
+- Extension and tool registries
 
 **Examples:**
 - `ExtensionRegistry` - Extension registration
@@ -658,9 +658,6 @@ type Config struct {
     
     // MCP (optional)
     MCP                *MCPConfig
-    
-    // Plugins (optional)
-    Plugins            *PluginsConfig
 }
 ```
 
@@ -816,10 +813,10 @@ type Config struct {
    - Load balancing
    - Shared cache
 
-5. **Plugin Marketplace**
-   - Plugin discovery
-   - Plugin sharing
-   - Plugin versioning
+5. **Extension Marketplace** (Future)
+   - Extension discovery
+   - Extension sharing
+   - Extension versioning
 
 ## Related Documentation
 
