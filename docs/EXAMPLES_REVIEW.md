@@ -86,7 +86,7 @@ from langchain_openai import ChatOpenAI
 
 # Use ChatOpenAI with LlamaGate endpoint
 llm = ChatOpenAI(
-    model="llama2",
+    model="mistral",
     base_url="http://localhost:11435/v1",  # Use base_url instead of openai_api_base
     api_key="not-needed"  # Optional: only if API_KEY is set
 )
@@ -132,10 +132,8 @@ except Exception as e:
 
 **Recommendation:** Use more current model names or add note about model availability
 
-**Current:** All examples use "llama2"  
-**Recommended:** 
-- Use "llama3" or "llama3.2" (more current)
-- OR add note: "Replace 'llama2' with any model available in your Ollama installation (e.g., llama3, mistral, codellama)"
+**Current:** ✅ All examples now use "mistral" (Mistral 7B) as default  
+**Status:** ✅ **COMPLETE** - Model standardization completed. All documentation examples updated to use Mistral 7B, with notes about model recommendations.
 
 **Location:** Add note at top of Usage Examples section
 
@@ -155,7 +153,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="llama2",
+    model="mistral",
     messages=[{"role": "user", "content": "What files are in my workspace?"}],
     tools=[{
         "type": "function",
@@ -197,7 +195,7 @@ os.environ["OPENAI_API_KEY"] = os.getenv("LLAMAGATE_API_KEY", "not-needed")
 client = OpenAI()  # Automatically uses env vars
 
 response = client.chat.completions.create(
-    model="llama2",
+    model="mistral",
     messages=[{"role": "user", "content": "Hello!"}]
 )
 ```
