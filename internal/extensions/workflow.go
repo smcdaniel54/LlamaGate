@@ -117,7 +117,7 @@ func (e *WorkflowExecutor) loadTemplate(_ context.Context, _ WorkflowStep, resol
 }
 
 // renderTemplate renders a template with variables
-func (e *WorkflowExecutor) renderTemplate(_ context.Context, _ WorkflowStep, resolvedWith map[string]interface{}, state map[string]interface{}, manifest *Manifest) (map[string]interface{}, error) {
+func (e *WorkflowExecutor) renderTemplate(_ context.Context, _ WorkflowStep, resolvedWith map[string]interface{}, state map[string]interface{}, _ *Manifest) (map[string]interface{}, error) {
 	templateContent, ok := state["template_content"].(string)
 	if !ok {
 		return nil, fmt.Errorf("template_content not found in state")
