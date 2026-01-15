@@ -1,0 +1,27 @@
+name: prompt-template-executor
+version: 1.0.0
+description: Execute approved prompt templates with structured inputs.
+type: workflow
+enabled: true
+
+inputs:
+  - id: template_id
+    type: string
+    required: true
+  - id: variables
+    type: object
+    required: true
+  - id: model
+    type: string
+    required: false
+
+outputs:
+  - id: result
+    type: file
+    path: ./output/result.md
+
+steps:
+  - uses: template.load
+  - uses: template.render
+  - uses: llm.chat
+  - uses: file.write

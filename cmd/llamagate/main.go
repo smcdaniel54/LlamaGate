@@ -17,6 +17,7 @@ import (
 	"github.com/llamagate/llamagate/internal/config"
 	"github.com/llamagate/llamagate/internal/logger"
 	"github.com/llamagate/llamagate/internal/middleware"
+	"github.com/llamagate/llamagate/internal/extensions"
 	"github.com/llamagate/llamagate/internal/plugins"
 	"github.com/llamagate/llamagate/internal/proxy"
 	"github.com/llamagate/llamagate/internal/setup"
@@ -122,6 +123,39 @@ func main() {
 	rateLimitMiddleware := middleware.NewRateLimitMiddleware(cfg.RateLimitRPS)
 	router.Use(rateLimitMiddleware.Handler())
 
+	// Initialize extension system
+	extensionRegistry := extensions.NewRegistry()
+	extensionBaseDir := "extensions"
+	
+	// Discover and load extensions
+	manifests, discoverErr := extensions.DiscoverExtensions(extensionBaseDir)
+	if discoverErr != nil {
+		log.Warn().Err(discoverErr).Msg("Failed to discover extensions")
+	} else {
+		for _, manifest := range manifests {
+			if err := extensionRegistry.Register(manifest); err != nil {
+				log.Warn().Err(err).Str("extension", manifest.Name).Msg("Failed to register extension")
+			} else {
+				log.Info().
+					Str("extension", manifest.Name).
+					Str("version", manifest.Version).
+					Str("type", manifest.Type).
+					Bool("enabled", manifest.IsEnabled()).
+					Msg("Extension registered")
+			}
+		}
+		log.Info().Int("count", len(manifests)).Msg("Extension discovery complete")
+	}
+
+	// Create extension hook manager
+	extensionHookManager := extensions.NewHookManager(extensionRegistry, extensionBaseDir)
+	
+	// Add extension middleware hooks (for request-inspector)
+	router.Use(extensionHookManager.CreateMiddlewareHook())
+
+	// Set response hooks in proxy (for cost-usage-reporter)
+	proxyInstance.SetResponseHook(extensionHookManager.ExecuteResponseHooks)
+
 	// All routes below will require authentication when API_KEY is set
 	// OpenAI-compatible endpoints
 	v1 := router.Group("/v1")
@@ -163,7 +197,7 @@ func main() {
 		// Plugin system endpoints
 		pluginRegistry := plugins.NewRegistry()
 
-		// Create LLM handler for plugins
+		// Create LLM handler for plugins and extensions
 		llmHandler := proxyInstance.CreatePluginLLMHandler()
 
 		// Register Alexa Skill plugin with context
@@ -192,6 +226,15 @@ func main() {
 
 		// Register custom plugin routes (for ExtendedPlugin with custom endpoints)
 		api.RegisterPluginRoutes(v1, pluginRegistry)
+
+		// Extension system endpoints
+		extensionHandler := extensions.NewHandler(extensionRegistry, llmHandler, extensionBaseDir)
+		extensionsGroup := v1.Group("/extensions")
+		{
+			extensionsGroup.GET("", extensionHandler.ListExtensions)
+			extensionsGroup.GET("/:name", extensionHandler.GetExtension)
+			extensionsGroup.POST("/:name/execute", extensionHandler.ExecuteExtension)
+		}
 	}
 
 	// Check port availability before starting server

@@ -646,6 +646,170 @@ When the rate limit is exceeded:
 - Response body follows OpenAI-compatible error format with `rate_limit_error` type
 - Structured logs capture the rate limit decision with request ID and retry information
 
+## Extensions API
+
+LlamaGate provides a RESTful API for managing and executing extensions. All extension endpoints are available under the `/v1/extensions` prefix.
+
+### List All Extensions
+
+Get information about all registered extensions.
+
+**Endpoint:** `GET /v1/extensions`
+
+**Response:**
+```json
+{
+  "extensions": [
+    {
+      "name": "prompt-template-executor",
+      "version": "1.0.0",
+      "description": "Execute approved prompt templates with structured inputs.",
+      "type": "workflow",
+      "enabled": true
+    },
+    {
+      "name": "request-inspector",
+      "version": "1.0.0",
+      "description": "Redacted audit logging for inbound and outbound requests.",
+      "type": "middleware",
+      "enabled": true
+    },
+    {
+      "name": "cost-usage-reporter",
+      "version": "1.0.0",
+      "description": "Track token usage and estimated cost per request.",
+      "type": "observer",
+      "enabled": true
+    }
+  ],
+  "count": 3
+}
+```
+
+**Example:**
+```bash
+curl -H "X-API-Key: sk-llamagate" \
+  http://localhost:11435/v1/extensions
+```
+
+### Get Extension Details
+
+Get detailed information about a specific extension, including input/output schemas.
+
+**Endpoint:** `GET /v1/extensions/:name`
+
+**Parameters:**
+- `name` (path) - Extension name
+
+**Response:**
+```json
+{
+  "name": "prompt-template-executor",
+  "version": "1.0.0",
+  "description": "Execute approved prompt templates with structured inputs.",
+  "type": "workflow",
+  "enabled": true,
+  "inputs": [
+    {
+      "id": "template_id",
+      "type": "string",
+      "required": true
+    },
+    {
+      "id": "variables",
+      "type": "object",
+      "required": true
+    }
+  ],
+  "outputs": [
+    {
+      "id": "result",
+      "type": "file",
+      "path": "./output/result.md"
+    }
+  ]
+}
+```
+
+**Example:**
+```bash
+curl -H "X-API-Key: sk-llamagate" \
+  http://localhost:11435/v1/extensions/prompt-template-executor
+```
+
+**Error Responses:**
+- `404 Not Found` - Extension not found
+- `503 Service Unavailable` - Extension system not available
+
+### Execute Workflow Extension
+
+Execute a workflow extension with provided inputs.
+
+**Endpoint:** `POST /v1/extensions/:name/execute`
+
+**Parameters:**
+- `name` (path) - Extension name (must be a workflow extension)
+
+**Request Body:**
+```json
+{
+  "template_id": "example",
+  "variables": {
+    "document_type": "executive summary",
+    "format": "markdown"
+  },
+  "model": "llama3.2"
+}
+```
+
+**Response (Success):**
+```json
+{
+  "success": true,
+  "data": {
+    "output_file": "/path/to/extensions/prompt-template-executor/output/result.md"
+  }
+}
+```
+
+**Response (Error):**
+```json
+{
+  "error": {
+    "message": "Extension execution failed: template_id is required",
+    "type": "invalid_request_error",
+    "request_id": "req-123456"
+  }
+}
+```
+
+**Example:**
+```bash
+curl -X POST \
+  -H "X-API-Key: sk-llamagate" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "template_id": "example",
+    "variables": {
+      "document_type": "executive summary",
+      "format": "markdown"
+    }
+  }' \
+  http://localhost:11435/v1/extensions/prompt-template-executor/execute
+```
+
+**Status Codes:**
+- `200 OK` - Execution successful
+- `400 Bad Request` - Invalid input or extension type
+- `404 Not Found` - Extension not found
+- `503 Service Unavailable` - Extension is disabled or system unavailable
+
+**Notes:**
+- Only workflow extensions can be executed via this endpoint
+- Middleware and observer extensions run automatically (no API call needed)
+- All required inputs must be provided
+- Output files are written to the extension's output directory
+
 ## Health Endpoint
 
 The main health endpoint (`/health`) does not require authentication and can be used for monitoring:

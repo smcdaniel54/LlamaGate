@@ -45,3 +45,7 @@ Thumbs.db
 temp_*.json
 *.tmp
 
+# Extension test artifacts
+internal/extensions/output/
+internal/extensions/var/
+

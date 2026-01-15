@@ -28,6 +28,7 @@ type Proxy struct {
 	guardrails           *tools.Guardrails      // Optional guardrails for tool execution
 	serverManager        ServerManagerInterface // Optional server manager for MCP resource access
 	resourceFetchTimeout time.Duration          // Timeout for fetching MCP resources
+	responseHookFunc     func(*gin.Context, map[string]interface{}) // Hook function for response observers
 }
 
 // New creates a new proxy instance with default timeout (5 minutes)
@@ -60,6 +61,11 @@ func (p *Proxy) SetServerManager(serverManager ServerManagerInterface) {
 // SetResourceFetchTimeout sets the timeout for fetching MCP resources
 func (p *Proxy) SetResourceFetchTimeout(timeout time.Duration) {
 	p.resourceFetchTimeout = timeout
+}
+
+// SetResponseHook sets a function to be called after LLM responses
+func (p *Proxy) SetResponseHook(hookFunc func(*gin.Context, map[string]interface{})) {
+	p.responseHookFunc = hookFunc
 }
 
 // Close closes all connections and cleans up resources
@@ -565,6 +571,17 @@ func (p *Proxy) handleNonStreamingResponse(c *gin.Context, httpReq *http.Request
 				Str("request_id", requestID).
 				Err(err).
 				Msg("Failed to cache response")
+		}
+
+		// Execute response hooks (for cost-usage-reporter and other observers)
+		if p.responseHookFunc != nil {
+			// Parse response to extract usage data
+			var responseData map[string]interface{}
+			if err := json.Unmarshal(responseBody, &responseData); err == nil {
+				// Add model from request
+				responseData["model"] = cacheParams.Model
+				p.responseHookFunc(c, responseData)
+			}
 		}
 	} else {
 		// For non-OK responses, forward as-is

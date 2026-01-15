@@ -1,0 +1,20 @@
+name: request-inspector
+version: 1.0.0
+description: Redacted audit logging for inbound and outbound requests.
+type: middleware
+enabled: true
+
+config:
+  enabled: true
+  sample_rate: 1.0
+  audit_dir: ./var/audit
+  redact:
+    - path: $.messages[*].content
+      mode: truncate
+      max_len: 120
+
+hooks:
+  - on: http.request
+    match:
+      path_prefix: /v1/
+    action: audit.log
