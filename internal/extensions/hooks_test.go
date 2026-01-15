@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestHookManager_AuditLog(t *testing.T) {
@@ -78,7 +79,7 @@ func TestHookManager_AuditLog(t *testing.T) {
 func TestHookManager_TrackUsage(t *testing.T) {
 	tmpDir := t.TempDir()
 	extDir := filepath.Join(tmpDir, "cost-usage-reporter")
-	os.MkdirAll(filepath.Join(extDir, "output"), 0755)
+	require.NoError(t, os.MkdirAll(filepath.Join(extDir, "output"), 0755))
 
 	registry := NewRegistry()
 	manifest := &Manifest{

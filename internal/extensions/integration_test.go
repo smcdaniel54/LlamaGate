@@ -52,7 +52,7 @@ func TestPromptTemplateExecutor_EndToEnd(t *testing.T) {
 	require.NoError(t, err)
 
 	// Mock LLM handler
-	llmHandler := func(ctx context.Context, model string, messages []map[string]interface{}, options map[string]interface{}) (map[string]interface{}, error) {
+	llmHandler := func(_ context.Context, _ string, _ []map[string]interface{}, _ map[string]interface{}) (map[string]interface{}, error) {
 		return map[string]interface{}{
 			"choices": []interface{}{
 				map[string]interface{}{
@@ -203,8 +203,8 @@ func TestExtensionEnableDisable(t *testing.T) {
 		Enabled:     boolPtr(false),
 	}
 
-	registry.Register(enabled)
-	registry.Register(disabled)
+	require.NoError(t, registry.Register(enabled))
+	require.NoError(t, registry.Register(disabled))
 
 	// Test enabled extension
 	assert.True(t, registry.IsEnabled("enabled-ext"))
@@ -231,8 +231,8 @@ func setupExampleExtensions(t *testing.T, baseDir string) {
 }
 
 func setupPromptTemplateExecutor(t *testing.T, extDir string) {
-	os.MkdirAll(filepath.Join(extDir, "templates"), 0755)
-	os.MkdirAll(filepath.Join(extDir, "output"), 0755)
+	require.NoError(t, os.MkdirAll(filepath.Join(extDir, "templates"), 0755))
+	require.NoError(t, os.MkdirAll(filepath.Join(extDir, "output"), 0755))
 
 	manifest := `name: prompt-template-executor
 version: 1.0.0
@@ -269,12 +269,12 @@ steps:
 Please format the output as {{.format}}.
 `
 
-	os.WriteFile(filepath.Join(extDir, "manifest.yaml"), []byte(manifest), 0644)
-	os.WriteFile(filepath.Join(extDir, "templates", "example.txt"), []byte(template), 0644)
+	require.NoError(t, os.WriteFile(filepath.Join(extDir, "manifest.yaml"), []byte(manifest), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(extDir, "templates", "example.txt"), []byte(template), 0644))
 }
 
 func setupRequestInspector(t *testing.T, extDir string) {
-	os.MkdirAll(extDir, 0755)
+	require.NoError(t, os.MkdirAll(extDir, 0755))
 
 	manifest := `name: request-inspector
 version: 1.0.0
@@ -298,11 +298,11 @@ hooks:
     action: audit.log
 `
 
-	os.WriteFile(filepath.Join(extDir, "manifest.yaml"), []byte(manifest), 0644)
+	require.NoError(t, os.WriteFile(filepath.Join(extDir, "manifest.yaml"), []byte(manifest), 0644))
 }
 
 func setupCostUsageReporter(t *testing.T, extDir string) {
-	os.MkdirAll(filepath.Join(extDir, "output"), 0755)
+	require.NoError(t, os.MkdirAll(filepath.Join(extDir, "output"), 0755))
 
 	manifest := `name: cost-usage-reporter
 version: 1.0.0
@@ -323,5 +323,5 @@ hooks:
     action: usage.track
 `
 
-	os.WriteFile(filepath.Join(extDir, "manifest.yaml"), []byte(manifest), 0644)
+	require.NoError(t, os.WriteFile(filepath.Join(extDir, "manifest.yaml"), []byte(manifest), 0644))
 }

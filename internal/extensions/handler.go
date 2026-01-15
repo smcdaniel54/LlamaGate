@@ -1,3 +1,6 @@
+// Package extensions provides the extension system for LlamaGate.
+// Extensions are declarative, YAML-based modules that extend LlamaGate
+// functionality through workflows, middleware hooks, and observer hooks.
 package extensions
 
 import (

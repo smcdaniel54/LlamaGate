@@ -5,19 +5,21 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestWorkflowExecutor_Execute(t *testing.T) {
 	tmpDir := t.TempDir()
 	extDir := filepath.Join(tmpDir, "test-extension")
-	os.MkdirAll(extDir, 0755)
-	os.MkdirAll(filepath.Join(extDir, "templates"), 0755)
-	os.MkdirAll(filepath.Join(extDir, "output"), 0755)
+	require.NoError(t, os.MkdirAll(extDir, 0755))
+	require.NoError(t, os.MkdirAll(filepath.Join(extDir, "templates"), 0755))
+	require.NoError(t, os.MkdirAll(filepath.Join(extDir, "output"), 0755))
 
 	// Create a simple template
 	templateContent := "Hello {{.name}}"
 	templatePath := filepath.Join(extDir, "templates", "test.txt")
-	os.WriteFile(templatePath, []byte(templateContent), 0644)
+	require.NoError(t, os.WriteFile(templatePath, []byte(templateContent), 0644))
 
 	// Create manifest
 	manifest := &Manifest{
@@ -86,11 +88,11 @@ func TestWorkflowExecutor_Execute(t *testing.T) {
 func TestWorkflowExecutor_TemplateLoad(t *testing.T) {
 	tmpDir := t.TempDir()
 	extDir := filepath.Join(tmpDir, "test-extension")
-	os.MkdirAll(filepath.Join(extDir, "templates"), 0755)
+	require.NoError(t, os.MkdirAll(filepath.Join(extDir, "templates"), 0755))
 
 	templateContent := "Test template"
 	templatePath := filepath.Join(extDir, "templates", "test.txt")
-	os.WriteFile(templatePath, []byte(templateContent), 0644)
+	require.NoError(t, os.WriteFile(templatePath, []byte(templateContent), 0644))
 
 	manifest := &Manifest{Name: "test-extension"}
 	executor := NewWorkflowExecutor(nil, tmpDir)
@@ -162,7 +164,7 @@ func TestWorkflowExecutor_CallLLM(t *testing.T) {
 func TestWorkflowExecutor_WriteFile(t *testing.T) {
 	tmpDir := t.TempDir()
 	extDir := filepath.Join(tmpDir, "test-extension")
-	os.MkdirAll(extDir, 0755)
+	require.NoError(t, os.MkdirAll(extDir, 0755))
 
 	manifest := &Manifest{
 		Name: "test-extension",

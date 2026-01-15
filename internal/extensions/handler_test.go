@@ -31,10 +31,10 @@ func TestHandler_ListExtensions(t *testing.T) {
 		Type:        "middleware",
 	}
 
-	registry.Register(manifest1)
-	registry.Register(manifest2)
+	require.NoError(t, registry.Register(manifest1))
+	require.NoError(t, registry.Register(manifest2))
 
-	llmHandler := func(ctx context.Context, model string, messages []map[string]interface{}, options map[string]interface{}) (map[string]interface{}, error) {
+	llmHandler := func(_ context.Context, _ string, _ []map[string]interface{}, _ map[string]interface{}) (map[string]interface{}, error) {
 		return nil, nil
 	}
 
@@ -75,9 +75,9 @@ func TestHandler_GetExtension(t *testing.T) {
 		},
 	}
 
-	registry.Register(manifest)
+	require.NoError(t, registry.Register(manifest))
 
-	llmHandler := func(ctx context.Context, model string, messages []map[string]interface{}, options map[string]interface{}) (map[string]interface{}, error) {
+	llmHandler := func(_ context.Context, _ string, _ []map[string]interface{}, _ map[string]interface{}) (map[string]interface{}, error) {
 		return nil, nil
 	}
 
@@ -104,7 +104,7 @@ func TestHandler_GetExtension(t *testing.T) {
 
 func TestHandler_GetExtension_NotFound(t *testing.T) {
 	registry := NewRegistry()
-	llmHandler := func(ctx context.Context, model string, messages []map[string]interface{}, options map[string]interface{}) (map[string]interface{}, error) {
+	llmHandler := func(_ context.Context, _ string, _ []map[string]interface{}, _ map[string]interface{}) (map[string]interface{}, error) {
 		return nil, nil
 	}
 
@@ -124,12 +124,12 @@ func TestHandler_GetExtension_NotFound(t *testing.T) {
 func TestHandler_ExecuteExtension(t *testing.T) {
 	tmpDir := t.TempDir()
 	extDir := filepath.Join(tmpDir, "test-extension")
-	os.MkdirAll(filepath.Join(extDir, "templates"), 0755)
-	os.MkdirAll(filepath.Join(extDir, "output"), 0755)
+	require.NoError(t, os.MkdirAll(filepath.Join(extDir, "templates"), 0755))
+	require.NoError(t, os.MkdirAll(filepath.Join(extDir, "output"), 0755))
 
 	// Create template
 	templatePath := filepath.Join(extDir, "templates", "test.txt")
-	os.WriteFile(templatePath, []byte("Test template"), 0644)
+	require.NoError(t, os.WriteFile(templatePath, []byte("Test template"), 0644))
 
 	registry := NewRegistry()
 
@@ -153,9 +153,9 @@ func TestHandler_ExecuteExtension(t *testing.T) {
 		},
 	}
 
-	registry.Register(manifest)
+	require.NoError(t, registry.Register(manifest))
 
-	llmHandler := func(ctx context.Context, model string, messages []map[string]interface{}, options map[string]interface{}) (map[string]interface{}, error) {
+	llmHandler := func(_ context.Context, _ string, _ []map[string]interface{}, _ map[string]interface{}) (map[string]interface{}, error) {
 		return map[string]interface{}{
 			"choices": []interface{}{
 				map[string]interface{}{
@@ -207,9 +207,9 @@ func TestHandler_ExecuteExtension_Disabled(t *testing.T) {
 		Enabled:     boolPtr(false),
 	}
 
-	registry.Register(manifest)
+	require.NoError(t, registry.Register(manifest))
 
-	llmHandler := func(ctx context.Context, model string, messages []map[string]interface{}, options map[string]interface{}) (map[string]interface{}, error) {
+	llmHandler := func(_ context.Context, _ string, _ []map[string]interface{}, _ map[string]interface{}) (map[string]interface{}, error) {
 		return nil, nil
 	}
 
@@ -239,9 +239,9 @@ func TestHandler_ExecuteExtension_NonWorkflow(t *testing.T) {
 		Type:        "middleware",
 	}
 
-	registry.Register(manifest)
+	require.NoError(t, registry.Register(manifest))
 
-	llmHandler := func(ctx context.Context, model string, messages []map[string]interface{}, options map[string]interface{}) (map[string]interface{}, error) {
+	llmHandler := func(_ context.Context, _ string, _ []map[string]interface{}, _ map[string]interface{}) (map[string]interface{}, error) {
 		return nil, nil
 	}
 
@@ -274,9 +274,9 @@ func TestHandler_ExecuteExtension_MissingRequiredInput(t *testing.T) {
 		},
 	}
 
-	registry.Register(manifest)
+	require.NoError(t, registry.Register(manifest))
 
-	llmHandler := func(ctx context.Context, model string, messages []map[string]interface{}, options map[string]interface{}) (map[string]interface{}, error) {
+	llmHandler := func(_ context.Context, _ string, _ []map[string]interface{}, _ map[string]interface{}) (map[string]interface{}, error) {
 		return nil, nil
 	}
 

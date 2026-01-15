@@ -2,6 +2,8 @@ package extensions
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestRegistry_Register(t *testing.T) {
@@ -34,7 +36,7 @@ func TestRegistry_Get(t *testing.T) {
 		Description: "Test extension",
 	}
 
-	registry.Register(manifest)
+	require.NoError(t, registry.Register(manifest))
 
 	retrieved, err := registry.Get("test")
 	if err != nil {
@@ -61,7 +63,7 @@ func TestRegistry_List(t *testing.T) {
 	}
 
 	for _, m := range manifests {
-		registry.Register(m)
+		require.NoError(t, registry.Register(m))
 	}
 
 	list := registry.List()
@@ -108,7 +110,7 @@ func TestRegistry_SetEnabled(t *testing.T) {
 		Enabled:     boolPtr(true),
 	}
 
-	registry.Register(manifest)
+	require.NoError(t, registry.Register(manifest))
 
 	// Disable it
 	err := registry.SetEnabled("test", false)

@@ -105,10 +105,9 @@ func (h *HookManager) auditLog(manifest *Manifest, c *gin.Context, responseData 
 	}
 
 	// Sample rate check (simple implementation)
-	if sampleRate < 1.0 {
-		// In production, would use proper sampling
-		// For now, always log
-	}
+	// In production, would use proper sampling based on sampleRate
+	// For now, always log regardless of sample rate
+	_ = sampleRate
 
 	// Get audit directory
 	auditDir := "./var/audit"
@@ -166,7 +165,12 @@ func (h *HookManager) auditLog(manifest *Manifest, c *gin.Context, responseData 
 	if err != nil {
 		return fmt.Errorf("failed to open audit file: %w", err)
 	}
-	defer file.Close()
+	defer func() {
+		if err := file.Close(); err != nil {
+			// Log error but don't fail the operation
+			_ = err
+		}
+	}()
 
 	if _, err := file.WriteString(string(entryJSON) + "\n"); err != nil {
 		return fmt.Errorf("failed to write audit entry: %w", err)
@@ -233,7 +237,10 @@ func (h *HookManager) trackUsage(manifest *Manifest, c *gin.Context, responseDat
 	// Read existing report or create new
 	var report []map[string]interface{}
 	if data, err := os.ReadFile(reportFile); err == nil {
-		json.Unmarshal(data, &report)
+		if err := json.Unmarshal(data, &report); err != nil {
+			// If unmarshal fails, start with empty report
+			report = []map[string]interface{}{}
+		}
 	}
 
 	// Append new usage entry

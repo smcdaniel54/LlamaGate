@@ -4,6 +4,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestLoadManifest(t *testing.T) {
@@ -116,8 +118,8 @@ func TestDiscoverExtensions(t *testing.T) {
 	// Create extension directories
 	ext1Dir := filepath.Join(tmpDir, "extension1")
 	ext2Dir := filepath.Join(tmpDir, "extension2")
-	os.MkdirAll(ext1Dir, 0755)
-	os.MkdirAll(ext2Dir, 0755)
+	require.NoError(t, os.MkdirAll(ext1Dir, 0755))
+	require.NoError(t, os.MkdirAll(ext2Dir, 0755))
 
 	// Create valid manifests
 	manifest1 := `name: extension1
@@ -131,8 +133,8 @@ description: Second extension
 type: middleware
 `
 
-	os.WriteFile(filepath.Join(ext1Dir, "manifest.yaml"), []byte(manifest1), 0644)
-	os.WriteFile(filepath.Join(ext2Dir, "manifest.yaml"), []byte(manifest2), 0644)
+	require.NoError(t, os.WriteFile(filepath.Join(ext1Dir, "manifest.yaml"), []byte(manifest1), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(ext2Dir, "manifest.yaml"), []byte(manifest2), 0644))
 
 	manifests, err := DiscoverExtensions(tmpDir)
 	if err != nil {

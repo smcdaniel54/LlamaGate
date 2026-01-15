@@ -43,10 +43,8 @@ func (e *WorkflowExecutor) Execute(ctx context.Context, manifest *Manifest, inpu
 		}
 
 		// Merge step result into state
-		if stepResult != nil {
-			for k, v := range stepResult {
-				state[k] = v
-			}
+		for k, v := range stepResult {
+			state[k] = v
 		}
 	}
 
@@ -93,7 +91,7 @@ func (e *WorkflowExecutor) resolveStepWith(with map[string]interface{}, state ma
 }
 
 // loadTemplate loads a template file
-func (e *WorkflowExecutor) loadTemplate(ctx context.Context, step WorkflowStep, resolvedWith map[string]interface{}, state map[string]interface{}, manifest *Manifest) (map[string]interface{}, error) {
+func (e *WorkflowExecutor) loadTemplate(_ context.Context, step WorkflowStep, resolvedWith map[string]interface{}, state map[string]interface{}, manifest *Manifest) (map[string]interface{}, error) {
 	templateID, ok := resolvedWith["template_id"].(string)
 	if !ok {
 		if tid, ok := state["template_id"].(string); ok {
@@ -119,7 +117,7 @@ func (e *WorkflowExecutor) loadTemplate(ctx context.Context, step WorkflowStep, 
 }
 
 // renderTemplate renders a template with variables
-func (e *WorkflowExecutor) renderTemplate(ctx context.Context, step WorkflowStep, resolvedWith map[string]interface{}, state map[string]interface{}, manifest *Manifest) (map[string]interface{}, error) {
+func (e *WorkflowExecutor) renderTemplate(_ context.Context, step WorkflowStep, resolvedWith map[string]interface{}, state map[string]interface{}, manifest *Manifest) (map[string]interface{}, error) {
 	templateContent, ok := state["template_content"].(string)
 	if !ok {
 		return nil, fmt.Errorf("template_content not found in state")
@@ -150,7 +148,7 @@ func (e *WorkflowExecutor) renderTemplate(ctx context.Context, step WorkflowStep
 }
 
 // callLLM calls the LLM with the rendered prompt
-func (e *WorkflowExecutor) callLLM(ctx context.Context, step WorkflowStep, resolvedWith map[string]interface{}, state map[string]interface{}) (map[string]interface{}, error) {
+func (e *WorkflowExecutor) callLLM(ctx context.Context, _ WorkflowStep, resolvedWith map[string]interface{}, state map[string]interface{}) (map[string]interface{}, error) {
 	if e.llmHandler == nil {
 		return nil, fmt.Errorf("LLM handler not available")
 	}
@@ -197,7 +195,7 @@ func (e *WorkflowExecutor) callLLM(ctx context.Context, step WorkflowStep, resol
 }
 
 // writeFile writes output to a file
-func (e *WorkflowExecutor) writeFile(ctx context.Context, step WorkflowStep, resolvedWith map[string]interface{}, state map[string]interface{}, manifest *Manifest) (map[string]interface{}, error) {
+func (e *WorkflowExecutor) writeFile(_ context.Context, step WorkflowStep, resolvedWith map[string]interface{}, state map[string]interface{}, manifest *Manifest) (map[string]interface{}, error) {
 	// Get output path from resolvedWith or manifest outputs
 	outputPath := ""
 	if path, ok := resolvedWith["path"].(string); ok {
