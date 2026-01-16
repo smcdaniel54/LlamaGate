@@ -357,6 +357,7 @@ result = response.json()
 - **Extension Quick Start:** [EXTENSIONS_QUICKSTART.md](EXTENSIONS_QUICKSTART.md)
 - **AgenticModules Guide:** [AGENTICMODULES.md](AGENTICMODULES.md)
 - **Extension Specification:** [EXTENSIONS_SPEC_V0.9.1.md](EXTENSIONS_SPEC_V0.9.1.md)
+- **Example Extensions:** [LlamaGate Extension Examples Repository](https://github.com/smcdaniel54/LlamaGate-extension-examples) - Copy/paste-ready examples and templates
 
 ---
 

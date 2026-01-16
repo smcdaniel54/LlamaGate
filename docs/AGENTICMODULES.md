@@ -359,7 +359,8 @@ Each module should provide one cohesive capability. Split complex workflows into
 - **Extension Quick Start:** [EXTENSIONS_QUICKSTART.md](EXTENSIONS_QUICKSTART.md)
 - **Extension Specification:** [EXTENSIONS_SPEC_V0.9.1.md](EXTENSIONS_SPEC_V0.9.1.md)
 - **UX Commands:** [UX_COMMANDS.md](UX_COMMANDS.md)
-- **Examples:** `examples/agenticmodules/intake_and_routing/`
+- **Example Modules:** [LlamaGate Extension Examples Repository](https://github.com/smcdaniel54/LlamaGate-extension-examples) - Real-world AgenticModule patterns and templates
+- **In-Repo Examples:** `examples/agenticmodules/intake_and_routing/`
 
 ---
 

@@ -40,7 +40,8 @@ LlamaGate is a production-ready, OpenAI-compatible API gateway for local LLMs (O
 ## Example Repositories
 
 - 📚 **[OpenAI SDK Examples](https://github.com/smcdaniel54/LlamaGate-openai-sdk-examples)** - Minimal examples showing how to use the OpenAI SDK with LlamaGate (streaming and non-streaming)
-- 🔧 **Extension Examples** - See `extensions/` directory and `examples/agenticmodules/` for AgenticModule examples
+- 🔧 **[Extension Examples](https://github.com/smcdaniel54/LlamaGate-extension-examples)** - High-value, copy/paste-ready examples of LlamaGate Extensions and AgenticModules demonstrating real-world patterns for workflows, routing, evaluation, and orchestration
+- 📦 **In-Repo Examples** - See `extensions/` directory and `examples/agenticmodules/` for AgenticModule examples
 - 🎯 **MCP Examples** - Coming soon
 
 ## Installation

@@ -312,7 +312,8 @@ grep "my-first-extension" llamagate.log
 - **Learn more:** [Extension Specification](EXTENSIONS_SPEC_V0.9.1.md)
 - **Create modules:** [AgenticModules Guide](AGENTICMODULES.md)
 - **CLI reference:** [UX Commands](UX_COMMANDS.md)
-- **Examples:** See `extensions/` directory and `examples/agenticmodules/`
+- **Example Extensions:** [LlamaGate Extension Examples Repository](https://github.com/smcdaniel54/LlamaGate-extension-examples) - High-value, copy/paste-ready examples
+- **In-Repo Examples:** See `extensions/` directory and `examples/agenticmodules/`
 
 ---
 
