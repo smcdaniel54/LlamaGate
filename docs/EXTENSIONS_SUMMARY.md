@@ -251,7 +251,7 @@ If critical issues discovered:
 
 ### Reference
 - [LlamaGate Extension Expectations](../c:\Users\smcda\Downloads\LlamaGate_Extension_Expectations.md) – Industry standards
-- ~~[Plugin System](./PLUGINS.md)~~ – **REMOVED**: Plugin system has been replaced by Extensions. See [Extension Specification](./EXTENSIONS_SPEC_V0.9.1.md) for the new system.
+- ~~[Plugin System](./PLUGINS.md)~~ – **DELETED**: Plugin system documentation has been removed. See [Extension Specification](./EXTENSIONS_SPEC_V0.9.1.md) for the new system.
 
 ### External
 - [YAML v3 Library](https://github.com/go-yaml/yaml) – YAML parsing

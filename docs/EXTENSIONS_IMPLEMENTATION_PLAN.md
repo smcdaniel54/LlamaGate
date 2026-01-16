@@ -223,14 +223,14 @@ This document provides a step-by-step implementation plan for migrating LlamaGat
 **Goal:** Update all documentation from plugins to extensions
 
 - [ ] **8.1** Update main documentation files
-  - [ ] `docs/PLUGINS.md` → `docs/EXTENSIONS.md`
+  - [x] `docs/PLUGINS.md` → Removed (plugin system deleted)
   - [ ] Replace all "plugin" with "extension"
   - [ ] Update API endpoint examples
   - [ ] Update code examples
   - [ ] Update directory references
 
 - [ ] **8.2** Update quickstart guides
-  - [ ] `docs/PLUGIN_QUICKSTART.md` → `docs/EXTENSION_QUICKSTART.md`
+  - [x] `docs/PLUGIN_QUICKSTART.md` → Removed (plugin system deleted)
   - [ ] Update step-by-step instructions
   - [ ] Update YAML examples
 
