@@ -49,7 +49,7 @@ python mcp-demo-workflow.py
 **Environment Variables:**
 - `LLAMAGATE_URL` - LlamaGate API URL (default: `http://localhost:11435/v1`)
 - `LLAMAGATE_API_KEY` - API key (default: `sk-llamagate`)
-- `MODEL` - Model name (default: `llama3.2`)
+- `MODEL` - Model name (default: `mistral`)
 - `WORKSPACE_DIR` - Working directory (default: `~/llamagate-workspace`)
 
 ### `mcp-demo-workflow.sh`

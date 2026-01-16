@@ -90,13 +90,19 @@ print(response.choices[0].message.content)
 
 ---
 
-## ⚠️ Important: Model Loading Behavior
+## ⚠️ Important Notes
+
+### Model Loading Behavior
 
 **Understanding Model Loading Latency:**
 
 - **First request to a model:** 5-30+ seconds (Ollama loads model weights into memory)
 - **Subsequent requests:** Fast (model stays loaded in memory)
 - **Switching to a different model:** First request is slow again (new model needs loading)
+
+### Production Usage
+
+**⚠️ Always specify models explicitly in production code.** Examples in this guide use `"mistral"` as a default for demonstration purposes only. In production, explicitly specify the model name that matches your requirements and hardware capabilities.
 
 **Why?** Ollama needs to load model weights (often several GB) into RAM/VRAM. This is a one-time cost per model.
 
@@ -217,7 +223,7 @@ curl https://api.openai.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer sk-your-openai-key" \
   -d '{
-    "model": "gpt-3.5-turbo",
+    "model": "mistral",
     "messages": [{"role": "user", "content": "Hello!"}]
   }'
 ```

@@ -63,12 +63,12 @@ RESPONSE1=$(curl -s -X POST "${BASE_URL}/v1/chat/completions" \
     -H "Content-Type: application/json" \
     -H "X-API-Key: ${API_KEY}" \
     -d '{
-        "model": "llama2",
+        "model": "mistral",
         "messages": [{"role": "user", "content": "Say hello in exactly one word"}]
     }' 2>/dev/null || curl -s -X POST "${BASE_URL}/v1/chat/completions" \
     -H "Content-Type: application/json" \
     -d '{
-        "model": "llama2",
+        "model": "mistral",
         "messages": [{"role": "user", "content": "Say hello in exactly one word"}]
     }')
 END_TIME=$(date +%s%N)
@@ -89,12 +89,12 @@ RESPONSE2=$(curl -s -X POST "${BASE_URL}/v1/chat/completions" \
     -H "Content-Type: application/json" \
     -H "X-API-Key: ${API_KEY}" \
     -d '{
-        "model": "llama2",
+        "model": "mistral",
         "messages": [{"role": "user", "content": "Say hello in exactly one word"}]
     }' 2>/dev/null || curl -s -X POST "${BASE_URL}/v1/chat/completions" \
     -H "Content-Type: application/json" \
     -d '{
-        "model": "llama2",
+        "model": "mistral",
         "messages": [{"role": "user", "content": "Say hello in exactly one word"}]
     }')
 END_TIME=$(date +%s%N)

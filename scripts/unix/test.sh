@@ -48,7 +48,7 @@ echo "✓ Models endpoint passed"
 echo ""
 
 echo "[3/9] Testing Chat Completions (Non-Streaming)..."
-BODY='{"model":"llama2","messages":[{"role":"user","content":"Say hello in one word"}]}'
+BODY='{"model":"mistral","messages":[{"role":"user","content":"Say hello in one word"}]}'
 if [ -n "$API_KEY" ]; then
     RESPONSE=$(curl -s -X POST "$BASE_URL/v1/chat/completions" \
         -H "Content-Type: application/json" \
@@ -135,7 +135,7 @@ echo ""
 echo "[7/9] Testing MCP URI Scheme (if MCP enabled)..."
 echo "Testing chat completion with MCP URI..."
 echo "Note: This requires an MCP server with resources configured"
-BODY='{"model":"llama2","messages":[{"role":"user","content":"Test mcp://test-server/resource"}]}'
+BODY='{"model":"mistral","messages":[{"role":"user","content":"Test mcp://test-server/resource"}]}'
 if [ -n "$API_KEY" ]; then
     curl -s -X POST "$BASE_URL/v1/chat/completions" \
         -H "Content-Type: application/json" \

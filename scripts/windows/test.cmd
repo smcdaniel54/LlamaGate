@@ -9,7 +9,7 @@ echo.
 echo Prerequisites:
 echo   1. Ollama must be running on http://localhost:11434
 echo   2. LlamaGate must be running on http://localhost:11435
-echo   3. At least one model should be available in Ollama (e.g., llama2)
+echo   3. At least one model should be available in Ollama (e.g., mistral)
 echo.
 echo Press any key to start testing...
 pause >nul
@@ -49,12 +49,12 @@ echo [3/9] Testing Chat Completions (Non-Streaming)...
 if "%API_KEY%"=="" (
     curl -s -X POST %BASE_URL%/v1/chat/completions ^
         -H "Content-Type: application/json" ^
-        -d "{\"model\":\"llama2\",\"messages\":[{\"role\":\"user\",\"content\":\"Say hello in one word\"}]}"
+        -d "{\"model\":\"mistral\",\"messages\":[{\"role\":\"user\",\"content\":\"Say hello in one word\"}]}"
 ) else (
     curl -s -X POST %BASE_URL%/v1/chat/completions ^
         -H "Content-Type: application/json" ^
         -H "X-API-Key: %API_KEY%" ^
-        -d "{\"model\":\"llama2\",\"messages\":[{\"role\":\"user\",\"content\":\"Say hello in one word\"}]}"
+        -d "{\"model\":\"mistral\",\"messages\":[{\"role\":\"user\",\"content\":\"Say hello in one word\"}]}"
 )
 if %ERRORLEVEL% EQU 0 (
     echo.
@@ -70,24 +70,24 @@ echo First request (should be slow):
 if "%API_KEY%"=="" (
     curl -s -w "\nTime: %%{time_total}s\n" -X POST %BASE_URL%/v1/chat/completions ^
         -H "Content-Type: application/json" ^
-        -d "{\"model\":\"llama2\",\"messages\":[{\"role\":\"user\",\"content\":\"What is 2+2?\"}]}"
+        -d "{\"model\":\"mistral\",\"messages\":[{\"role\":\"user\",\"content\":\"What is 2+2?\"}]}"
 ) else (
     curl -s -w "\nTime: %%{time_total}s\n" -X POST %BASE_URL%/v1/chat/completions ^
         -H "Content-Type: application/json" ^
         -H "X-API-Key: %API_KEY%" ^
-        -d "{\"model\":\"llama2\",\"messages\":[{\"role\":\"user\",\"content\":\"What is 2+2?\"}]}"
+        -d "{\"model\":\"mistral\",\"messages\":[{\"role\":\"user\",\"content\":\"What is 2+2?\"}]}"
 )
 echo.
 echo Second request (should be fast - cached):
 if "%API_KEY%"=="" (
     curl -s -w "\nTime: %%{time_total}s\n" -X POST %BASE_URL%/v1/chat/completions ^
         -H "Content-Type: application/json" ^
-        -d "{\"model\":\"llama2\",\"messages\":[{\"role\":\"user\",\"content\":\"What is 2+2?\"}]}"
+        -d "{\"model\":\"mistral\",\"messages\":[{\"role\":\"user\",\"content\":\"What is 2+2?\"}]}"
 ) else (
     curl -s -w "\nTime: %%{time_total}s\n" -X POST %BASE_URL%/v1/chat/completions ^
         -H "Content-Type: application/json" ^
         -H "X-API-Key: %API_KEY%" ^
-        -d "{\"model\":\"llama2\",\"messages\":[{\"role\":\"user\",\"content\":\"What is 2+2?\"}]}"
+        -d "{\"model\":\"mistral\",\"messages\":[{\"role\":\"user\",\"content\":\"What is 2+2?\"}]}"
 )
 echo.
 echo ✓ Cache test completed (check times above - second should be much faster)
@@ -137,7 +137,7 @@ echo Testing chat completion with MCP URI...
 echo Note: This requires an MCP server with resources configured
 curl -s -X POST %BASE_URL%/v1/chat/completions %AUTH_HEADER% ^
     -H "Content-Type: application/json" ^
-    -d "{\"model\":\"llama2\",\"messages\":[{\"role\":\"user\",\"content\":\"Test mcp://test-server/resource\"}]}" >nul
+    -d "{\"model\":\"mistral\",\"messages\":[{\"role\":\"user\",\"content\":\"Test mcp://test-server/resource\"}]}" >nul
 if %ERRORLEVEL% EQU 0 (
     echo.
     echo ✓ MCP URI scheme test completed

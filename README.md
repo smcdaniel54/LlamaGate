@@ -348,7 +348,8 @@ All examples below assume:
 - **Ollama** running locally on `http://localhost:11434` (default port)
 - **Default configuration** (no authentication unless specified)
 
-> 💡 **Model Names:** Examples use `"mistral"` (Mistral 7B) as the default - works on most business hardware (8GB VRAM or CPU). See our [Top 5 Model Recommendations](docs/MODEL_RECOMMENDATIONS.md) for other options. Check available models with: `curl http://localhost:11435/v1/models`
+> 💡 **Model Names:** Examples use `"mistral"` (Mistral 7B) as the default - works on most business hardware (8GB VRAM or CPU). See our [Top 5 Model Recommendations](docs/MODEL_RECOMMENDATIONS.md) for other options. Check available models with: `curl http://localhost:11435/v1/models`  
+> ⚠️ **Production Note:** Always specify models explicitly in production code. Examples use `"mistral"` for demonstration purposes only.
 
 #### 1. Non-Streaming Request (curl)
 
@@ -1144,7 +1145,7 @@ curl -X POST http://localhost:11435/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "X-API-Key: sk-llamagate" \
   -d '{
-    "model": "llama3.2",
+    "model": "mistral",
     "messages": [{
       "role": "user",
       "content": "Summarize mcp://filesystem/file:///docs/readme.txt"

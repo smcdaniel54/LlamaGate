@@ -58,11 +58,11 @@ echo    Sending request...
 curl -s -X POST "%BASE_URL%/v1/chat/completions" ^
     -H "Content-Type: application/json" ^
     -H "X-API-Key: %API_KEY%" ^
-    -d "{\"model\":\"llama2\",\"messages\":[{\"role\":\"user\",\"content\":\"Say hello in exactly one word\"}]}" > temp_response1.json 2>nul
+    -d "{\"model\":\"mistral\",\"messages\":[{\"role\":\"user\",\"content\":\"Say hello in exactly one word\"}]}" > temp_response1.json 2>nul
 if %ERRORLEVEL% NEQ 0 (
     curl -s -X POST "%BASE_URL%/v1/chat/completions" ^
         -H "Content-Type: application/json" ^
-        -d "{\"model\":\"llama2\",\"messages\":[{\"role\":\"user\",\"content\":\"Say hello in exactly one word\"}]}" > temp_response1.json
+        -d "{\"model\":\"mistral\",\"messages\":[{\"role\":\"user\",\"content\":\"Say hello in exactly one word\"}]}" > temp_response1.json
 )
 echo    Response received (check temp_response1.json for details)
 echo    Time: Slow ^(includes model loading if first time^)
@@ -74,11 +74,11 @@ echo    Sending request...
 curl -s -X POST "%BASE_URL%/v1/chat/completions" ^
     -H "Content-Type: application/json" ^
     -H "X-API-Key: %API_KEY%" ^
-    -d "{\"model\":\"llama2\",\"messages\":[{\"role\":\"user\",\"content\":\"Say hello in exactly one word\"}]}" > temp_response2.json 2>nul
+    -d "{\"model\":\"mistral\",\"messages\":[{\"role\":\"user\",\"content\":\"Say hello in exactly one word\"}]}" > temp_response2.json 2>nul
 if %ERRORLEVEL% NEQ 0 (
     curl -s -X POST "%BASE_URL%/v1/chat/completions" ^
         -H "Content-Type: application/json" ^
-        -d "{\"model\":\"llama2\",\"messages\":[{\"role\":\"user\",\"content\":\"Say hello in exactly one word\"}]}" > temp_response2.json
+        -d "{\"model\":\"mistral\",\"messages\":[{\"role\":\"user\",\"content\":\"Say hello in exactly one word\"}]}" > temp_response2.json
 )
 echo    Response received (check temp_response2.json for details)
 echo    Time: INSTANT ^(from cache!^)

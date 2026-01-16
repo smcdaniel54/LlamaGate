@@ -13,7 +13,7 @@ param(
 # Set defaults
 if ([string]::IsNullOrEmpty($LlamaGateUrl)) { $LlamaGateUrl = "http://localhost:11435/v1" }
 if ([string]::IsNullOrEmpty($ApiKey)) { $ApiKey = "sk-llamagate" }
-if ([string]::IsNullOrEmpty($Model)) { $Model = "llama3.2" }
+if ([string]::IsNullOrEmpty($Model)) { $Model = "mistral" }
 if ([string]::IsNullOrEmpty($WorkspaceDir)) { $WorkspaceDir = "$env:USERPROFILE\llamagate-workspace" }
 
 function Print-Section {

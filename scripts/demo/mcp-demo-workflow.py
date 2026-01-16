@@ -20,7 +20,7 @@ from openai import OpenAI
 # Configuration
 LLAMAGATE_URL = os.getenv("LLAMAGATE_URL", "http://localhost:11435/v1")
 LLAMAGATE_API_KEY = os.getenv("LLAMAGATE_API_KEY", "sk-llamagate")
-MODEL = os.getenv("MODEL", "llama3.2")
+MODEL = os.getenv("MODEL", "mistral")
 WORKSPACE_DIR = os.getenv("WORKSPACE_DIR", os.path.expanduser("~/llamagate-workspace"))
 
 # Initialize OpenAI client (pointing to LlamaGate)
