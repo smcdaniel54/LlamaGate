@@ -22,7 +22,7 @@ All notable changes to LlamaGate will be documented in this file.
   - Plugin configuration (`PluginsConfig`) has been removed
   - Extension system is now the only extensibility mechanism
 
-  **Migration Guide:** See `docs/MIGRATION_STATUS.md` for details.
+  **Migration Guide:** See `docs/PLANS_REVIEW.md` for migration completion details.
 
 ### Added
 
