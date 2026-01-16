@@ -121,7 +121,8 @@ func TestWorkflowExecutor_TemplateRender(t *testing.T) {
 		},
 	}
 
-	result, err := executor.renderTemplate(context.Background(), WorkflowStep{}, map[string]interface{}{}, state, &Manifest{})
+	execCtx := NewExecutionContext(context.Background(), "", "")
+	result, err := executor.renderTemplate(execCtx, WorkflowStep{}, map[string]interface{}{}, state, &Manifest{})
 	if err != nil {
 		t.Fatalf("Failed to render template: %v", err)
 	}
@@ -151,7 +152,8 @@ func TestWorkflowExecutor_CallLLM(t *testing.T) {
 		"model":           "llama3.2",
 	}
 
-	result, err := executor.callLLM(context.Background(), WorkflowStep{}, map[string]interface{}{}, state)
+	execCtx := NewExecutionContext(context.Background(), "", "")
+	result, err := executor.callLLM(execCtx, WorkflowStep{}, map[string]interface{}{}, state)
 	if err != nil {
 		t.Fatalf("Failed to call LLM: %v", err)
 	}

@@ -14,6 +14,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// boolPtr returns a pointer to a boolean value
+func boolPtr(b bool) *bool {
+	return &b
+}
+
 // TestExtensionDiscovery_EndToEnd tests the complete extension discovery flow
 func TestExtensionDiscovery_EndToEnd(t *testing.T) {
 	tmpDir := t.TempDir()
