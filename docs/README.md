@@ -23,7 +23,7 @@ Welcome to the LlamaGate documentation! This directory contains detailed guides 
 
 ## Example Repositories
 - [OpenAI SDK Examples](https://github.com/smcdaniel54/LlamaGate-openai-sdk-examples) - Minimal examples showing how to use the OpenAI SDK with LlamaGate
-- Extension Examples - Coming soon
+- [Extension Examples](https://github.com/smcdaniel54/LlamaGate-extension-examples) - High-value, copy/paste-ready examples of LlamaGate Extensions and AgenticModules
 - MCP Examples - Coming soon
 
 ## Main Documentation

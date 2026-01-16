@@ -31,12 +31,14 @@ Minimal, runnable examples showing how to use the OpenAI Python SDK with LlamaGa
 - Error handling
 
 ### Extension Examples
-**Status:** Coming soon
+**Repository:** [LlamaGate-extension-examples](https://github.com/smcdaniel54/LlamaGate-extension-examples)
 
-Examples for using LlamaGate extensions system:
-- Creating custom extensions
-- Extension workflows
-- Extension configuration
+High-value, copy/paste-ready examples of LlamaGate Extensions and AgenticModules:
+- **Structured Intake Summary** - Converts raw request text into structured JSON
+- **ROI Assessment** - Calculates ROI from costs, savings, and risk factors
+- **Intake and Routing** - Orchestrates intake processing and urgency-based routing
+- **Templates** - Ready-to-use templates for quick starts
+- Demonstrates real-world patterns for workflows, routing, evaluation, and orchestration
 
 ### MCP Examples
 **Status:** Coming soon
