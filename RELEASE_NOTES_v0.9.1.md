@@ -32,7 +32,7 @@ The Go-based plugin system has been **completely removed** and replaced with the
    - All plugin-related Go code has been removed
    - Use the new extension system instead
 
-**Migration Guide:** See `docs/MIGRATION_STATUS.md` for detailed migration information.
+**Migration Guide:** See `docs/PLANS_REVIEW.md` for migration completion details.
 
 ---
 
@@ -98,7 +98,7 @@ Follow the installation guide in `docs/INSTALL.md` or `README.md`.
 ## 📚 Documentation
 
 - **Extension Specification**: `docs/EXTENSIONS_SPEC_V0.9.1.md`
-- **Migration Guide**: `docs/MIGRATION_STATUS.md`
+- **Migration Guide**: `docs/PLANS_REVIEW.md`
 - **Extension Quick Start**: `docs/EXTENSIONS_QUICKSTART.md`
 - **API Documentation**: `docs/API.md`
 
@@ -122,7 +122,7 @@ None at this time.
 
 Thank you for using LlamaGate! If you encounter any issues or have questions about the migration, please:
 
-- Check the migration guide: `docs/MIGRATION_STATUS.md`
+- Check the migration guide: `docs/PLANS_REVIEW.md`
 - Review the extension specification: `docs/EXTENSIONS_SPEC_V0.9.1.md`
 - Open an issue on GitHub if you need help
 
