@@ -99,7 +99,7 @@ Follow the installation guide in `docs/INSTALL.md` or `README.md`.
 
 - **Extension Specification**: `docs/EXTENSIONS_SPEC_V0.9.1.md`
 - **Migration Guide**: `docs/MIGRATION_STATUS.md`
-- **Extension Quick Start**: `docs/EXTENSION_QUICKSTART.md`
+- **Extension Quick Start**: `docs/EXTENSIONS_QUICKSTART.md`
 - **API Documentation**: `docs/API.md`
 
 ---

@@ -35,7 +35,8 @@ This document provides a summary of the Extensions v0.9.1 design lock-in phase. 
 - Success criteria
 - Estimated effort (40-60 hours)
 
-### 3. [EXTENSIONS_MIGRATION_CHECKLIST.md](./EXTENSIONS_MIGRATION_CHECKLIST.md)
+### 3. Migration Checklist
+**Status:** Removed - Migration complete in v0.9.1
 **Quick reference checklist** for tracking progress during implementation.
 
 ---
@@ -247,7 +248,7 @@ If critical issues discovered:
 ### Documentation
 - [Specification](./EXTENSIONS_SPEC_V0.9.1.md) – Complete design specification
 - [Implementation Plan](./EXTENSIONS_IMPLEMENTATION_PLAN.md) – Step-by-step guide
-- [Checklist](./EXTENSIONS_MIGRATION_CHECKLIST.md) – Progress tracking
+- Migration completed in v0.9.1 - checklist no longer needed
 
 ### Reference
 - [LlamaGate Extension Expectations](../c:\Users\smcda\Downloads\LlamaGate_Extension_Expectations.md) – Industry standards

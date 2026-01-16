@@ -168,7 +168,7 @@ echo.
 
 echo [9/9] Testing Extensions (if extensions installed)...
 echo Note: Extensions are discovered from the extensions\ directory
-echo       See docs\EXTENSION_QUICKSTART.md for extension examples
+echo       See docs\EXTENSIONS_QUICKSTART.md for extension examples
 echo.
 
 :end

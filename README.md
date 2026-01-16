@@ -20,7 +20,7 @@ LlamaGate is a production-ready, OpenAI-compatible API gateway for local LLMs (O
 - ✅ **Request Correlation & Structured Logging**: JSON logging with request IDs using Zerolog
 - ✅ **Caching**: In-memory caching for identical prompts to reduce Ollama load
 - ✅ **MCP Client Support**: Connect to MCP servers and expose their tools to models ([MCP Guide](docs/MCP.md) | [Quick Start](docs/MCP_QUICKSTART.md))
-- ✅ **Extension System**: YAML-based extensions for workflows, middleware, and observability ([Extension Guide](docs/EXTENSIONS_SPEC_V0.9.1.md) | [Quick Start](docs/EXTENSION_QUICKSTART.md))
+- ✅ **Extension System**: YAML-based extensions for workflows, middleware, and observability ([Extension Guide](docs/EXTENSIONS_SPEC_V0.9.1.md) | [Quick Start](docs/EXTENSIONS_QUICKSTART.md))
 - ✅ **AgenticModules**: Bundle extensions into versioned, reusable modules ([AgenticModules Guide](docs/AGENTICMODULES.md))
 
 ## Documentation
@@ -32,7 +32,7 @@ LlamaGate is a production-ready, OpenAI-compatible API gateway for local LLMs (O
 - 🎯 **[MCP Demo Guide](docs/MCP_DEMO_QUICKSTART.md)** - Full demo with multiple servers
 - 🌐 **[MCP HTTP API](docs/API.md)** - Complete API reference for MCP management
 - 🔧 **[Extension System](docs/EXTENSIONS_SPEC_V0.9.1.md)** - YAML-based extensions (v0.9.1)
-- 🚀 **[Extension Quick Start](docs/EXTENSION_QUICKSTART.md)** - Get started with extensions in 5 minutes
+- 🚀 **[Extension Quick Start](docs/EXTENSIONS_QUICKSTART.md)** - Write, validate, load, and run extensions
 - 🧪 **[Testing Guide](docs/TESTING.md)** - Testing your setup
 - 📦 **[Installation Guide](docs/INSTALL.md)** - Detailed installation instructions
 - ✅ **[Manual Acceptance Test](docs/ACCEPTANCE_TEST.md)** - Comprehensive acceptance test checklist for human verification

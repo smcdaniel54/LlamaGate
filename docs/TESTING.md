@@ -87,7 +87,7 @@ chmod +x scripts/unix/test.sh
 
 ### Test Extensions
 
-Test extensions are created by placing `manifest.yaml` files in the `extensions/` directory. See `docs/EXTENSION_QUICKSTART.md` for examples.
+Test extensions are created by placing `manifest.yaml` files in the `extensions/` directory. See `docs/EXTENSIONS_QUICKSTART.md` for examples.
 
 1. Create extension directory: `extensions/my_test_extension/`
 2. Add `manifest.yaml` with required fields

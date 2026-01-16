@@ -13,15 +13,16 @@ Complete documentation for the LlamaGate Extensions system v0.9.1.
 
 ## User Documentation
 
-### 🚀 [Extension Quick Start](./EXTENSION_QUICKSTART.md)
-**For:** End users who want to use extensions  
+### 🚀 [Extension Quick Start](./EXTENSIONS_QUICKSTART.md)
+**For:** End users and developers who want to create and use extensions  
 **Content:**
-- Quick start guide for the three example extensions
-- Step-by-step usage examples
-- Troubleshooting tips
-- Enable/disable instructions
+- Write, validate, load, and run extensions
+- Extension types (workflow, middleware, observer)
+- Available step types
+- CLI commands
+- Common failure modes and troubleshooting
 
-**Start here if:** You want to use the example extensions right away.
+**Start here if:** You want to create your own extensions or understand how they work.
 
 ---
 
@@ -65,14 +66,9 @@ Complete documentation for the LlamaGate Extensions system v0.9.1.
 
 ---
 
-### ✅ [Migration Checklist](./EXTENSIONS_MIGRATION_CHECKLIST.md)
-**For:** Developers executing the migration  
-**Content:**
-- Quick reference checklist
-- Progress tracking
-- Task validation
-
-**Start here if:** You're actively migrating and need a checklist.
+### ✅ Migration Checklist
+**Status:** Migration complete - checklist no longer needed  
+**Note:** The plugins-to-extensions migration was completed in v0.9.1. This checklist has been removed as it's no longer relevant.
 
 ---
 
@@ -175,9 +171,9 @@ Complete documentation for the LlamaGate Extensions system v0.9.1.
 2. Review [Summary](./EXTENSIONS_SUMMARY.md) - High-level overview
 
 **...migrate from plugins:**
-1. Read [Implementation Plan](./EXTENSIONS_IMPLEMENTATION_PLAN.md)
-2. Use [Migration Checklist](./EXTENSIONS_MIGRATION_CHECKLIST.md)
-3. Review [Extension Specification](./EXTENSIONS_SPEC_V0.9.1.md) - Migration section
+1. Review [Extension Specification](./EXTENSIONS_SPEC_V0.9.1.md) - Migration section
+2. See [PLANS_REVIEW.md](./PLANS_REVIEW.md) for migration completion details
+3. Note: Migration was completed in v0.9.1 - plugins system has been removed
 
 **...test extensions:**
 1. Read [Testing Documentation](./EXTENSIONS_TESTING.md)
@@ -185,14 +181,14 @@ Complete documentation for the LlamaGate Extensions system v0.9.1.
 
 **...integrate via API:**
 1. Read [API Reference](./API.md) - Extension endpoints section
-2. Review [Extension Quick Start](./EXTENSION_QUICKSTART.md) - API examples
+2. Review [Extension Quick Start](./EXTENSIONS_QUICKSTART.md) - API examples
 
 ---
 
 ## Quick Links
 
 - **Specification:** [EXTENSIONS_SPEC_V0.9.1.md](./EXTENSIONS_SPEC_V0.9.1.md)
-- **Quick Start:** [EXTENSION_QUICKSTART.md](./EXTENSION_QUICKSTART.md)
+- **Quick Start:** [EXTENSIONS_QUICKSTART.md](./EXTENSIONS_QUICKSTART.md)
 - **API Reference:** [API.md](./API.md) (Extension endpoints section)
 - **Example Extensions:** [extensions/README.md](../extensions/README.md)
 - **Testing:** [EXTENSIONS_TESTING.md](./EXTENSIONS_TESTING.md)
@@ -207,8 +203,8 @@ Complete documentation for the LlamaGate Extensions system v0.9.1.
 | Extension Quick Start | ✅ Complete | Users |
 | Extensions README | ✅ Complete | Users/Developers |
 | API Reference | ✅ Complete | API Consumers |
-| Implementation Plan | ✅ Complete | Developers |
-| Migration Checklist | ✅ Complete | Developers |
+| Implementation Plan | ✅ Complete (Historical) | Developers |
+| Migration Checklist | ✅ Complete (Removed) | Developers |
 | Testing Documentation | ✅ Complete | Developers/QA |
 | Summary | ✅ Complete | Stakeholders |
 
