@@ -36,7 +36,7 @@ This document provides a comprehensive manual acceptance test checklist for Llam
 6. [Caching](#caching)
 7. [Rate Limiting](#rate-limiting)
 8. [MCP Integration](#mcp-integration)
-9. [Plugin System](#plugin-system)
+9. [Extension System](#extension-system)
 10. [Error Handling](#error-handling)
 11. [Logging & Monitoring](#logging--monitoring)
 12. [Performance](#performance)
@@ -731,21 +731,21 @@ _________________________________________________________________
 
 ---
 
-## Plugin System
+## Extension System
 
-**Note:** These tests require plugins to be enabled. Skip if plugins are not configured.
+**Note:** These tests require extensions to be configured. Skip if extensions are not configured.
 
-### Test 8.1: List Plugins
+### Test 8.1: List Extensions
 
 | Test Step | Expected Result | Status | Notes |
 |-----------|----------------|--------|-------|
-| GET `/v1/plugins` | Returns list of registered plugins | ☐ | |
-| Verify plugin metadata | Plugin names, descriptions present | ☐ | |
+| GET `/v1/extensions` | Returns list of registered extensions | ☐ | |
+| Verify extension metadata | Extension names, descriptions present | ☐ | |
 
 **Test Command:**
 ```bash
 curl -H "X-API-Key: sk-llamagate" \
-  http://localhost:11435/v1/plugins
+  http://localhost:11435/v1/extensions
 ```
 
 **Actual Result:**
@@ -754,17 +754,17 @@ _________________________________________________________________
 _________________________________________________________________
 ```
 
-### Test 8.2: Get Plugin Details
+### Test 8.2: Get Extension Details
 
 | Test Step | Expected Result | Status | Notes |
 |-----------|----------------|--------|-------|
-| GET `/v1/plugins/:name` | Returns plugin metadata | ☐ | |
+| GET `/v1/extensions/:name` | Returns extension metadata | ☐ | |
 | Verify input schema | Input parameters documented | ☐ | |
 
 **Test Command:**
 ```bash
 curl -H "X-API-Key: sk-llamagate" \
-  http://localhost:11435/v1/plugins/alexa-skill
+  http://localhost:11435/v1/extensions/prompt-template-executor
 ```
 
 **Actual Result:**
@@ -773,11 +773,11 @@ _________________________________________________________________
 _________________________________________________________________
 ```
 
-### Test 8.3: Execute Plugin
+### Test 8.3: Execute Extension
 
 | Test Step | Expected Result | Status | Notes |
 |-----------|----------------|--------|-------|
-| POST `/v1/plugins/:name/execute` | Executes plugin and returns result | ☐ | |
+| POST `/v1/extensions/:name/execute` | Executes extension and returns result | ☐ | |
 | Verify input validation | Invalid inputs return 400 Bad Request | ☐ | |
 | Check execution result | Valid inputs return 200 OK with results | ☐ | |
 
@@ -787,11 +787,11 @@ curl -X POST -H "X-API-Key: sk-llamagate" \
   -H "Content-Type: application/json" \
   -d '{
     "input": {
-      "intent": "GetWeather",
-      "slots": {}
+      "template": "Hello {{name}}",
+      "variables": {"name": "World"}
     }
   }' \
-  http://localhost:11435/v1/plugins/alexa-skill/execute
+  http://localhost:11435/v1/extensions/prompt-template-executor/execute
 ```
 
 **Actual Result:**
@@ -1139,7 +1139,7 @@ _________________________________________________________________
 | Caching | ___ / ___ | ___ / ___ | ___ / ___ | |
 | Rate Limiting | ___ / ___ | ___ / ___ | ___ / ___ | |
 | MCP Integration | ___ / ___ | ___ / ___ | ___ / ___ | |
-| Plugin System | ___ / ___ | ___ / ___ | ___ / ___ | |
+| Extension System | ___ / ___ | ___ / ___ | ___ / ___ | |
 | Error Handling | ___ / ___ | ___ / ___ | ___ / ___ | |
 | Logging | ___ / ___ | ___ / ___ | ___ / ___ | |
 | Performance | ___ / ___ | ___ / ___ | ___ / ___ | |
