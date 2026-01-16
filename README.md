@@ -21,6 +21,7 @@ LlamaGate is a production-ready, OpenAI-compatible API gateway for local LLMs (O
 - ✅ **Caching**: In-memory caching for identical prompts to reduce Ollama load
 - ✅ **MCP Client Support**: Connect to MCP servers and expose their tools to models ([MCP Guide](docs/MCP.md) | [Quick Start](docs/MCP_QUICKSTART.md))
 - ✅ **Extension System**: YAML-based extensions for workflows, middleware, and observability ([Extension Guide](docs/EXTENSIONS_SPEC_V0.9.1.md) | [Quick Start](docs/EXTENSION_QUICKSTART.md))
+- ✅ **AgenticModules**: Bundle extensions into versioned, reusable modules ([AgenticModules Guide](docs/AGENTICMODULES.md))
 
 ## Documentation
 
@@ -39,7 +40,7 @@ LlamaGate is a production-ready, OpenAI-compatible API gateway for local LLMs (O
 ## Example Repositories
 
 - 📚 **[OpenAI SDK Examples](https://github.com/smcdaniel54/LlamaGate-openai-sdk-examples)** - Minimal examples showing how to use the OpenAI SDK with LlamaGate (streaming and non-streaming)
-- 🔧 **Extension Examples** - Coming soon
+- 🔧 **Extension Examples** - See `extensions/` directory and `examples/agenticmodules/` for AgenticModule examples
 - 🎯 **MCP Examples** - Coming soon
 
 ## Installation

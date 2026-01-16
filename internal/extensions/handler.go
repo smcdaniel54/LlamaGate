@@ -21,9 +21,11 @@ type Handler struct {
 
 // NewHandler creates a new extension handler
 func NewHandler(registry *Registry, llmHandler LLMHandlerFunc, baseDir string) *Handler {
+	executor := NewWorkflowExecutor(llmHandler, baseDir)
+	executor.SetRegistry(registry) // Enable extension-to-extension calls
 	return &Handler{
 		registry:        registry,
-		workflowExecutor: NewWorkflowExecutor(llmHandler, baseDir),
+		workflowExecutor: executor,
 	}
 }
 
@@ -121,8 +123,11 @@ func (h *Handler) ExecuteExtension(c *gin.Context) {
 		}
 	}
 
+	// Create execution context with guardrails
+	execCtx := NewExecutionContext(c.Request.Context(), requestID, GetExtensionDir("extensions", extensionName))
+	
 	// Execute workflow
-	result, err := h.workflowExecutor.Execute(c.Request.Context(), manifest, input)
+	result, err := h.workflowExecutor.Execute(execCtx, manifest, input)
 	if err != nil {
 		log.Error().
 			Str("request_id", requestID).

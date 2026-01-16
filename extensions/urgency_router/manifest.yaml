@@ -1,0 +1,33 @@
+name: urgency_router
+version: 1.0.0
+description: Route items based on urgency level
+type: workflow
+enabled: true
+
+inputs:
+  - id: summary
+    type: object
+    required: true
+
+outputs:
+  - id: route
+    type: string
+  - id: priority
+    type: number
+
+steps:
+  - uses: rules.evaluate
+    with:
+      rules:
+        - if: "urgency_level == 'high'"
+          then:
+            route: "immediate"
+            priority: 1
+        - if: "urgency_level == 'medium'"
+          then:
+            route: "standard"
+            priority: 2
+        - if: "urgency_level == 'low'"
+          then:
+            route: "queue"
+            priority: 3

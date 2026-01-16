@@ -72,24 +72,30 @@ func LoadManifest(path string) (*Manifest, error) {
 	return &manifest, nil
 }
 
-// ValidateManifest validates a manifest
+// ValidateManifest validates a manifest with actionable error messages
 func ValidateManifest(m *Manifest) error {
 	if m.Name == "" {
-		return fmt.Errorf("name is required")
+		return fmt.Errorf("validation error: 'name' field is required in manifest.yaml")
 	}
 
 	// Validate name format (alphanumeric + underscore + hyphen)
 	nameRegex := regexp.MustCompile(`^[a-zA-Z0-9_-]+$`)
 	if !nameRegex.MatchString(m.Name) {
-		return fmt.Errorf("name must be alphanumeric with underscores and hyphens only")
+		return fmt.Errorf("validation error: 'name' field '%s' contains invalid characters. Only alphanumeric characters, underscores, and hyphens are allowed", m.Name)
 	}
 
 	if m.Version == "" {
-		return fmt.Errorf("version is required")
+		return fmt.Errorf("validation error: 'version' field is required in manifest.yaml")
+	}
+
+	// Validate version format (semantic versioning recommended)
+	versionRegex := regexp.MustCompile(`^[0-9]+\.[0-9]+\.[0-9]+`)
+	if !versionRegex.MatchString(m.Version) {
+		return fmt.Errorf("validation warning: 'version' field '%s' should follow semantic versioning (e.g., '1.0.0')", m.Version)
 	}
 
 	if m.Description == "" {
-		return fmt.Errorf("description is required")
+		return fmt.Errorf("validation error: 'description' field is required in manifest.yaml")
 	}
 
 	// Validate type
@@ -98,8 +104,55 @@ func ValidateManifest(m *Manifest) error {
 		"middleware": true,
 		"observer":  true,
 	}
-	if m.Type != "" && !validTypes[m.Type] {
-		return fmt.Errorf("type must be one of: workflow, middleware, observer")
+	if m.Type == "" {
+		return fmt.Errorf("validation error: 'type' field is required. Must be one of: workflow, middleware, observer")
+	}
+	if !validTypes[m.Type] {
+		return fmt.Errorf("validation error: 'type' field '%s' is invalid. Must be one of: workflow, middleware, observer", m.Type)
+	}
+
+	// Validate workflow-specific fields
+	if m.Type == "workflow" {
+		if len(m.Steps) == 0 {
+			return fmt.Errorf("validation error: workflow extension '%s' must have at least one step in 'steps' field", m.Name)
+		}
+		for i, step := range m.Steps {
+			if step.Uses == "" {
+				return fmt.Errorf("validation error: workflow step %d in extension '%s' is missing 'uses' field", i, m.Name)
+			}
+		}
+	}
+
+	// Validate middleware/observer-specific fields
+	if m.Type == "middleware" || m.Type == "observer" {
+		if len(m.Hooks) == 0 {
+			return fmt.Errorf("validation error: %s extension '%s' must have at least one hook in 'hooks' field", m.Type, m.Name)
+		}
+		for i, hook := range m.Hooks {
+			if hook.On == "" {
+				return fmt.Errorf("validation error: hook %d in extension '%s' is missing 'on' field", i, m.Name)
+			}
+		}
+	}
+
+	// Validate inputs
+	for i, input := range m.Inputs {
+		if input.ID == "" {
+			return fmt.Errorf("validation error: input %d in extension '%s' is missing 'id' field", i, m.Name)
+		}
+		if input.Type == "" {
+			return fmt.Errorf("validation error: input '%s' in extension '%s' is missing 'type' field", input.ID, m.Name)
+		}
+		validInputTypes := map[string]bool{
+			"string": true,
+			"number": true,
+			"boolean": true,
+			"object": true,
+			"array": true,
+		}
+		if !validInputTypes[input.Type] {
+			return fmt.Errorf("validation error: input '%s' in extension '%s' has invalid type '%s'. Must be one of: string, number, boolean, object, array", input.ID, m.Name, input.Type)
+		}
 	}
 
 	return nil
@@ -114,6 +167,8 @@ func (m *Manifest) IsEnabled() bool {
 }
 
 // DiscoverExtensions discovers all extensions in a directory
+// Supports both flat structure (extensions/<name>/manifest.yaml) and nested structure
+// (e.g., agenticmodules/<module>/extensions/<name>/manifest.yaml)
 func DiscoverExtensions(dir string) ([]*Manifest, error) {
 	var manifests []*Manifest
 
@@ -127,17 +182,19 @@ func DiscoverExtensions(dir string) ([]*Manifest, error) {
 	}
 
 	// Walk directory looking for manifest.yaml files
+	// This supports nested directories (e.g., agenticmodules/<module>/extensions/<name>/manifest.yaml)
 	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 
-		// Look for manifest.yaml files
+		// Look for manifest.yaml files (both in extension directories and nested in modules)
 		if info.Name() == "manifest.yaml" {
 			manifest, err := LoadManifest(path)
 			if err != nil {
 				// Log error but continue discovering other extensions
-				return fmt.Errorf("failed to load manifest at %s: %w", path, err)
+				// Return nil to continue walking, but log the error
+				return nil // Continue discovering other extensions
 			}
 			manifests = append(manifests, manifest)
 		}

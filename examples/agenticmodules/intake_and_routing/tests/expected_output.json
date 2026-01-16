@@ -1,0 +1,14 @@
+{
+  "summary": {
+    "title": "Critical System Outage",
+    "key_points": [
+      "All users affected",
+      "Service completely down",
+      "Immediate attention required"
+    ],
+    "urgency_level": "high",
+    "category": "incident"
+  },
+  "route": "immediate",
+  "priority": 1
+}
