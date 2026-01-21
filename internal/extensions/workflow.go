@@ -625,7 +625,7 @@ func (e *WorkflowExecutor) validateModule(_ *ExecutionContext, _ WorkflowStep, _
 }
 
 // executeModule executes an AgenticModule's workflow steps
-func (e *WorkflowExecutor) executeModule(ctx *ExecutionContext, _ WorkflowStep, resolvedWith map[string]interface{}, state map[string]interface{}, manifest *Manifest) (map[string]interface{}, error) {
+func (e *WorkflowExecutor) executeModule(ctx *ExecutionContext, _ WorkflowStep, resolvedWith map[string]interface{}, state map[string]interface{}, _ *Manifest) (map[string]interface{}, error) {
 	moduleManifestRaw, ok := state["module_manifest"]
 	if !ok {
 		return nil, fmt.Errorf("module_manifest not found in state")
