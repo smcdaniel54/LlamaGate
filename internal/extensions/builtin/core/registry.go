@@ -8,14 +8,14 @@ import (
 
 // Registry manages extension registration and discovery
 type Registry struct {
-	mu          sync.RWMutex
-	extensions  map[string]Extension
-	callers     map[string]AgentCaller
-	executors   map[string]ToolExecutor
-	evaluators  map[string]DecisionEvaluator
-	managers    map[string]StateManager
-	publishers  map[string]EventPublisher
-	validators  map[string]Validator
+	mu           sync.RWMutex
+	extensions   map[string]Extension
+	callers      map[string]AgentCaller
+	executors    map[string]ToolExecutor
+	evaluators   map[string]DecisionEvaluator
+	managers     map[string]StateManager
+	publishers   map[string]EventPublisher
+	validators   map[string]Validator
 	interactions map[string]HumanInteraction
 	transformers map[string]Transformer
 }

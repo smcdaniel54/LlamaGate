@@ -109,8 +109,8 @@ func TestToolDefinition(t *testing.T) {
 func TestToolCall(t *testing.T) {
 	t.Run("create tool call", func(t *testing.T) {
 		call := &ToolCall{
-			ID:       "call-1",
-			Name:     "test-tool",
+			ID:        "call-1",
+			Name:      "test-tool",
 			Arguments: map[string]interface{}{"arg1": "value1"},
 		}
 
@@ -316,8 +316,8 @@ func TestValidationResult(t *testing.T) {
 
 	t.Run("create invalid validation result", func(t *testing.T) {
 		result := &ValidationResult{
-			Valid:   false,
-			Errors:  []string{"error1", "error2"},
+			Valid:    false,
+			Errors:   []string{"error1", "error2"},
 			Warnings: []string{"warning1"},
 		}
 

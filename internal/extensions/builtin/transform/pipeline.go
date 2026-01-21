@@ -80,26 +80,26 @@ func (p *Pipeline) TransformMany(ctx context.Context, data interface{}, transfor
 }
 
 // transformMap applies a map transformation
-func (p *Pipeline) transformMap(_ context.Context, data interface{}, transformation *core.Transformation) (interface{}, error) {
+func (p *Pipeline) transformMap(_ context.Context, data interface{}, _ *core.Transformation) (interface{}, error) {
 	// This is a placeholder - in production, implement actual mapping logic
 	// based on the transformation config
 	return data, nil
 }
 
 // transformFilter applies a filter transformation
-func (p *Pipeline) transformFilter(_ context.Context, data interface{}, transformation *core.Transformation) (interface{}, error) {
+func (p *Pipeline) transformFilter(_ context.Context, data interface{}, _ *core.Transformation) (interface{}, error) {
 	// This is a placeholder - in production, implement actual filtering logic
 	return data, nil
 }
 
 // transformReduce applies a reduce transformation
-func (p *Pipeline) transformReduce(_ context.Context, data interface{}, transformation *core.Transformation) (interface{}, error) {
+func (p *Pipeline) transformReduce(_ context.Context, data interface{}, _ *core.Transformation) (interface{}, error) {
 	// This is a placeholder - in production, implement actual reduction logic
 	return data, nil
 }
 
 // transformCustom applies a custom transformation
-func (p *Pipeline) transformCustom(_ context.Context, data interface{}, transformation *core.Transformation) (interface{}, error) {
+func (p *Pipeline) transformCustom(_ context.Context, data interface{}, _ *core.Transformation) (interface{}, error) {
 	// Custom transformations would be registered and called here
 	return data, fmt.Errorf("custom transformation not implemented")
 }

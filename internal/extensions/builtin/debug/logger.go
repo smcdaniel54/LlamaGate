@@ -93,7 +93,7 @@ func (l *Logger) Initialize(ctx context.Context, config map[string]interface{}) 
 // Shutdown shuts down the logger
 func (l *Logger) Shutdown(ctx context.Context) error {
 	if l.logFile != nil {
-		l.logFile.Close()
+		_ = l.logFile.Close() // Log file close errors are non-critical during shutdown
 	}
 
 	// Print event counts summary
@@ -176,7 +176,7 @@ func (l *Logger) logToFile(entry map[string]interface{}) {
 	if err != nil {
 		return
 	}
-	l.logFile.WriteString(string(jsonData) + "\n")
+	_, _ = l.logFile.WriteString(string(jsonData) + "\n") // Log write errors are non-critical
 }
 
 // getColorPrefix returns color prefix for log level
@@ -186,9 +186,9 @@ func (l *Logger) getColorPrefix(level string) string {
 	}
 	colors := map[string]string{
 		LogLevelDebug:   "\033[36m", // Cyan
-		LogLevelInfo:   "\033[32m",  // Green
-		LogLevelWarning: "\033[33m",  // Yellow
-		LogLevelError:   "\033[31m",  // Red
+		LogLevelInfo:    "\033[32m", // Green
+		LogLevelWarning: "\033[33m", // Yellow
+		LogLevelError:   "\033[31m", // Red
 	}
 	return colors[level]
 }
@@ -204,8 +204,8 @@ func (l *Logger) handleEvent(_ context.Context, event *core.Event) error {
 
 	// Log event
 	l.Log(LogLevelDebug, fmt.Sprintf("Event: %s", event.Type), map[string]interface{}{
-		"source":    event.Source,
-		"event_id":  event.ID,
+		"source":     event.Source,
+		"event_id":   event.ID,
 		"event_data": event.Data,
 	})
 

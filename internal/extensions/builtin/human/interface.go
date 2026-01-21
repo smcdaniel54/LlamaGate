@@ -1,3 +1,4 @@
+// Package human provides human-in-the-loop interaction capabilities for extensions.
 package human
 
 import (
@@ -58,7 +59,7 @@ func (h *Interface) Initialize(ctx context.Context, config map[string]interface{
 }
 
 // Shutdown shuts down the interface
-func (h *Interface) Shutdown(ctx context.Context) error {
+func (h *Interface) Shutdown(_ context.Context) error {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 

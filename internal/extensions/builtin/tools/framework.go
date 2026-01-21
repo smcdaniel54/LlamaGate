@@ -1,3 +1,4 @@
+// Package tools provides tool registration and execution capabilities for extensions.
 package tools
 
 import (

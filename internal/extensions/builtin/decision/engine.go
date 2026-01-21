@@ -1,3 +1,4 @@
+// Package decision provides decision evaluation capabilities for extensions.
 package decision
 
 import (

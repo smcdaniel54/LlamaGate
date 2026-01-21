@@ -10,8 +10,8 @@ import (
 
 // TestHelper provides utilities for testing and debugging extensions
 type TestHelper struct {
-	registry *core.Registry
-	logger   *Logger
+	registry   *core.Registry
+	logger     *Logger
 	visualizer *Visualizer
 }
 
@@ -27,9 +27,9 @@ func (th *TestHelper) SetupDebugging(ctx context.Context, _ map[string]interface
 	// Setup logger
 	th.logger = NewLogger("test-logger", "1.0.0")
 	if err := th.registry.Register(ctx, th.logger, map[string]interface{}{
-		"level":     "debug",
+		"level":      "debug",
 		"structured": false,
-		"colors":    true,
+		"colors":     true,
 	}); err != nil {
 		return fmt.Errorf("failed to register logger: %w", err)
 	}
@@ -48,10 +48,10 @@ func (th *TestHelper) SetupDebugging(ctx context.Context, _ map[string]interface
 // TeardownDebugging tears down debugging setup
 func (th *TestHelper) TeardownDebugging(ctx context.Context) error {
 	if th.logger != nil {
-		th.registry.Unregister(ctx, th.logger.Name())
+		_ = th.registry.Unregister(ctx, th.logger.Name()) // Ignore errors during test teardown
 	}
 	if th.visualizer != nil {
-		th.registry.Unregister(ctx, th.visualizer.Name())
+		_ = th.registry.Unregister(ctx, th.visualizer.Name()) // Ignore errors during test teardown
 	}
 	return nil
 }
@@ -59,11 +59,11 @@ func (th *TestHelper) TeardownDebugging(ctx context.Context) error {
 // TraceWorkflow traces a workflow execution
 func (th *TestHelper) TraceWorkflow(ctx context.Context, workflowID string, fn func() error) error {
 	start := time.Now()
-	
+
 	// Publish workflow started event
 	publisher, _ := th.registry.GetEventPublisher("default")
 	if publisher != nil {
-		publisher.Publish(ctx, &core.Event{
+		_ = publisher.Publish(ctx, &core.Event{ // Ignore publish errors in test helpers
 			Type:      "workflow.started",
 			Source:    "test-helper",
 			Timestamp: start,
@@ -84,7 +84,7 @@ func (th *TestHelper) TraceWorkflow(ctx context.Context, workflowID string, fn f
 		if err != nil {
 			eventType = "workflow.failed"
 		}
-		publisher.Publish(ctx, &core.Event{
+		_ = publisher.Publish(ctx, &core.Event{ // Ignore publish errors in test helpers
 			Type:      eventType,
 			Source:    "test-helper",
 			Timestamp: time.Now(),
@@ -106,7 +106,7 @@ func (th *TestHelper) TraceStep(ctx context.Context, workflowID, stepName string
 	// Publish step started event
 	publisher, _ := th.registry.GetEventPublisher("default")
 	if publisher != nil {
-		publisher.Publish(ctx, &core.Event{
+		_ = publisher.Publish(ctx, &core.Event{ // Ignore publish errors in test helpers
 			Type:      "workflow.step.started",
 			Source:    "test-helper",
 			Timestamp: start,
@@ -128,7 +128,7 @@ func (th *TestHelper) TraceStep(ctx context.Context, workflowID, stepName string
 		if err != nil {
 			eventType = "workflow.step.failed"
 		}
-		publisher.Publish(ctx, &core.Event{
+		_ = publisher.Publish(ctx, &core.Event{ // Ignore publish errors in test helpers
 			Type:      eventType,
 			Source:    "test-helper",
 			Timestamp: time.Now(),
@@ -207,7 +207,9 @@ func (th *TestHelper) WaitForEvent(ctx context.Context, eventType string, timeou
 	if err != nil {
 		return nil, err
 	}
-	defer subscription.Unsubscribe(ctx)
+	defer func() {
+		_ = subscription.Unsubscribe(ctx) // Ignore unsubscribe errors in test helpers
+	}()
 
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()

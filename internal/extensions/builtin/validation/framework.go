@@ -83,7 +83,7 @@ func (f *Framework) Validate(ctx context.Context, data interface{}, rules *core.
 }
 
 // validateSchema validates data against a schema
-func (f *Framework) validateSchema(_ context.Context, data interface{}, rules *core.ValidationRules) (*core.ValidationResult, error) {
+func (f *Framework) validateSchema(_ context.Context, data interface{}, _ *core.ValidationRules) (*core.ValidationResult, error) {
 	// This is a placeholder - in production, use a proper schema validator like JSON Schema
 	result := &core.ValidationResult{
 		Valid:    true,
@@ -157,7 +157,7 @@ func (f *Framework) validateLLM(ctx context.Context, data interface{}, rules *co
 }
 
 // validateCustom validates data using custom validators
-func (f *Framework) validateCustom(_ context.Context, data interface{}, rules *core.ValidationRules) (*core.ValidationResult, error) {
+func (f *Framework) validateCustom(_ context.Context, _ interface{}, rules *core.ValidationRules) (*core.ValidationResult, error) {
 	// Custom validators would be registered and called here
 	return &core.ValidationResult{
 		Valid:  false,

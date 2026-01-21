@@ -11,10 +11,10 @@ import (
 
 // Visualizer provides visual debugging output for workflows
 type Visualizer struct {
-	name     string
-	version  string
-	enabled  bool
-	registry *core.Registry
+	name      string
+	version   string
+	enabled   bool
+	registry  *core.Registry
 	workflows map[string]*WorkflowVisualization
 }
 
@@ -347,10 +347,10 @@ func getColorCode(color string) string {
 // getStatusIcon returns icon for status
 func getStatusIcon(status string) string {
 	icons := map[string]string{
-		"running":  "▶️",
-		"paused":   "⏸️",
+		"running":   "▶️",
+		"paused":    "⏸️",
 		"completed": "✅",
-		"failed":   "❌",
+		"failed":    "❌",
 	}
 	if icon, ok := icons[status]; ok {
 		return icon

@@ -1,3 +1,4 @@
+// Package events provides event publishing and subscription capabilities for extensions.
 package events
 
 import (
@@ -46,12 +47,12 @@ func (s *System) Version() string {
 }
 
 // Initialize initializes the system
-func (s *System) Initialize(ctx context.Context, config map[string]interface{}) error {
+func (s *System) Initialize(_ context.Context, _ map[string]interface{}) error {
 	return nil
 }
 
 // Shutdown shuts down the system
-func (s *System) Shutdown(ctx context.Context) error {
+func (s *System) Shutdown(_ context.Context) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -95,7 +96,7 @@ func (s *System) Publish(ctx context.Context, event *core.Event) error {
 }
 
 // Subscribe subscribes to events matching the filter
-func (s *System) Subscribe(ctx context.Context, filter *core.EventFilter, handler core.EventHandler) (core.Subscription, error) {
+func (s *System) Subscribe(_ context.Context, filter *core.EventFilter, handler core.EventHandler) (core.Subscription, error) {
 	if handler == nil {
 		return nil, fmt.Errorf("handler cannot be nil")
 	}
@@ -191,7 +192,7 @@ type SubscriptionImpl struct {
 }
 
 // Unsubscribe unsubscribes from events
-func (si *SubscriptionImpl) Unsubscribe(ctx context.Context) error {
+func (si *SubscriptionImpl) Unsubscribe(_ context.Context) error {
 	si.system.mu.Lock()
 	defer si.system.mu.Unlock()
 

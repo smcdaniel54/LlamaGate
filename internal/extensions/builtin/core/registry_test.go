@@ -36,7 +36,7 @@ func (m *mockExtension) Shutdown(_ context.Context) error {
 // mockAgentCaller is a mock implementation of AgentCaller
 type mockAgentCaller struct {
 	*mockExtension
-	callErr      error
+	callErr       error
 	callStreamErr error
 }
 
@@ -51,7 +51,7 @@ func (m *mockAgentCaller) Call(ctx context.Context, req *AgentRequest) (*AgentRe
 	}, nil
 }
 
-func (m *mockAgentCaller) CallStream(_ context.Context, req *AgentRequest) (<-chan *StreamChunk, error) {
+func (m *mockAgentCaller) CallStream(_ context.Context, _ *AgentRequest) (<-chan *StreamChunk, error) {
 	if m.callStreamErr != nil {
 		return nil, m.callStreamErr
 	}

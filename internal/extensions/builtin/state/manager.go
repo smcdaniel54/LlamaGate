@@ -1,3 +1,4 @@
+// Package state provides state management capabilities for extensions.
 package state
 
 import (
@@ -39,12 +40,12 @@ func (m *Manager) Version() string {
 }
 
 // Initialize initializes the manager
-func (m *Manager) Initialize(ctx context.Context, config map[string]interface{}) error {
+func (m *Manager) Initialize(_ context.Context, _ map[string]interface{}) error {
 	return nil
 }
 
 // Shutdown shuts down the manager
-func (m *Manager) Shutdown(ctx context.Context) error {
+func (m *Manager) Shutdown(_ context.Context) error {
 	return nil
 }
 
@@ -82,7 +83,7 @@ func (m *Manager) SaveState(ctx context.Context, workflowID string, state *core.
 }
 
 // LoadState loads workflow state
-func (m *Manager) LoadState(ctx context.Context, workflowID string) (*core.WorkflowState, error) {
+func (m *Manager) LoadState(_ context.Context, workflowID string) (*core.WorkflowState, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
@@ -95,7 +96,7 @@ func (m *Manager) LoadState(ctx context.Context, workflowID string) (*core.Workf
 }
 
 // UpdateContext updates the context for a workflow
-func (m *Manager) UpdateContext(ctx context.Context, workflowID string, updates map[string]interface{}) error {
+func (m *Manager) UpdateContext(_ context.Context, workflowID string, updates map[string]interface{}) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -134,7 +135,7 @@ func (m *Manager) UpdateContext(ctx context.Context, workflowID string, updates 
 }
 
 // AddHistory adds a history entry
-func (m *Manager) AddHistory(ctx context.Context, workflowID, step, action string, data map[string]interface{}) error {
+func (m *Manager) AddHistory(_ context.Context, workflowID, step, action string, data map[string]interface{}) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -155,7 +156,7 @@ func (m *Manager) AddHistory(ctx context.Context, workflowID, step, action strin
 }
 
 // UpdateStatus updates the status of a workflow
-func (m *Manager) UpdateStatus(ctx context.Context, workflowID, status string) error {
+func (m *Manager) UpdateStatus(_ context.Context, workflowID, status string) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
