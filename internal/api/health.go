@@ -1,4 +1,5 @@
 // Package api provides HTTP API handlers for LlamaGate endpoints.
+//nolint:revive // Package name 'api' is standard for HTTP API handlers
 package api
 
 import (

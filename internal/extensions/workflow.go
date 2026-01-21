@@ -444,7 +444,7 @@ func (e *WorkflowExecutor) ExecuteExtensionInternal(execCtx *ExecutionContext, e
 }
 
 // parseSummary parses LLM response as structured JSON summary
-func (e *WorkflowExecutor) parseSummary(ctx *ExecutionContext, step WorkflowStep, resolvedWith map[string]interface{}, state map[string]interface{}, manifest *Manifest) (map[string]interface{}, error) {
+func (e *WorkflowExecutor) parseSummary(_ *ExecutionContext, _ WorkflowStep, _ map[string]interface{}, state map[string]interface{}, _ *Manifest) (map[string]interface{}, error) {
 	// Get LLM response from state
 	llmResponse, ok := state["llm_response"].(string)
 	if !ok {
@@ -625,7 +625,7 @@ func (e *WorkflowExecutor) validateModule(_ *ExecutionContext, _ WorkflowStep, _
 }
 
 // executeModule executes an AgenticModule's workflow steps
-func (e *WorkflowExecutor) executeModule(ctx *ExecutionContext, step WorkflowStep, resolvedWith map[string]interface{}, state map[string]interface{}, manifest *Manifest) (map[string]interface{}, error) {
+func (e *WorkflowExecutor) executeModule(ctx *ExecutionContext, _ WorkflowStep, resolvedWith map[string]interface{}, state map[string]interface{}, manifest *Manifest) (map[string]interface{}, error) {
 	moduleManifestRaw, ok := state["module_manifest"]
 	if !ok {
 		return nil, fmt.Errorf("module_manifest not found in state")
@@ -742,7 +742,7 @@ func (e *WorkflowExecutor) executeModule(ctx *ExecutionContext, step WorkflowSte
 }
 
 // createModuleRecord creates a structured run record for the module execution
-func (e *WorkflowExecutor) createModuleRecord(ctx *ExecutionContext, step WorkflowStep, resolvedWith map[string]interface{}, state map[string]interface{}, manifest *Manifest) (map[string]interface{}, error) {
+func (e *WorkflowExecutor) createModuleRecord(ctx *ExecutionContext, _ WorkflowStep, resolvedWith map[string]interface{}, state map[string]interface{}, manifest *Manifest) (map[string]interface{}, error) {
 	moduleManifestRaw, ok := state["module_manifest"]
 	if !ok {
 		return nil, fmt.Errorf("module_manifest not found in state")

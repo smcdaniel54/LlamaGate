@@ -107,7 +107,7 @@ steps:
 	}
 }
 
-func writeExtensionManifest(t *testing.T, dir, name string, steps []WorkflowStep) {
+func writeExtensionManifest(_ *testing.T, dir, name string, steps []WorkflowStep) {
 	// This is a simplified version - in real tests, use proper YAML marshaling
 	manifest := &Manifest{
 		Name:        name,
