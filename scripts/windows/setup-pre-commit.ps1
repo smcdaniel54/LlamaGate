@@ -55,6 +55,12 @@ echo "Linting staged Go files..."
 
 if [ $? -ne 0 ]; then
     echo "${RED}Linting failed! Please fix errors before committing.${NC}"
+    echo ""
+    echo "${YELLOW}💡 Quick fixes:${NC}"
+    echo "   - Run: ./scripts/unix/lint-fix.sh (or .\\scripts\\windows\\lint-fix.ps1)"
+    echo "   - Auto-fix: ./scripts/unix/lint-fix.sh --autofix"
+    echo "   - Format: go fmt ./..."
+    echo ""
     echo "${YELLOW}To skip this check: git commit --no-verify${NC}"
     exit 1
 fi
