@@ -226,21 +226,16 @@ func (e *WorkflowExecutor) callLLM(ctx *ExecutionContext, _ WorkflowStep, resolv
 		model = m
 	}
 
-	// Get prompt from state (can be rendered_prompt or prompt)
-	prompt, ok := state["rendered_prompt"].(string)
-	if !ok {
-		if p, ok := state["prompt"].(string); ok {
-			prompt = p
-		} else {
-			return nil, fmt.Errorf("rendered_prompt or prompt not found in state")
-		}
-	}
-
-	// Get prompt from resolvedWith if provided directly (for direct prompt passing)
+	// Get prompt from resolvedWith first (for direct prompt passing), then from state
+	var prompt string
 	if promptFromWith, ok := resolvedWith["prompt"].(string); ok {
 		prompt = promptFromWith
+	} else if promptFromState, ok := state["rendered_prompt"].(string); ok {
+		prompt = promptFromState
 	} else if promptFromState, ok := state["prompt"].(string); ok {
 		prompt = promptFromState
+	} else {
+		return nil, fmt.Errorf("rendered_prompt or prompt not found in state")
 	}
 
 	// Call LLM

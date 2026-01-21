@@ -32,7 +32,12 @@ func TestExecuteExtensionInternal_Guardrails(t *testing.T) {
 		Description: "Test",
 		Type:        "workflow",
 		Steps: []WorkflowStep{
-			{Uses: "llm.chat"},
+			{
+				Uses: "llm.chat",
+				With: map[string]interface{}{
+					"prompt": "test prompt",
+				},
+			},
 		},
 	}
 	require.NoError(t, registry.Register(manifest))
@@ -96,7 +101,12 @@ func TestExecuteExtensionInternal_CallBudget(t *testing.T) {
 		Description: "Test",
 		Type:        "workflow",
 		Steps: []WorkflowStep{
-			{Uses: "llm.chat"},
+			{
+				Uses: "llm.chat",
+				With: map[string]interface{}{
+					"prompt": "test prompt",
+				},
+			},
 		},
 	}
 	require.NoError(t, registry.Register(manifest))
