@@ -541,7 +541,7 @@ func (e *WorkflowExecutor) executeModuleStep(ctx *ExecutionContext, step Workflo
 }
 
 // loadModule loads an AgenticModule manifest
-func (e *WorkflowExecutor) loadModule(ctx *ExecutionContext, step WorkflowStep, resolvedWith map[string]interface{}, state map[string]interface{}, manifest *Manifest) (map[string]interface{}, error) {
+func (e *WorkflowExecutor) loadModule(_ *ExecutionContext, _ WorkflowStep, resolvedWith map[string]interface{}, state map[string]interface{}, _ *Manifest) (map[string]interface{}, error) {
 	moduleName, ok := resolvedWith["module_name"].(string)
 	if !ok {
 		if mn, ok := state["module_name"].(string); ok {
@@ -742,7 +742,7 @@ func (e *WorkflowExecutor) executeModule(ctx *ExecutionContext, _ WorkflowStep, 
 }
 
 // createModuleRecord creates a structured run record for the module execution
-func (e *WorkflowExecutor) createModuleRecord(ctx *ExecutionContext, _ WorkflowStep, resolvedWith map[string]interface{}, state map[string]interface{}, manifest *Manifest) (map[string]interface{}, error) {
+func (e *WorkflowExecutor) createModuleRecord(ctx *ExecutionContext, _ WorkflowStep, _ map[string]interface{}, state map[string]interface{}, _ *Manifest) (map[string]interface{}, error) {
 	moduleManifestRaw, ok := state["module_manifest"]
 	if !ok {
 		return nil, fmt.Errorf("module_manifest not found in state")
