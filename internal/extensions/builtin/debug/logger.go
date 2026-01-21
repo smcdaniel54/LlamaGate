@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/smcdaniel54/LlamaGate/internal/extensions/builtin/core"
+	"github.com/llamagate/llamagate/internal/extensions/builtin/core"
 )
 
 // Logger provides comprehensive debugging and logging capabilities

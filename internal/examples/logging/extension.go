@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/smcdaniel54/LlamaGate/internal/extensions/builtin/core"
+	"github.com/llamagate/llamagate/internal/extensions/builtin/core"
 )
 
 // Extension is a simple logging extension example

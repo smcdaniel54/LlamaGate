@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/smcdaniel54/LlamaGate/internal/extensions/builtin/core"
+	"github.com/llamagate/llamagate/internal/extensions/builtin/core"
 )
 
 // Framework provides validation capabilities

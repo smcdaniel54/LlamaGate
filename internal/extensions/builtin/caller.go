@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/smcdaniel54/LlamaGate/internal/extensions/builtin/core"
+	"github.com/llamagate/llamagate/internal/extensions/builtin/core"
 )
 
 // DefaultCaller is the default implementation of AgentCaller
