@@ -286,7 +286,7 @@ func (v *Visualizer) printBox(message, color string) {
 	reset := "\033[0m"
 
 	fmt.Printf("%s┌%s┐%s\n", colorCode, strings.Repeat("─", width-2), reset)
-	fmt.Printf("%s│%s%s%s%s│%s\n", colorCode, strings.Repeat(" ", leftPad), message, strings.Repeat(" ", rightPad), reset)
+	fmt.Printf("%s│%s%s%s│%s\n", colorCode, strings.Repeat(" ", leftPad), message, strings.Repeat(" ", rightPad), reset)
 	fmt.Printf("%s└%s┘%s\n", colorCode, strings.Repeat("─", width-2), reset)
 }
 

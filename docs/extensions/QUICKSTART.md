@@ -42,8 +42,8 @@ package main
 
 import (
     "context"
-    "github.com/smcdaniel54/LlamaGate/internal/extensions/core"
-    "github.com/smcdaniel54/LlamaGate/internal/extensions/agent"
+    "github.com/llamagate/llamagate/internal/extensions/builtin/core"
+    "github.com/llamagate/llamagate/internal/extensions/builtin/agent"
 )
 
 func main() {
@@ -92,7 +92,7 @@ package myextension
 
 import (
     "context"
-    "github.com/smcdaniel54/LlamaGate/internal/extensions/core"
+    "github.com/llamagate/llamagate/internal/extensions/builtin/core"
 )
 
 type MyExtension struct {
@@ -314,10 +314,10 @@ package main
 import (
     "context"
     "fmt"
-    "github.com/smcdaniel54/LlamaGate/internal/extensions/core"
-    "github.com/smcdaniel54/LlamaGate/internal/extensions/agent"
-    "github.com/smcdaniel54/LlamaGate/internal/extensions/decision"
-    "github.com/smcdaniel54/LlamaGate/internal/extensions/state"
+    "github.com/llamagate/llamagate/internal/extensions/builtin/core"
+    "github.com/llamagate/llamagate/internal/extensions/builtin/agent"
+    "github.com/llamagate/llamagate/internal/extensions/builtin/decision"
+    "github.com/llamagate/llamagate/internal/extensions/builtin/state"
 )
 
 func main() {
