@@ -15,22 +15,23 @@ run:
   build-tags: []
 
 linters:
-  # Enable specific linters (disabled some slower ones for CI performance)
+  # Focus on bug-catching linters only (see docs/LINTING_PHILOSOPHY.md)
   # Note: gosimple is merged into staticcheck in v2.x
   # Note: gofmt and goimports are formatters, not linters in v2.x - use 'go fmt' and 'goimports' commands directly
   enable:
-    - errcheck
-    - govet
-    - ineffassign
-    - staticcheck
-    - unused
-    - misspell
-    - unconvert
-    - unparam
-    - revive
-  # Disabled gocritic for performance - can re-enable selectively if needed
+    # Bug-catching linters (keep these)
+    - errcheck      # Unchecked errors - catches real bugs
+    - govet         # Go vet checks - catches real bugs
+    - staticcheck   # Advanced static analysis - catches logic errors
+    - ineffassign   # Ineffectual assignments - catches dead code
+    - unused        # Unused code - catches dead code (can be noisy, but useful)
   disable:
-    - gocritic
+    # Style-only linters (disabled to reduce friction)
+    - gocritic      # Performance - disabled for CI speed
+    - revive        # Style - package comments, unused params (interface compliance)
+    - unparam       # Style - unused parameters (often false positives for interfaces)
+    - misspell      # Style - spelling checker
+    - unconvert     # Style - type conversions (often false positives)
 
 issues:
   # Maximum issues per linter (prevents one linter from overwhelming output)
