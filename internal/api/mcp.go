@@ -1,3 +1,4 @@
+//nolint:revive // Package name 'api' is standard for HTTP API handlers
 package api
 
 import (

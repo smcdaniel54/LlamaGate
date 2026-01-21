@@ -319,7 +319,7 @@ func (e *WorkflowExecutor) writeFile(_ context.Context, _ WorkflowStep, resolved
 }
 
 // callExtension calls another extension (extension-to-extension invocation)
-func (e *WorkflowExecutor) callExtension(ctx *ExecutionContext, step WorkflowStep, resolvedWith map[string]interface{}, state map[string]interface{}, callingManifest *Manifest) (map[string]interface{}, error) {
+func (e *WorkflowExecutor) callExtension(ctx *ExecutionContext, _ WorkflowStep, resolvedWith map[string]interface{}, state map[string]interface{}, callingManifest *Manifest) (map[string]interface{}, error) {
 	if e.registry == nil {
 		return nil, fmt.Errorf("extension registry not available for extension-to-extension calls")
 	}
@@ -335,7 +335,7 @@ func (e *WorkflowExecutor) callExtension(ctx *ExecutionContext, step WorkflowSte
 	}
 
 	// Get input for the called extension
-	extensionInput := make(map[string]interface{})
+	var extensionInput map[string]interface{}
 	if input, ok := resolvedWith["input"].(map[string]interface{}); ok {
 		extensionInput = input
 	} else if input, ok := state["input"].(map[string]interface{}); ok {
@@ -473,7 +473,7 @@ func (e *WorkflowExecutor) parseSummary(ctx *ExecutionContext, step WorkflowStep
 }
 
 // evaluateRules evaluates simple if-then rules
-func (e *WorkflowExecutor) evaluateRules(ctx *ExecutionContext, step WorkflowStep, resolvedWith map[string]interface{}, state map[string]interface{}, manifest *Manifest) (map[string]interface{}, error) {
+func (e *WorkflowExecutor) evaluateRules(_ *ExecutionContext, _ WorkflowStep, resolvedWith map[string]interface{}, state map[string]interface{}, _ *Manifest) (map[string]interface{}, error) {
 	// Get rules from step
 	rules, ok := resolvedWith["rules"].([]interface{})
 	if !ok {
@@ -587,7 +587,7 @@ func (e *WorkflowExecutor) loadModule(ctx *ExecutionContext, step WorkflowStep, 
 }
 
 // validateModule validates an AgenticModule and its referenced extensions
-func (e *WorkflowExecutor) validateModule(ctx *ExecutionContext, step WorkflowStep, resolvedWith map[string]interface{}, state map[string]interface{}, manifest *Manifest) (map[string]interface{}, error) {
+func (e *WorkflowExecutor) validateModule(_ *ExecutionContext, _ WorkflowStep, _ map[string]interface{}, state map[string]interface{}, _ *Manifest) (map[string]interface{}, error) {
 	moduleManifestRaw, ok := state["module_manifest"]
 	if !ok {
 		return nil, fmt.Errorf("module_manifest not found in state")
