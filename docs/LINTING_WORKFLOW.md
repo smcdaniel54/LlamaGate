@@ -1,15 +1,42 @@
-# Linting Workflow: Tight Feedback Loop
+# Linting Workflow: Fix Errors When They Occur
 
 **Date:** 2026-01-21  
-**Purpose:** Catch and fix linting errors before committing
+**Purpose:** Tools to fix linting errors when you encounter them (reactive approach)
 
 ---
 
-## Quick Start
+## When to Use These Tools
 
-### Before Committing
+**Use these scripts only when:**
+- Pre-commit hook fails with linting errors
+- CI fails with linting errors
+- You want to check for linting issues before pushing
 
-Run the lint-fix script to catch errors early:
+**Don't run these proactively** - the pre-commit hook will catch issues automatically.
+
+---
+
+## Quick Start (When You Have Linting Errors)
+
+### Step 1: Pre-Commit Hook Failed
+
+If your commit was blocked by the pre-commit hook:
+
+**Windows:**
+```powershell
+# Auto-fix what can be fixed automatically
+.\scripts\windows\lint-fix.ps1 -AutoFix
+```
+
+**Unix/Linux/macOS:**
+```bash
+# Auto-fix what can be fixed automatically
+./scripts/unix/lint-fix.sh --autofix
+```
+
+### Step 2: Fix Remaining Issues
+
+After auto-fix, manually fix remaining issues, then verify:
 
 **Windows:**
 ```powershell
@@ -21,23 +48,18 @@ Run the lint-fix script to catch errors early:
 ./scripts/unix/lint-fix.sh
 ```
 
-### Auto-Fix Issues
+### Step 3: Commit When Clean
 
-Many linting issues can be auto-fixed:
-
-**Windows:**
-```powershell
-.\scripts\windows\lint-fix.ps1 -AutoFix
-```
-
-**Unix/Linux/macOS:**
+Once linting passes, commit normally:
 ```bash
-./scripts/unix/lint-fix.sh --autofix
+git commit -m "your message"
 ```
 
-### Quick Check (Staged Files Only)
+---
 
-For faster feedback on just your changes:
+## Quick Check (Staged Files Only)
+
+If you want to check staged files before committing (optional):
 
 **Windows:**
 ```powershell
@@ -53,31 +75,29 @@ For faster feedback on just your changes:
 
 ## Workflow Options
 
-### 1. **Standard Workflow** (Recommended)
+### 1. **Standard Workflow** (When Pre-Commit Fails)
 
 ```bash
-# 1. Make your changes
-git add .
+# 1. Try to commit
+git commit -m "your message"
+# → Pre-commit hook fails with linting errors
 
-# 2. Quick check on staged files (fast)
-./scripts/unix/lint-staged.sh
-
-# 3. If issues found, run full lint with auto-fix
+# 2. Auto-fix what can be fixed
 ./scripts/unix/lint-fix.sh --autofix
 
-# 4. Fix remaining issues manually
+# 3. Fix remaining issues manually
 # ... edit files ...
 
-# 5. Verify again
+# 4. Verify again
 ./scripts/unix/lint-fix.sh
 
-# 6. Commit when clean
+# 5. Commit when clean
 git commit -m "your message"
 ```
 
-### 2. **Watch Mode** (Continuous Feedback)
+### 2. **Watch Mode** (When Fixing Multiple Issues)
 
-Automatically re-lint when files change:
+Use watch mode when you have many linting errors to fix:
 
 **Windows:**
 ```powershell
@@ -89,7 +109,7 @@ Automatically re-lint when files change:
 ./scripts/unix/lint-fix.sh --watch
 ```
 
-**Use Case:** Keep this running in a terminal while you code. It will automatically check your code as you save files.
+**Use Case:** When fixing many linting errors, watch mode provides continuous feedback as you fix each issue.
 
 **Requirements:**
 - macOS: `brew install fswatch`
@@ -159,13 +179,17 @@ git add file.go
 
 ---
 
-## Pre-Commit Hook
+## Pre-Commit Hook (Primary Safety Net)
 
-The pre-commit hook automatically runs linting on staged files. If it fails:
+The pre-commit hook automatically runs linting on staged files. **This is your primary tool** - you don't need to run linting manually unless the hook fails.
+
+### When Pre-Commit Hook Fails
 
 1. **Don't skip it** - Fix the issues instead
-2. **Use lint-fix script** - It provides better error messages
-3. **Auto-fix when possible** - Many issues can be fixed automatically
+2. **Use lint-fix script** - It provides better error messages and auto-fix
+3. **Auto-fix first** - Run with `--autofix` to fix what can be fixed automatically
+4. **Fix remaining manually** - Then verify with lint-fix script
+5. **Commit again** - The hook will pass once issues are fixed
 
 ### Bypassing Pre-Commit (Not Recommended)
 
@@ -175,7 +199,7 @@ Only use if absolutely necessary:
 git commit --no-verify
 ```
 
-**Warning:** This bypasses all pre-commit checks, not just linting.
+**Warning:** This bypasses all pre-commit checks, not just linting. You'll likely fail CI.
 
 ---
 
@@ -259,32 +283,37 @@ let g:go_metalinter_enabled = ['errcheck', 'govet', 'staticcheck']
 
 ## Best Practices
 
-### 1. **Run Before Committing**
+### 1. **Let Pre-Commit Hook Do Its Job**
 
-Always run lint-fix before committing:
+The pre-commit hook runs automatically. **Only use lint-fix scripts when the hook fails.**
 
 ```bash
-./scripts/unix/lint-fix.sh
+# Normal workflow - just commit
 git commit -m "your message"
+# → Pre-commit hook runs automatically
+
+# If hook fails, then use lint-fix
+./scripts/unix/lint-fix.sh --autofix
+# Fix remaining issues, then commit again
 ```
 
-### 2. **Use Watch Mode During Development**
+### 2. **Auto-Fix First, Manual Fix Second**
 
-Keep watch mode running while coding:
-
-```bash
-# Terminal 1: Watch mode
-./scripts/unix/lint-fix.sh --watch
-
-# Terminal 2: Your editor
-code .
-```
-
-### 3. **Auto-Fix First, Manual Fix Second**
-
+When the hook fails:
 1. Run with `--autofix` first
 2. Review auto-fixed changes
 3. Manually fix remaining issues
+4. Commit again
+
+### 3. **Use Watch Mode Only When Fixing Many Issues**
+
+Watch mode is helpful when you have many linting errors to fix:
+
+```bash
+# When fixing many errors
+./scripts/unix/lint-fix.sh --watch
+# Fix issues as they're reported
+```
 
 ### 4. **Fix Issues Incrementally**
 
@@ -295,7 +324,7 @@ Don't try to fix everything at once:
 
 ### 5. **Don't Skip Pre-Commit Hook**
 
-The pre-commit hook is your safety net. Fix issues instead of bypassing.
+The pre-commit hook is your primary safety net. Fix issues instead of bypassing.
 
 ---
 
@@ -345,26 +374,25 @@ yum install inotify-tools
 
 ## Summary
 
-**Quick Commands:**
+**When to Use:**
 
 ```bash
-# Before committing (recommended)
-./scripts/unix/lint-fix.sh
+# Only when pre-commit hook fails or CI fails
+./scripts/unix/lint-fix.sh --autofix  # Auto-fix issues
+./scripts/unix/lint-fix.sh             # Verify fixes
 
-# Auto-fix issues
-./scripts/unix/lint-fix.sh --autofix
-
-# Quick check (staged files only)
+# Optional: Check before committing (not required)
 ./scripts/unix/lint-staged.sh
 
-# Watch mode (continuous feedback)
+# Optional: Watch mode when fixing many issues
 ./scripts/unix/lint-fix.sh --watch
 ```
 
-**Workflow:**
+**Normal Workflow:**
 1. Code
-2. `lint-fix.sh` (or `lint-staged.sh` for speed)
-3. Fix issues
-4. Commit
+2. `git commit -m "message"` → Pre-commit hook runs automatically
+3. If hook fails → Use `lint-fix.sh --autofix`
+4. Fix remaining issues
+5. Commit again
 
-**Remember:** The goal is to catch issues early, not to fix everything at once. Use these tools to maintain code quality incrementally.
+**Remember:** The pre-commit hook is your primary tool. Only use lint-fix scripts when you encounter linting errors.
