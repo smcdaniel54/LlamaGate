@@ -13,16 +13,6 @@ run:
   
   # Build tags to use
   build-tags: []
-  
-  # Skip directories
-  skip-dirs:
-    - vendor
-    - .git
-  
-  # Skip files (generated code)
-  skip-files:
-    - ".*_gen\\.go$"
-    - ".*\\.pb\\.go$"
 
 linters:
   # Enable specific linters (disabled some slower ones for CI performance)
@@ -42,47 +32,10 @@ linters:
   disable:
     - gocritic
 
-linters-settings:
-  revive:
-    rules:
-      - name: package-comments
-        severity: warning  # Make package comment checks warnings, not errors
-      - name: exported
-        severity: warning   # Exported function checks as warnings
-  
-  errcheck:
-    check-type-assertions: true
-    check-blank: true
-    exclude-functions:
-      - (io.ReadCloser).Close
-      - (*os.File).Close
-  
-  unparam:
-    check-exported: false  # Don't check exported functions (interface compliance)
-
 issues:
   # Maximum issues per linter (prevents one linter from overwhelming output)
   max-issues-per-linter: 50
   
   # Maximum duplicate issues (prevents same error repeated many times)
   max-same-issues: 5
-  
-  # Exclude rules for known issues
-  exclude-rules:
-    # Exclude test helper files from unparam (interface compliance)
-    - path: _test\.go$
-      linters:
-        - unparam
-    
-    # Exclude generated files
-    - path: _gen\.go$
-      linters:
-        - errcheck
-        - revive
-  
-  # Only show errors in CI (warnings can be addressed gradually)
-  severity: error
-  
-  # Exclude use of default excludes (be explicit)
-  exclude-use-default: false
 
