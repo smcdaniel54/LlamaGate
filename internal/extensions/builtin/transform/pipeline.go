@@ -1,3 +1,4 @@
+// Package transform provides data transformation capabilities for extensions.
 package transform
 
 import (
@@ -34,12 +35,12 @@ func (p *Pipeline) Version() string {
 }
 
 // Initialize initializes the pipeline
-func (p *Pipeline) Initialize(ctx context.Context, config map[string]interface{}) error {
+func (p *Pipeline) Initialize(_ context.Context, _ map[string]interface{}) error {
 	return nil
 }
 
 // Shutdown shuts down the pipeline
-func (p *Pipeline) Shutdown(ctx context.Context) error {
+func (p *Pipeline) Shutdown(_ context.Context) error {
 	return nil
 }
 
@@ -79,26 +80,26 @@ func (p *Pipeline) TransformMany(ctx context.Context, data interface{}, transfor
 }
 
 // transformMap applies a map transformation
-func (p *Pipeline) transformMap(ctx context.Context, data interface{}, transformation *core.Transformation) (interface{}, error) {
+func (p *Pipeline) transformMap(_ context.Context, data interface{}, transformation *core.Transformation) (interface{}, error) {
 	// This is a placeholder - in production, implement actual mapping logic
 	// based on the transformation config
 	return data, nil
 }
 
 // transformFilter applies a filter transformation
-func (p *Pipeline) transformFilter(ctx context.Context, data interface{}, transformation *core.Transformation) (interface{}, error) {
+func (p *Pipeline) transformFilter(_ context.Context, data interface{}, transformation *core.Transformation) (interface{}, error) {
 	// This is a placeholder - in production, implement actual filtering logic
 	return data, nil
 }
 
 // transformReduce applies a reduce transformation
-func (p *Pipeline) transformReduce(ctx context.Context, data interface{}, transformation *core.Transformation) (interface{}, error) {
+func (p *Pipeline) transformReduce(_ context.Context, data interface{}, transformation *core.Transformation) (interface{}, error) {
 	// This is a placeholder - in production, implement actual reduction logic
 	return data, nil
 }
 
 // transformCustom applies a custom transformation
-func (p *Pipeline) transformCustom(ctx context.Context, data interface{}, transformation *core.Transformation) (interface{}, error) {
+func (p *Pipeline) transformCustom(_ context.Context, data interface{}, transformation *core.Transformation) (interface{}, error) {
 	// Custom transformations would be registered and called here
 	return data, fmt.Errorf("custom transformation not implemented")
 }

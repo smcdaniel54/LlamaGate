@@ -1,3 +1,4 @@
+// Package validation provides validation capabilities for extension outputs.
 package validation
 
 import (
@@ -54,7 +55,7 @@ func (f *Framework) Initialize(ctx context.Context, config map[string]interface{
 }
 
 // Shutdown shuts down the framework
-func (f *Framework) Shutdown(ctx context.Context) error {
+func (f *Framework) Shutdown(_ context.Context) error {
 	return nil
 }
 
@@ -82,7 +83,7 @@ func (f *Framework) Validate(ctx context.Context, data interface{}, rules *core.
 }
 
 // validateSchema validates data against a schema
-func (f *Framework) validateSchema(ctx context.Context, data interface{}, rules *core.ValidationRules) (*core.ValidationResult, error) {
+func (f *Framework) validateSchema(_ context.Context, data interface{}, rules *core.ValidationRules) (*core.ValidationResult, error) {
 	// This is a placeholder - in production, use a proper schema validator like JSON Schema
 	result := &core.ValidationResult{
 		Valid:    true,
@@ -156,7 +157,7 @@ func (f *Framework) validateLLM(ctx context.Context, data interface{}, rules *co
 }
 
 // validateCustom validates data using custom validators
-func (f *Framework) validateCustom(ctx context.Context, data interface{}, rules *core.ValidationRules) (*core.ValidationResult, error) {
+func (f *Framework) validateCustom(_ context.Context, data interface{}, rules *core.ValidationRules) (*core.ValidationResult, error) {
 	// Custom validators would be registered and called here
 	return &core.ValidationResult{
 		Valid:  false,

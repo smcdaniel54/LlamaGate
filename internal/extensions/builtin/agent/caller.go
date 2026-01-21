@@ -1,3 +1,4 @@
+// Package agent provides agent/LLM calling capabilities for extensions.
 package agent
 
 import (
@@ -41,7 +42,7 @@ func (c *DefaultCaller) Version() string {
 }
 
 // Initialize initializes the caller
-func (c *DefaultCaller) Initialize(ctx context.Context, config map[string]interface{}) error {
+func (c *DefaultCaller) Initialize(_ context.Context, config map[string]interface{}) error {
 	if baseURL, ok := config["base_url"].(string); ok {
 		c.baseURL = baseURL
 	}
@@ -57,7 +58,7 @@ func (c *DefaultCaller) Initialize(ctx context.Context, config map[string]interf
 }
 
 // Shutdown shuts down the caller
-func (c *DefaultCaller) Shutdown(ctx context.Context) error {
+func (c *DefaultCaller) Shutdown(_ context.Context) error {
 	return nil
 }
 
@@ -154,7 +155,7 @@ func (c *DefaultCaller) CallStream(ctx context.Context, req *core.AgentRequest) 
 
 // makeAPICall makes the actual HTTP API call
 // This would integrate with LlamaGate's proxy layer
-func (c *DefaultCaller) makeAPICall(ctx context.Context, req *core.AgentRequest) (*core.AgentResponse, error) {
+func (c *DefaultCaller) makeAPICall(_ context.Context, req *core.AgentRequest) (*core.AgentResponse, error) {
 	// TODO: Integrate with LlamaGate's proxy/proxy.go
 	// This is a placeholder implementation
 	return &core.AgentResponse{
@@ -168,7 +169,7 @@ func (c *DefaultCaller) makeAPICall(ctx context.Context, req *core.AgentRequest)
 }
 
 // makeStreamingAPICall makes a streaming HTTP API call
-func (c *DefaultCaller) makeStreamingAPICall(ctx context.Context, req *core.AgentRequest, ch chan<- *core.StreamChunk) error {
+func (c *DefaultCaller) makeStreamingAPICall(ctx context.Context, _ *core.AgentRequest, ch chan<- *core.StreamChunk) error {
 	// TODO: Integrate with LlamaGate's streaming proxy
 	// This is a placeholder implementation
 	// Check context before sending chunks

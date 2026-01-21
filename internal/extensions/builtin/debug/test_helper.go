@@ -23,7 +23,7 @@ func NewTestHelper() *TestHelper {
 }
 
 // SetupDebugging sets up logging and visualization for testing
-func (th *TestHelper) SetupDebugging(ctx context.Context, config map[string]interface{}) error {
+func (th *TestHelper) SetupDebugging(ctx context.Context, _ map[string]interface{}) error {
 	// Setup logger
 	th.logger = NewLogger("test-logger", "1.0.0")
 	if err := th.registry.Register(ctx, th.logger, map[string]interface{}{

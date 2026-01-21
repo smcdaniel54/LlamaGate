@@ -1,3 +1,4 @@
+// Package debug provides debugging and logging capabilities for extensions.
 package debug
 
 import (
@@ -163,7 +164,7 @@ func (l *Logger) logPlain(level, message string, data map[string]interface{}) {
 	}
 
 	fmt.Printf("%s[%s] %s%s %s", prefix, timestamp, level, reset, message)
-	if data != nil && len(data) > 0 {
+	if len(data) > 0 {
 		fmt.Printf(" %+v", data)
 	}
 	fmt.Println()
@@ -193,7 +194,7 @@ func (l *Logger) getColorPrefix(level string) string {
 }
 
 // handleEvent handles events for logging
-func (l *Logger) handleEvent(ctx context.Context, event *core.Event) error {
+func (l *Logger) handleEvent(_ context.Context, event *core.Event) error {
 	if event == nil {
 		return nil
 	}

@@ -1,3 +1,4 @@
+// Package core provides core interfaces and types for the extension foundation system.
 package core
 
 import (

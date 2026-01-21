@@ -198,7 +198,7 @@ func (f *Framework) Execute(ctx context.Context, toolName string, params map[str
 }
 
 // ListTools returns all available tools
-func (f *Framework) ListTools(ctx context.Context) ([]*core.ToolDefinition, error) {
+func (f *Framework) ListTools(_ context.Context) ([]*core.ToolDefinition, error) {
 	f.mu.RLock()
 	defer f.mu.RUnlock()
 

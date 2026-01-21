@@ -25,11 +25,11 @@ func (m *mockExtension) Version() string {
 	return m.version
 }
 
-func (m *mockExtension) Initialize(ctx context.Context, config map[string]interface{}) error {
+func (m *mockExtension) Initialize(_ context.Context, _ map[string]interface{}) error {
 	return m.initErr
 }
 
-func (m *mockExtension) Shutdown(ctx context.Context) error {
+func (m *mockExtension) Shutdown(_ context.Context) error {
 	return m.shutErr
 }
 
@@ -51,7 +51,7 @@ func (m *mockAgentCaller) Call(ctx context.Context, req *AgentRequest) (*AgentRe
 	}, nil
 }
 
-func (m *mockAgentCaller) CallStream(ctx context.Context, req *AgentRequest) (<-chan *StreamChunk, error) {
+func (m *mockAgentCaller) CallStream(_ context.Context, req *AgentRequest) (<-chan *StreamChunk, error) {
 	if m.callStreamErr != nil {
 		return nil, m.callStreamErr
 	}
