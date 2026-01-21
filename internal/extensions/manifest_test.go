@@ -41,6 +41,8 @@ version: ` + version + `
 description: Test extension
 type: workflow
 enabled: true
+steps:
+  - uses: llm.chat
 `
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "manifest.yaml"), []byte(manifest), 0644))
 }
