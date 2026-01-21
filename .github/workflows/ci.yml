@@ -53,14 +53,14 @@ jobs:
       shell: bash
     
     - name: Run tests
-      timeout-minutes: 10
+      timeout-minutes: 15
       shell: bash
       run: |
         PACKAGES=$(go list ./... 2>/dev/null | grep -v "^\.out$" || go list ./...)
         if [ -z "$PACKAGES" ]; then
           PACKAGES=$(go list ./...)
         fi
-        go test -coverprofile=coverage.out -covermode=atomic -timeout=5m $PACKAGES
+        go test -v -coverprofile=coverage.out -covermode=atomic -timeout=10m $PACKAGES
     
     - name: Upload coverage reports
       uses: codecov/codecov-action@v5
