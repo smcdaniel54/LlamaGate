@@ -15,7 +15,7 @@ mkdir -p "$HOOKS_DIR"
 # Create pre-commit hook
 cat > "$PRE_COMMIT_HOOK" << 'EOF'
 #!/bin/sh
-# Pre-commit hook to run formatting check and golangci-lint before allowing commits
+# Pre-commit hook to auto-format and run golangci-lint before allowing commits
 # This ensures code quality before pushing
 
 # Colors for output
@@ -24,7 +24,7 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-echo "${YELLOW}Running pre-commit checks...${NC}"
+echo "${YELLOW}Running pre-commit checks (formatting + linting)...${NC}"
 
 # Get GOPATH
 GOPATH=$(go env GOPATH 2>/dev/null)
@@ -50,22 +50,18 @@ if [ -z "$STAGED_GO_FILES" ]; then
     exit 0
 fi
 
-# Check formatting first (fast check)
-echo "Checking formatting..."
-UNFORMATTED=$(gofmt -d $STAGED_GO_FILES 2>/dev/null || true)
-if [ -n "$UNFORMATTED" ]; then
-    echo "${RED}Code is not formatted!${NC}"
-    echo "${YELLOW}Unformatted changes:${NC}"
-    echo "$UNFORMATTED"
-    echo ""
-    echo "${YELLOW}💡 Fix formatting:${NC}"
-    echo "   go fmt $STAGED_GO_FILES"
-    echo "   Then stage the formatted files: git add $STAGED_GO_FILES"
-    echo ""
-    exit 1
+# Auto-format staged files
+echo "Auto-formatting staged Go files..."
+go fmt $STAGED_GO_FILES 2>/dev/null || true
+
+# Re-stage formatted files (in case formatting changed them)
+FORMATTED_FILES=$(git diff --name-only | grep '\.go$' || true)
+if [ -n "$FORMATTED_FILES" ]; then
+    echo "${YELLOW}Re-staging formatted files...${NC}"
+    git add $FORMATTED_FILES
 fi
 
-echo "Formatting check passed ✓"
+echo "Formatting complete ✓"
 echo "Linting staged Go files..."
 "$LINT_PATH" run --timeout=5m --tests $STAGED_GO_FILES
 
@@ -89,5 +85,5 @@ EOF
 chmod +x "$PRE_COMMIT_HOOK"
 
 echo "✅ Pre-commit hook installed at: $PRE_COMMIT_HOOK"
-echo "The hook will check formatting and run golangci-lint on staged files before each commit."
+echo "The hook will auto-format and lint staged files before each commit."
 echo "To skip: git commit --no-verify"
