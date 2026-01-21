@@ -49,10 +49,10 @@ steps:
 
 func TestValidateManifest_ActionableErrors(t *testing.T) {
 	tests := []struct {
-		name    string
+		name     string
 		manifest *Manifest
-		wantErr bool
-		errMsg  string
+		wantErr  bool
+		errMsg   string
 	}{
 		{
 			name: "missing name",

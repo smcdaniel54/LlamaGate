@@ -120,23 +120,23 @@ func TestServerManager_HTTPTransportWithPool(t *testing.T) {
 	// Verify it's a different instance (not the same pointer) - pool should create new clients
 	// Compare pointers explicitly to ensure they're different instances
 	assert.NotSame(t, client, acquiredClient1, "Pool should return a new client instance, not reuse the same one")
-	
+
 	// Release the first client
 	manager.ReleaseClient("http-server", acquiredClient1)
-	
+
 	// Get another client - pool might reuse the released one or create a new one
 	acquiredClient2, err := manager.GetClient(ctx, "http-server")
 	require.NoError(t, err)
 	assert.NotNil(t, acquiredClient2)
 	// Should be different from original client (the one passed to AddServer)
 	assert.NotSame(t, client, acquiredClient2, "Pool should not return the original client instance")
-	
+
 	// Get multiple clients concurrently to verify pool creates multiple instances
 	acquiredClient3, err := manager.GetClient(ctx, "http-server")
 	require.NoError(t, err)
 	assert.NotNil(t, acquiredClient3)
 	assert.NotSame(t, client, acquiredClient3, "Pool should not return the original client instance")
-	
+
 	// Verify at least one of the acquired clients is different from the others
 	// (proving the pool is creating new instances, not always returning the same one)
 	allDifferent := acquiredClient1 != acquiredClient2 || acquiredClient1 != acquiredClient3 || acquiredClient2 != acquiredClient3

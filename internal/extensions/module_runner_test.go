@@ -92,7 +92,7 @@ steps:
 	// Set module_dir in state for module.load to find the manifest
 	// In real usage, this would be resolved from module_name
 	result, err := executor.Execute(execCtx, runnerManifest, input)
-	
+
 	// Module execution should work (may have errors if extensions aren't fully implemented)
 	// But the structure should be correct
 	if err != nil {
@@ -116,7 +116,7 @@ func writeExtensionManifest(_ *testing.T, _ string, name string, steps []Workflo
 		Type:        "workflow",
 		Steps:       steps,
 	}
-	
+
 	// For testing, we'll register it directly rather than writing YAML
 	// But we need the directory structure
 	_ = manifest
@@ -129,7 +129,7 @@ func TestModuleRunner_ErrorHandling(t *testing.T) {
 	// Create extension that will fail
 	extDir := filepath.Join(tmpDir, "extensions", "failing-ext")
 	require.NoError(t, os.MkdirAll(extDir, 0755))
-	
+
 	failingManifest := &Manifest{
 		Name:        "failing-ext",
 		Version:     "1.0.0",
@@ -184,7 +184,7 @@ steps:
 
 	// Execution should handle the error
 	result, err := executor.Execute(execCtx, runnerManifest, input)
-	
+
 	// Should either fail gracefully or return error record
 	if err != nil {
 		assert.Contains(t, err.Error(), "module", "Error should mention module")

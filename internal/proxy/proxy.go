@@ -24,10 +24,10 @@ type Proxy struct {
 	ollamaHost           string
 	cache                *cache.Cache
 	client               *http.Client
-	toolManager          *tools.Manager         // Optional tool manager for MCP
-	guardrails           *tools.Guardrails      // Optional guardrails for tool execution
-	serverManager        ServerManagerInterface // Optional server manager for MCP resource access
-	resourceFetchTimeout time.Duration          // Timeout for fetching MCP resources
+	toolManager          *tools.Manager                             // Optional tool manager for MCP
+	guardrails           *tools.Guardrails                          // Optional guardrails for tool execution
+	serverManager        ServerManagerInterface                     // Optional server manager for MCP resource access
+	resourceFetchTimeout time.Duration                              // Timeout for fetching MCP resources
 	responseHookFunc     func(*gin.Context, map[string]interface{}) // Hook function for response observers
 }
 

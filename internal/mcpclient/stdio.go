@@ -54,16 +54,16 @@ func NewStdioTransport(command string, args []string, env map[string]string) (*S
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
 		cancel()
-		_ = stdin.Close()   // Ignore error - we're already returning an error
-		_ = stdout.Close()   // Ignore error - we're already returning an error
+		_ = stdin.Close()  // Ignore error - we're already returning an error
+		_ = stdout.Close() // Ignore error - we're already returning an error
 		return nil, fmt.Errorf("failed to create stderr pipe: %w", err)
 	}
 
 	if err := cmd.Start(); err != nil {
 		cancel()
-		_ = stdin.Close()   // Ignore error - we're already returning an error
-		_ = stdout.Close()  // Ignore error - we're already returning an error
-		_ = stderr.Close()  // Ignore error - we're already returning an error
+		_ = stdin.Close()  // Ignore error - we're already returning an error
+		_ = stdout.Close() // Ignore error - we're already returning an error
+		_ = stderr.Close() // Ignore error - we're already returning an error
 		return nil, fmt.Errorf("failed to start command: %w", err)
 	}
 

@@ -156,7 +156,7 @@ func (m *Manager) AddHistory(_ context.Context, workflowID, step, action string,
 }
 
 // UpdateStatus updates the status of a workflow
-func (m *Manager) UpdateStatus(_ context.Context, workflowID, status string) error {
+func (m *Manager) UpdateStatus(ctx context.Context, workflowID, status string) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
