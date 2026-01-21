@@ -14,4 +14,7 @@ type ServerManagerInterface interface {
 
 	// GetClient gets a client for a server (with pooling for HTTP)
 	GetClient(ctx context.Context, name string) (*mcpclient.Client, error)
+
+	// ReleaseClient releases a pooled connection (no-op for non-pooled transports)
+	ReleaseClient(name string, client *mcpclient.Client)
 }

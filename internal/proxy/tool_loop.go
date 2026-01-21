@@ -317,20 +317,33 @@ func (p *Proxy) executeTool(ctx context.Context, requestID string, toolCall Tool
 	serverName := parts[1]
 	originalToolName := parts[2]
 
-	// Get MCP client
+	// Get MCP client (may be pooled for HTTP transport)
 	client, err := p.toolManager.GetClient(serverName)
 	if err != nil {
-		return "", fmt.Errorf("failed to get MCP client: %w", err)
+		return "", fmt.Errorf("failed to get MCP client (server=%s): %w", serverName, err)
+	}
+
+	// Ensure connection is released for pooled connections (HTTP transport)
+	// This is a no-op for stdio transport which doesn't use pooling
+	if p.serverManager != nil {
+		defer p.serverManager.ReleaseClient(serverName, client)
 	}
 
 	// Parse arguments
 	var arguments map[string]interface{}
 	if toolCall.Function.Arguments != "" {
 		if err := json.Unmarshal([]byte(toolCall.Function.Arguments), &arguments); err != nil {
-			return "", fmt.Errorf("failed to parse tool arguments: %w", err)
+			return "", fmt.Errorf("failed to parse tool arguments (server=%s, tool=%s): %w", serverName, originalToolName, err)
 		}
 	} else {
 		arguments = make(map[string]interface{})
+	}
+
+	// Validate arguments against tool schema (basic validation)
+	if tool, err := p.toolManager.GetTool(toolCall.Function.Name); err == nil && tool.InputSchema != nil {
+		if err := validateToolArguments(tool.InputSchema, arguments); err != nil {
+			return "", fmt.Errorf("invalid tool arguments (server=%s, tool=%s): %w", serverName, originalToolName, err)
+		}
 	}
 
 	// Execute tool with timeout and propagate request ID
@@ -346,11 +359,14 @@ func (p *Proxy) executeTool(ctx context.Context, requestID string, toolCall Tool
 	if err != nil {
 		log.Error().
 			Str("request_id", requestID).
+			Str("server", serverName).
 			Str("tool", toolCall.Function.Name).
+			Str("original_tool", originalToolName).
+			Str("arguments", toolCall.Function.Arguments).
 			Dur("duration", duration).
 			Err(err).
 			Msg("Tool execution failed")
-		return "", fmt.Errorf("tool execution failed: %w", err)
+		return "", fmt.Errorf("tool execution failed (server=%s, tool=%s): %w", serverName, originalToolName, err)
 	}
 
 	// Convert result to string
@@ -364,7 +380,9 @@ func (p *Proxy) executeTool(ctx context.Context, requestID string, toolCall Tool
 
 	log.Info().
 		Str("request_id", requestID).
+		Str("server", serverName).
 		Str("tool", toolCall.Function.Name).
+		Str("original_tool", originalToolName).
 		Dur("duration", duration).
 		Bool("is_error", result.IsError).
 		Msg("Tool executed successfully")
@@ -448,4 +466,71 @@ func createErrorResponse(errorType, message, requestID string) []byte {
 	}
 	jsonData, _ := json.Marshal(response)
 	return jsonData
+}
+
+// validateToolArguments performs basic validation of tool arguments against the input schema
+// This is a simplified validator - full JSON Schema validation would require a library
+func validateToolArguments(schema map[string]interface{}, arguments map[string]interface{}) error {
+	// Extract properties from schema
+	properties, ok := schema["properties"].(map[string]interface{})
+	if !ok {
+		// No properties defined, allow any arguments
+		return nil
+	}
+
+	// Extract required fields
+	requiredFields := make(map[string]bool)
+	if required, ok := schema["required"].([]interface{}); ok {
+		for _, field := range required {
+			if fieldStr, ok := field.(string); ok {
+				requiredFields[fieldStr] = true
+			}
+		}
+	}
+
+	// Check required fields are present
+	for field := range requiredFields {
+		if _, exists := arguments[field]; !exists {
+			return fmt.Errorf("required field '%s' is missing", field)
+		}
+	}
+
+	// Basic type checking for known fields
+	for fieldName, fieldValue := range arguments {
+		if prop, ok := properties[fieldName].(map[string]interface{}); ok {
+			expectedType, ok := prop["type"].(string)
+			if !ok {
+				continue // Skip if type not specified
+			}
+
+			// Basic type validation
+			switch expectedType {
+			case "string":
+				if _, ok := fieldValue.(string); !ok {
+					return fmt.Errorf("field '%s' must be a string, got %T", fieldName, fieldValue)
+				}
+			case "number", "integer":
+				switch fieldValue.(type) {
+				case float64, int, int64:
+					// Valid number types
+				default:
+					return fmt.Errorf("field '%s' must be a number, got %T", fieldName, fieldValue)
+				}
+			case "boolean":
+				if _, ok := fieldValue.(bool); !ok {
+					return fmt.Errorf("field '%s' must be a boolean, got %T", fieldName, fieldValue)
+				}
+			case "object":
+				if _, ok := fieldValue.(map[string]interface{}); !ok {
+					return fmt.Errorf("field '%s' must be an object, got %T", fieldName, fieldValue)
+				}
+			case "array":
+				if _, ok := fieldValue.([]interface{}); !ok {
+					return fmt.Errorf("field '%s' must be an array, got %T", fieldName, fieldValue)
+				}
+			}
+		}
+	}
+
+	return nil
 }
