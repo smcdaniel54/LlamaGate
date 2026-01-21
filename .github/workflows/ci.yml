@@ -112,6 +112,17 @@ jobs:
     - name: Download dependencies
       run: go mod download
     
+    - name: Check formatting
+      run: |
+        # Check if any files need formatting
+        UNFORMATTED=$(gofmt -d . 2>/dev/null || true)
+        if [ -n "$UNFORMATTED" ]; then
+          echo "❌ Code is not formatted. Run 'go fmt ./...' to fix."
+          echo "$UNFORMATTED"
+          exit 1
+        fi
+        echo "✅ Code is properly formatted"
+    
     - name: Run golangci-lint
       uses: golangci/golangci-lint-action@v9
       with:

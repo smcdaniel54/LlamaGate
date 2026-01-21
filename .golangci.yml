@@ -17,7 +17,8 @@ run:
 linters:
   # Focus on bug-catching linters only (see docs/LINTING_PHILOSOPHY.md)
   # Note: gosimple is merged into staticcheck in v2.x
-  # Note: gofmt and goimports are formatters, not linters in v2.x - use 'go fmt' and 'goimports' commands directly
+  # Note: gofmt and goimports are formatters, not linters in v2.x
+  #       Formatting is checked separately in CI and pre-commit hooks
   enable:
     # Bug-catching linters (keep these)
     - errcheck      # Unchecked errors - catches real bugs
