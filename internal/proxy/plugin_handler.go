@@ -69,7 +69,7 @@ func (p *Proxy) CreateExtensionLLMHandler() extensions.LLMHandlerFunc {
 
 		if resp.StatusCode != http.StatusOK {
 			body, _ := io.ReadAll(resp.Body)
-			return nil, fmt.Errorf("Ollama returned status %d: %s", resp.StatusCode, string(body))
+			return nil, fmt.Errorf("ollama returned status %d: %s", resp.StatusCode, string(body))
 		}
 
 		// Read response

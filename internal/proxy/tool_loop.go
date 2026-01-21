@@ -119,7 +119,7 @@ func (p *Proxy) executeToolLoop(ctx context.Context, requestID string, model str
 		}
 
 		if resp.StatusCode != http.StatusOK {
-			return nil, fmt.Errorf("Ollama returned status %d: %s", resp.StatusCode, string(body))
+			return nil, fmt.Errorf("ollama returned status %d: %s", resp.StatusCode, string(body))
 		}
 
 		// Parse response

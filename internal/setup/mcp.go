@@ -1,3 +1,4 @@
+// Package setup provides initialization and configuration for MCP clients and proxy components.
 package setup
 
 import (
