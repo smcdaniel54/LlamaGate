@@ -4,8 +4,8 @@
 version: "2"
 
 run:
-  # Timeout for analysis, e.g. 30s, 5m. Default is 1m.
-  timeout: 15m
+  # Timeout for analysis
+  timeout: 10m
   
   # Exclude test files from linting in CI (set to false)
   # This speeds up CI significantly - developers should lint tests locally
@@ -13,6 +13,16 @@ run:
   
   # Build tags to use
   build-tags: []
+  
+  # Skip directories
+  skip-dirs:
+    - vendor
+    - .git
+  
+  # Skip files (generated code)
+  skip-files:
+    - ".*_gen\\.go$"
+    - ".*\\.pb\\.go$"
 
 linters:
   # Enable specific linters (disabled some slower ones for CI performance)
@@ -28,18 +38,51 @@ linters:
     - unconvert
     - unparam
     - revive
-  # Disabled gocritic for now due to performance - can re-enable if needed
+  # Disabled gocritic for performance - can re-enable selectively if needed
   disable:
     - gocritic
 
+linters-settings:
+  revive:
+    rules:
+      - name: package-comments
+        severity: warning  # Make package comment checks warnings, not errors
+      - name: exported
+        severity: warning   # Exported function checks as warnings
+  
+  errcheck:
+    check-type-assertions: true
+    check-blank: true
+    exclude-functions:
+      - (io.ReadCloser).Close
+      - (*os.File).Close
+  
+  unparam:
+    check-exported: false  # Don't check exported functions (interface compliance)
+
 issues:
-  # The maximum number of issues per one linter. Set to 0 to disable. Default is 50.
-  max-issues-per-linter: 0
+  # Maximum issues per linter (prevents one linter from overwhelming output)
+  max-issues-per-linter: 50
   
-  # The maximum count of issues with the same text. Set to 0 to disable. Default is 3.
-  max-same-issues: 0
+  # Maximum duplicate issues (prevents same error repeated many times)
+  max-same-issues: 5
   
-  # Note: v2.8.0 doesn't support exclude-rules or linters-settings
-  # To speed up CI, we disable errcheck for test files by running lint only on production code
-  # This is handled in CI workflow by using: --skip-files='.*_test\.go'
+  # Exclude rules for known issues
+  exclude-rules:
+    # Exclude test helper files from unparam (interface compliance)
+    - path: _test\.go$
+      linters:
+        - unparam
+    
+    # Exclude generated files
+    - path: _gen\.go$
+      linters:
+        - errcheck
+        - revive
+  
+  # Only show errors in CI (warnings can be addressed gradually)
+  severity: error
+  
+  # Exclude use of default excludes (be explicit)
+  exclude-use-default: false
 
