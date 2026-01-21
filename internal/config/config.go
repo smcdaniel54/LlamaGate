@@ -20,10 +20,10 @@ type Config struct {
 	Debug              bool
 	Port               string
 	LogFile            string
-	Timeout            time.Duration  // HTTP client timeout
-	HealthCheckTimeout time.Duration  // Timeout for /health endpoint
-	ShutdownTimeout    time.Duration  // Timeout for graceful shutdown
-	MCP                *MCPConfig     // MCP configuration (optional)
+	Timeout            time.Duration // HTTP client timeout
+	HealthCheckTimeout time.Duration // Timeout for /health endpoint
+	ShutdownTimeout    time.Duration // Timeout for graceful shutdown
+	MCP                *MCPConfig    // MCP configuration (optional)
 	// TLS/HTTPS configuration
 	TLSEnabled  bool   // Enable HTTPS/TLS
 	TLSCertFile string // Path to TLS certificate file

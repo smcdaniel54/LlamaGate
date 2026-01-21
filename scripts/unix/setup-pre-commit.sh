@@ -1,19 +1,19 @@
-# Setup pre-commit hook for Windows
-# Run: .\scripts\windows\setup-pre-commit.ps1
+#!/bin/bash
+# Setup pre-commit hook for Unix/Linux/macOS
+# Run: ./scripts/unix/setup-pre-commit.sh
 
-$ErrorActionPreference = "Stop"
+set -e
 
-Write-Host "Setting up pre-commit hook..." -ForegroundColor Cyan
+echo "Setting up pre-commit hook..."
 
-$hooksDir = ".git\hooks"
-if (-not (Test-Path $hooksDir)) {
-    New-Item -ItemType Directory -Path $hooksDir -Force | Out-Null
-}
+HOOKS_DIR=".git/hooks"
+PRE_COMMIT_HOOK="$HOOKS_DIR/pre-commit"
 
-$preCommitHook = Join-Path $hooksDir "pre-commit"
+# Create hooks directory if it doesn't exist
+mkdir -p "$HOOKS_DIR"
 
 # Create pre-commit hook
-$hookContent = @'
+cat > "$PRE_COMMIT_HOOK" << 'EOF'
 #!/bin/sh
 # Pre-commit hook to auto-format and run golangci-lint before allowing commits
 # This ensures code quality before pushing
@@ -37,7 +37,7 @@ fi
 LINT_PATH="$GOPATH/bin/golangci-lint"
 if [ ! -f "$LINT_PATH" ]; then
     echo "${YELLOW}golangci-lint not found. Skipping pre-commit check.${NC}"
-    echo "${YELLOW}Install with: ./scripts/unix/lint.sh (Unix) or .\\scripts\\windows\\install-golangci-lint.ps1 (Windows)${NC}"
+    echo "${YELLOW}Install with: ./scripts/unix/lint.sh${NC}"
     exit 0
 fi
 
@@ -46,7 +46,7 @@ fi
 STAGED_GO_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep '\.go$' || true)
 
 if [ -z "$STAGED_GO_FILES" ]; then
-    echo "${GREEN}No Go files staged, skipping lint check${NC}"
+    echo "${GREEN}No Go files staged, skipping checks${NC}"
     exit 0
 fi
 
@@ -69,7 +69,7 @@ if [ $? -ne 0 ]; then
     echo "${RED}Linting failed! Please fix errors before committing.${NC}"
     echo ""
     echo "${YELLOW}💡 Quick fixes:${NC}"
-    echo "   - Run: ./scripts/unix/lint-fix.sh (or .\\scripts\\windows\\lint-fix.ps1)"
+    echo "   - Run: ./scripts/unix/lint-fix.sh"
     echo "   - Auto-fix: ./scripts/unix/lint-fix.sh --autofix"
     echo "   - Format: go fmt ./..."
     echo ""
@@ -77,18 +77,13 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-echo "${GREEN}Pre-commit linting passed!${NC}"
+echo "${GREEN}Pre-commit checks passed!${NC}"
 exit 0
-'@
+EOF
 
-# Write hook (use UTF-8 without BOM for Unix compatibility)
-[System.IO.File]::WriteAllText($preCommitHook, $hookContent, [System.Text.UTF8Encoding]::new($false))
+# Make executable
+chmod +x "$PRE_COMMIT_HOOK"
 
-# Make executable (for Git Bash/WSL)
-if (Get-Command bash -ErrorAction SilentlyContinue) {
-    bash -c "chmod +x '$preCommitHook'" 2>$null
-}
-
-Write-Host "Pre-commit hook installed at: $preCommitHook" -ForegroundColor Green
-Write-Host "The hook will auto-format and lint staged files before each commit." -ForegroundColor Yellow
-Write-Host "To skip: git commit --no-verify" -ForegroundColor Yellow
+echo "✅ Pre-commit hook installed at: $PRE_COMMIT_HOOK"
+echo "The hook will auto-format and lint staged files before each commit."
+echo "To skip: git commit --no-verify"

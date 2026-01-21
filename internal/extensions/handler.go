@@ -15,7 +15,7 @@ import (
 
 // Handler handles extension-related HTTP requests
 type Handler struct {
-	registry        *Registry
+	registry         *Registry
 	workflowExecutor *WorkflowExecutor
 }
 
@@ -24,7 +24,7 @@ func NewHandler(registry *Registry, llmHandler LLMHandlerFunc, baseDir string) *
 	executor := NewWorkflowExecutor(llmHandler, baseDir)
 	executor.SetRegistry(registry) // Enable extension-to-extension calls
 	return &Handler{
-		registry:        registry,
+		registry:         registry,
 		workflowExecutor: executor,
 	}
 }
@@ -35,7 +35,7 @@ func (h *Handler) ListExtensions(c *gin.Context) {
 	_ = middleware.GetRequestID(c) // For logging context
 
 	manifests := h.registry.List()
-	
+
 	// Convert to response format
 	extensions := make([]map[string]interface{}, 0, len(manifests))
 	for _, manifest := range manifests {
@@ -125,7 +125,7 @@ func (h *Handler) ExecuteExtension(c *gin.Context) {
 
 	// Create execution context with guardrails
 	execCtx := NewExecutionContext(c.Request.Context(), requestID, GetExtensionDir("extensions", extensionName))
-	
+
 	// Execute workflow
 	result, err := h.workflowExecutor.Execute(execCtx, manifest, input)
 	if err != nil {

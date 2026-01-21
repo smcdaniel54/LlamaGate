@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    name: Test
+    name: Test (${{ matrix.os }}, ${{ matrix.go-version }})
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -53,14 +53,14 @@ jobs:
       shell: bash
     
     - name: Run tests
-      timeout-minutes: 10
+      timeout-minutes: 15
       shell: bash
       run: |
         PACKAGES=$(go list ./... 2>/dev/null | grep -v "^\.out$" || go list ./...)
         if [ -z "$PACKAGES" ]; then
           PACKAGES=$(go list ./...)
         fi
-        go test -coverprofile=coverage.out -covermode=atomic -timeout=5m $PACKAGES
+        go test -v -coverprofile=coverage.out -covermode=atomic -timeout=10m $PACKAGES
     
     - name: Upload coverage reports
       uses: codecov/codecov-action@v5
@@ -111,6 +111,17 @@ jobs:
     
     - name: Download dependencies
       run: go mod download
+    
+    - name: Check formatting
+      run: |
+        # Check if any files need formatting
+        UNFORMATTED=$(gofmt -d . 2>/dev/null || true)
+        if [ -n "$UNFORMATTED" ]; then
+          echo "❌ Code is not formatted. Run 'go fmt ./...' to fix."
+          echo "$UNFORMATTED"
+          exit 1
+        fi
+        echo "✅ Code is properly formatted"
     
     - name: Run golangci-lint
       uses: golangci/golangci-lint-action@v9

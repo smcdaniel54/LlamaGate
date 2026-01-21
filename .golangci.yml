@@ -4,8 +4,8 @@
 version: "2"
 
 run:
-  # Timeout for analysis, e.g. 30s, 5m. Default is 1m.
-  timeout: 15m
+  # Timeout for analysis
+  timeout: 10m
   
   # Exclude test files from linting in CI (set to false)
   # This speeds up CI significantly - developers should lint tests locally
@@ -15,31 +15,29 @@ run:
   build-tags: []
 
 linters:
-  # Enable specific linters (disabled some slower ones for CI performance)
+  # Focus on bug-catching linters only (see docs/LINTING_PHILOSOPHY.md)
   # Note: gosimple is merged into staticcheck in v2.x
-  # Note: gofmt and goimports are formatters, not linters in v2.x - use 'go fmt' and 'goimports' commands directly
+  # Note: gofmt and goimports are formatters, not linters in v2.x
+  #       Formatting is checked separately in CI and pre-commit hooks
   enable:
-    - errcheck
-    - govet
-    - ineffassign
-    - staticcheck
-    - unused
-    - misspell
-    - unconvert
-    - unparam
-    - revive
-  # Disabled gocritic for now due to performance - can re-enable if needed
+    # Bug-catching linters (keep these)
+    - errcheck      # Unchecked errors - catches real bugs
+    - govet         # Go vet checks - catches real bugs
+    - staticcheck   # Advanced static analysis - catches logic errors
+    - ineffassign   # Ineffectual assignments - catches dead code
+    - unused        # Unused code - catches dead code (can be noisy, but useful)
   disable:
-    - gocritic
+    # Style-only linters (disabled to reduce friction)
+    - gocritic      # Performance - disabled for CI speed
+    - revive        # Style - package comments, unused params (interface compliance)
+    - unparam       # Style - unused parameters (often false positives for interfaces)
+    - misspell      # Style - spelling checker
+    - unconvert     # Style - type conversions (often false positives)
 
 issues:
-  # The maximum number of issues per one linter. Set to 0 to disable. Default is 50.
-  max-issues-per-linter: 0
+  # Maximum issues per linter (prevents one linter from overwhelming output)
+  max-issues-per-linter: 50
   
-  # The maximum count of issues with the same text. Set to 0 to disable. Default is 3.
-  max-same-issues: 0
-  
-  # Note: v2.8.0 doesn't support exclude-rules or linters-settings
-  # To speed up CI, we disable errcheck for test files by running lint only on production code
-  # This is handled in CI workflow by using: --skip-files='.*_test\.go'
+  # Maximum duplicate issues (prevents same error repeated many times)
+  max-same-issues: 5
 

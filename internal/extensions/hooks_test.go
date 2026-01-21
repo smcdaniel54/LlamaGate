@@ -24,7 +24,7 @@ func TestHookManager_AuditLog(t *testing.T) {
 		Description: "Request inspector",
 		Type:        "middleware",
 		Config: map[string]interface{}{
-			"audit_dir":  auditDir,
+			"audit_dir":   auditDir,
 			"sample_rate": 1.0,
 		},
 		Hooks: []HookDefinition{

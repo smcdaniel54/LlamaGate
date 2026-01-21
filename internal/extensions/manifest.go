@@ -15,7 +15,7 @@ type Manifest struct {
 	Name        string                 `yaml:"name"`
 	Version     string                 `yaml:"version"`
 	Description string                 `yaml:"description"`
-	Type        string                 `yaml:"type"` // "workflow", "middleware", "observer"
+	Type        string                 `yaml:"type"`    // "workflow", "middleware", "observer"
 	Enabled     *bool                  `yaml:"enabled"` // nil means default (true)
 	Config      map[string]interface{} `yaml:"config,omitempty"`
 	Inputs      []InputDefinition      `yaml:"inputs,omitempty"`
@@ -100,9 +100,9 @@ func ValidateManifest(m *Manifest) error {
 
 	// Validate type
 	validTypes := map[string]bool{
-		"workflow":  true,
+		"workflow":   true,
 		"middleware": true,
-		"observer":  true,
+		"observer":   true,
 	}
 	if m.Type == "" {
 		return fmt.Errorf("validation error: 'type' field is required. Must be one of: workflow, middleware, observer")
@@ -144,11 +144,11 @@ func ValidateManifest(m *Manifest) error {
 			return fmt.Errorf("validation error: input '%s' in extension '%s' is missing 'type' field", input.ID, m.Name)
 		}
 		validInputTypes := map[string]bool{
-			"string": true,
-			"number": true,
+			"string":  true,
+			"number":  true,
 			"boolean": true,
-			"object": true,
-			"array": true,
+			"object":  true,
+			"array":   true,
 		}
 		if !validInputTypes[input.Type] {
 			return fmt.Errorf("validation error: input '%s' in extension '%s' has invalid type '%s'. Must be one of: string, number, boolean, object, array", input.ID, m.Name, input.Type)

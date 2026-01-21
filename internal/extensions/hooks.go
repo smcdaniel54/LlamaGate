@@ -128,11 +128,11 @@ func (h *HookManager) auditLog(manifest *Manifest, c *gin.Context, _ map[string]
 
 	// Create audit entry
 	entry := map[string]interface{}{
-		"timestamp": time.Now().UTC().Format(time.RFC3339),
-		"method":    c.Request.Method,
-		"path":      c.Request.URL.Path,
+		"timestamp":  time.Now().UTC().Format(time.RFC3339),
+		"method":     c.Request.Method,
+		"path":       c.Request.URL.Path,
 		"request_id": c.GetString("request_id"),
-		"ip":        c.ClientIP(),
+		"ip":         c.ClientIP(),
 	}
 
 	// Apply redaction rules
@@ -233,7 +233,7 @@ func (h *HookManager) trackUsage(manifest *Manifest, c *gin.Context, responseDat
 			break
 		}
 	}
-	
+
 	// Read existing report or create new
 	var report []map[string]interface{}
 	if data, err := os.ReadFile(reportFile); err == nil {

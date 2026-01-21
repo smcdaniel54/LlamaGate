@@ -226,21 +226,16 @@ func (e *WorkflowExecutor) callLLM(ctx *ExecutionContext, _ WorkflowStep, resolv
 		model = m
 	}
 
-	// Get prompt from state (can be rendered_prompt or prompt)
-	prompt, ok := state["rendered_prompt"].(string)
-	if !ok {
-		if p, ok := state["prompt"].(string); ok {
-			prompt = p
-		} else {
-			return nil, fmt.Errorf("rendered_prompt or prompt not found in state")
-		}
-	}
-
-	// Get prompt from resolvedWith if provided directly (for direct prompt passing)
+	// Get prompt from resolvedWith first (for direct prompt passing), then from state
+	var prompt string
 	if promptFromWith, ok := resolvedWith["prompt"].(string); ok {
 		prompt = promptFromWith
+	} else if promptFromState, ok := state["rendered_prompt"].(string); ok {
+		prompt = promptFromState
 	} else if promptFromState, ok := state["prompt"].(string); ok {
 		prompt = promptFromState
+	} else {
+		return nil, fmt.Errorf("rendered_prompt or prompt not found in state")
 	}
 
 	// Call LLM
@@ -559,18 +554,18 @@ func (e *WorkflowExecutor) loadModule(_ *ExecutionContext, _ WorkflowStep, resol
 		filepath.Join(e.baseDir, "..", "agenticmodules", moduleName, "agenticmodule.yaml"),
 		filepath.Join(filepath.Dir(e.baseDir), "agenticmodules", moduleName, "agenticmodule.yaml"),
 	}
-	
+
 	for _, path := range possiblePaths {
 		if _, err := os.Stat(path); err == nil {
 			manifestPath = path
 			break
 		}
 	}
-	
+
 	if manifestPath == "" {
 		return nil, fmt.Errorf("agenticmodule.yaml not found for module '%s'. Tried: %v", moduleName, possiblePaths)
 	}
-	
+
 	moduleDir := filepath.Dir(manifestPath)
 
 	moduleManifest, err := LoadAgenticModuleManifest(manifestPath)
@@ -724,20 +719,20 @@ func (e *WorkflowExecutor) executeModule(ctx *ExecutionContext, _ WorkflowStep, 
 		}
 
 		stepRecord := map[string]interface{}{
-			"step_index":   i,
-			"extension":    moduleStep.Extension,
-			"status":       "success",
-			"duration_ms":  time.Since(stepStartTime).Milliseconds(),
-			"output":       result,
+			"step_index":  i,
+			"extension":   moduleStep.Extension,
+			"status":      "success",
+			"duration_ms": time.Since(stepStartTime).Milliseconds(),
+			"output":      result,
 		}
 		stepRecords = append(stepRecords, stepRecord)
 	}
 
 	return map[string]interface{}{
-		"module_output":      currentOutput,
-		"step_records":       stepRecords,
-		"total_steps":        len(stepRecords),
-		"total_duration_ms":  time.Since(moduleCtx.StartTime).Milliseconds(),
+		"module_output":     currentOutput,
+		"step_records":      stepRecords,
+		"total_steps":       len(stepRecords),
+		"total_duration_ms": time.Since(moduleCtx.StartTime).Milliseconds(),
 	}, nil
 }
 
@@ -770,14 +765,14 @@ func (e *WorkflowExecutor) createModuleRecord(ctx *ExecutionContext, _ WorkflowS
 
 	// Create run record
 	runRecord := map[string]interface{}{
-		"module_name":        moduleManifest.Name,
-		"module_version":     moduleManifest.Version,
-		"trace_id":           ctx.TraceID,
-		"started_at":         ctx.StartTime.Format(time.RFC3339),
-		"completed_at":       time.Now().Format(time.RFC3339),
-		"total_duration_ms":  totalDuration,
-		"steps":              stepRecords,
-		"final_output":       moduleOutput,
+		"module_name":       moduleManifest.Name,
+		"module_version":    moduleManifest.Version,
+		"trace_id":          ctx.TraceID,
+		"started_at":        ctx.StartTime.Format(time.RFC3339),
+		"completed_at":      time.Now().Format(time.RFC3339),
+		"total_duration_ms": totalDuration,
+		"steps":             stepRecords,
+		"final_output":      moduleOutput,
 	}
 
 	return map[string]interface{}{

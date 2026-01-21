@@ -73,7 +73,7 @@ func (ec *ExecutionContext) WithChild(manifestPath string) (*ExecutionContext, e
 		MaxDepth:     ec.MaxDepth,
 		CallBudget:   ec.CallBudget - 1,
 		StartTime:    ec.StartTime,
-		MaxRuntime:    ec.MaxRuntime,
+		MaxRuntime:   ec.MaxRuntime,
 		TraceID:      ec.TraceID,
 		ManifestPath: manifestPath,
 	}, nil

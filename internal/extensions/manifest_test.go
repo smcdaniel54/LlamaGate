@@ -41,16 +41,18 @@ version: ` + version + `
 description: Test extension
 type: workflow
 enabled: true
+steps:
+  - uses: llm.chat
 `
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "manifest.yaml"), []byte(manifest), 0644))
 }
 
 func TestValidateManifest_ActionableErrors(t *testing.T) {
 	tests := []struct {
-		name    string
+		name     string
 		manifest *Manifest
-		wantErr bool
-		errMsg  string
+		wantErr  bool
+		errMsg   string
 	}{
 		{
 			name: "missing name",

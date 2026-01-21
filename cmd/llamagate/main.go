@@ -15,9 +15,9 @@ import (
 	"github.com/llamagate/llamagate/internal/api"
 	"github.com/llamagate/llamagate/internal/cache"
 	"github.com/llamagate/llamagate/internal/config"
+	"github.com/llamagate/llamagate/internal/extensions"
 	"github.com/llamagate/llamagate/internal/logger"
 	"github.com/llamagate/llamagate/internal/middleware"
-	"github.com/llamagate/llamagate/internal/extensions"
 	"github.com/llamagate/llamagate/internal/proxy"
 	"github.com/llamagate/llamagate/internal/setup"
 	"github.com/rs/zerolog/log"
@@ -125,7 +125,7 @@ func main() {
 	// Initialize extension system
 	extensionRegistry := extensions.NewRegistry()
 	extensionBaseDir := "extensions"
-	
+
 	// Discover and load extensions
 	manifests, discoverErr := extensions.DiscoverExtensions(extensionBaseDir)
 	if discoverErr != nil {
@@ -148,7 +148,7 @@ func main() {
 
 	// Create extension hook manager
 	extensionHookManager := extensions.NewHookManager(extensionRegistry, extensionBaseDir)
-	
+
 	// Add extension middleware hooks (for request-inspector)
 	router.Use(extensionHookManager.CreateMiddlewareHook())
 
