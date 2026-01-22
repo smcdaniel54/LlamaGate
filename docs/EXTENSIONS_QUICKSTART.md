@@ -66,7 +66,12 @@ go run ./cmd/llamagate-cli ext validate extensions/my-first-extension/manifest.y
 Or use HTTP API:
 
 ```bash
-# Restart LlamaGate to load the extension
+# Option 1: Refresh extensions (no restart needed)
+curl -X POST \
+  -H "X-API-Key: sk-llamagate" \
+  http://localhost:11435/v1/extensions/refresh
+
+# Option 2: Restart LlamaGate to load the extension
 # Then check if it's loaded:
 curl -H "X-API-Key: sk-llamagate" http://localhost:11435/v1/extensions
 ```
@@ -239,7 +244,13 @@ grep "my-first-extension" llamagate.log
 **Fix:**
 - Verify extension directory exists: `ls extensions/my-extension/`
 - Check manifest file: `cat extensions/my-extension/manifest.yaml`
-- Restart LlamaGate to reload extensions
+- Refresh extensions via API (no restart needed):
+  ```bash
+  curl -X POST \
+    -H "X-API-Key: sk-llamagate" \
+    http://localhost:11435/v1/extensions/refresh
+  ```
+- Or restart LlamaGate to reload extensions
 
 ### 2. Validation Errors
 
@@ -337,7 +348,13 @@ grep "my-first-extension" llamagate.log
    tail -f llamagate.log | grep -i extension
    ```
 
-4. Restart LlamaGate to reload extensions
+4. Refresh extensions via API (no restart needed):
+   ```bash
+   curl -X POST \
+     -H "X-API-Key: sk-llamagate" \
+     http://localhost:11435/v1/extensions/refresh
+   ```
+   Or restart LlamaGate to reload extensions
 
 ### Extension Execution Failing
 

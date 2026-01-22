@@ -295,3 +295,118 @@ func TestHandler_ExecuteExtension_MissingRequiredInput(t *testing.T) {
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
+
+func TestHandler_RefreshExtensions(t *testing.T) {
+	tmpDir := t.TempDir()
+	extDir := filepath.Join(tmpDir, "extensions")
+	require.NoError(t, os.MkdirAll(extDir, 0755))
+
+	registry := NewRegistry()
+	llmHandler := func(_ context.Context, _ string, _ []map[string]interface{}, _ map[string]interface{}) (map[string]interface{}, error) {
+		return nil, nil
+	}
+
+	handler := NewHandler(registry, llmHandler, extDir)
+
+	// Create initial extension
+	ext1Dir := filepath.Join(extDir, "ext1")
+	require.NoError(t, os.MkdirAll(ext1Dir, 0755))
+	manifest1 := `name: ext1
+version: 1.0.0
+description: First extension
+type: workflow
+enabled: true
+
+steps:
+  - uses: llm.chat
+`
+	require.NoError(t, os.WriteFile(filepath.Join(ext1Dir, "manifest.yaml"), []byte(manifest1), 0644))
+
+	gin.SetMode(gin.TestMode)
+	router := gin.New()
+	router.POST("/extensions/refresh", handler.RefreshExtensions)
+
+	// Test 1: Add a new extension
+	ext2Dir := filepath.Join(extDir, "ext2")
+	require.NoError(t, os.MkdirAll(ext2Dir, 0755))
+	manifest2 := `name: ext2
+version: 2.0.0
+description: Second extension
+type: middleware
+enabled: true
+
+hooks:
+  - on: http.request
+    action: log
+`
+	require.NoError(t, os.WriteFile(filepath.Join(ext2Dir, "manifest.yaml"), []byte(manifest2), 0644))
+
+	req := httptest.NewRequest("POST", "/extensions/refresh", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var response map[string]interface{}
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	require.NoError(t, err)
+
+	assert.Equal(t, "refreshed", response["status"])
+	added := response["added"].([]interface{})
+	assert.Contains(t, added, "ext2")
+	assert.Equal(t, float64(2), response["total"])
+
+	// Verify ext2 is now registered
+	_, err = registry.Get("ext2")
+	assert.NoError(t, err)
+
+	// Test 2: Update existing extension
+	manifest1Updated := `name: ext1
+version: 1.1.0
+description: First extension (updated)
+type: workflow
+enabled: true
+
+steps:
+  - uses: llm.chat
+`
+	require.NoError(t, os.WriteFile(filepath.Join(ext1Dir, "manifest.yaml"), []byte(manifest1Updated), 0644))
+
+	req = httptest.NewRequest("POST", "/extensions/refresh", nil)
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	err = json.Unmarshal(w.Body.Bytes(), &response)
+	require.NoError(t, err)
+
+	updated := response["updated"].([]interface{})
+	assert.Contains(t, updated, "ext1")
+
+	// Verify ext1 is updated
+	manifest, err := registry.Get("ext1")
+	require.NoError(t, err)
+	assert.Equal(t, "1.1.0", manifest.Version)
+	assert.Equal(t, "First extension (updated)", manifest.Description)
+
+	// Test 3: Remove extension
+	require.NoError(t, os.RemoveAll(ext2Dir))
+
+	req = httptest.NewRequest("POST", "/extensions/refresh", nil)
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	err = json.Unmarshal(w.Body.Bytes(), &response)
+	require.NoError(t, err)
+
+	removed := response["removed"].([]interface{})
+	assert.Contains(t, removed, "ext2")
+	assert.Equal(t, float64(1), response["total"])
+
+	// Verify ext2 is no longer registered
+	_, err = registry.Get("ext2")
+	assert.Error(t, err)
+}

@@ -810,6 +810,70 @@ curl -X POST \
 - All required inputs must be provided
 - Output files are written to the extension's output directory
 
+### Refresh Extensions
+
+Re-discover extensions from the `extensions/` directory and update the registry. This is useful after installing new extensions or updating existing ones, as it allows extensions to be discovered without restarting the server.
+
+**Endpoint:** `POST /v1/extensions/refresh`
+
+**Response (Success):**
+```json
+{
+  "status": "refreshed",
+  "added": ["new-extension"],
+  "updated": ["existing-extension"],
+  "removed": ["deleted-extension"],
+  "total": 5
+}
+```
+
+**Response (Partial Failure):**
+```json
+{
+  "status": "partial",
+  "added": ["new-extension"],
+  "updated": [],
+  "removed": [],
+  "total": 4,
+  "errors": [
+    "invalid-extension: manifest validation failed"
+  ]
+}
+```
+
+**Example:**
+```bash
+curl -X POST \
+  -H "X-API-Key: sk-llamagate" \
+  http://localhost:11435/v1/extensions/refresh
+```
+
+**Status Codes:**
+- `200 OK` - All extensions refreshed successfully
+- `206 Partial Content` - Some extensions failed to load (check `errors` array)
+- `500 Internal Server Error` - Discovery failed
+
+**Notes:**
+- Re-scans the `extensions/` directory for `manifest.yaml` files
+- Adds newly discovered extensions
+- Updates existing extensions if their manifests changed
+- Removes extensions that no longer exist in the directory
+- Invalid extensions are logged but don't prevent other extensions from loading
+- This endpoint is typically called by install tools after installing extensions
+
+**Use Case:**
+After installing a new extension (e.g., via `agentic-module-tool`), call this endpoint to make it immediately available without restarting LlamaGate:
+
+```bash
+# Install extension (example)
+agentic-module-tool install my-module
+
+# Refresh extensions to discover the new extension
+curl -X POST \
+  -H "X-API-Key: sk-llamagate" \
+  http://localhost:11435/v1/extensions/refresh
+```
+
 ## Health Endpoint
 
 The main health endpoint (`/health`) does not require authentication and can be used for monitoring:

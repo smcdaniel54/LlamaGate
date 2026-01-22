@@ -17,6 +17,7 @@ import (
 type Handler struct {
 	registry         *Registry
 	workflowExecutor *WorkflowExecutor
+	baseDir          string
 }
 
 // NewHandler creates a new extension handler
@@ -26,6 +27,7 @@ func NewHandler(registry *Registry, llmHandler LLMHandlerFunc, baseDir string) *
 	return &Handler{
 		registry:         registry,
 		workflowExecutor: executor,
+		baseDir:          baseDir,
 	}
 }
 
@@ -142,4 +144,129 @@ func (h *Handler) ExecuteExtension(c *gin.Context) {
 		"success": true,
 		"data":    result,
 	})
+}
+
+// RefreshExtensions re-discovers extensions from the directory and updates the registry
+// POST /v1/extensions/refresh
+func (h *Handler) RefreshExtensions(c *gin.Context) {
+	requestID := middleware.GetRequestID(c)
+
+	// Get current extensions before refresh
+	currentManifests := h.registry.List()
+	currentNames := make(map[string]bool)
+	for _, manifest := range currentManifests {
+		currentNames[manifest.Name] = true
+	}
+
+	// Re-discover extensions
+	manifests, discoverErr := DiscoverExtensions(h.baseDir)
+	if discoverErr != nil {
+		log.Warn().
+			Str("request_id", requestID).
+			Err(discoverErr).
+			Msg("Failed to discover extensions during refresh")
+		response.InternalError(c, fmt.Sprintf("Failed to discover extensions: %v", discoverErr), requestID)
+		return
+	}
+
+	// Track changes
+	added := []string{}
+	updated := []string{}
+	removed := []string{}
+	errors := []string{}
+
+	// Build map of discovered extensions
+	discoveredNames := make(map[string]bool)
+	discoveredManifests := make(map[string]*Manifest)
+	for _, manifest := range manifests {
+		discoveredNames[manifest.Name] = true
+		discoveredManifests[manifest.Name] = manifest
+	}
+
+	// Add new extensions and update existing ones
+	for _, manifest := range manifests {
+		if _, exists := currentNames[manifest.Name]; exists {
+			// Extension exists - update it
+			if err := h.registry.RegisterOrUpdate(manifest); err != nil {
+				log.Warn().
+					Str("request_id", requestID).
+					Str("extension", manifest.Name).
+					Err(err).
+					Msg("Failed to update extension during refresh")
+				errors = append(errors, fmt.Sprintf("%s: %v", manifest.Name, err))
+			} else {
+				updated = append(updated, manifest.Name)
+				log.Info().
+					Str("request_id", requestID).
+					Str("extension", manifest.Name).
+					Str("version", manifest.Version).
+					Msg("Extension updated during refresh")
+			}
+		} else {
+			// New extension - register it
+			if err := h.registry.RegisterOrUpdate(manifest); err != nil {
+				log.Warn().
+					Str("request_id", requestID).
+					Str("extension", manifest.Name).
+					Err(err).
+					Msg("Failed to register extension during refresh")
+				errors = append(errors, fmt.Sprintf("%s: %v", manifest.Name, err))
+			} else {
+				added = append(added, manifest.Name)
+				log.Info().
+					Str("request_id", requestID).
+					Str("extension", manifest.Name).
+					Str("version", manifest.Version).
+					Str("type", manifest.Type).
+					Bool("enabled", manifest.IsEnabled()).
+					Msg("Extension registered during refresh")
+			}
+		}
+	}
+
+	// Remove extensions that no longer exist
+	for name := range currentNames {
+		if !discoveredNames[name] {
+			if err := h.registry.Unregister(name); err != nil {
+				log.Warn().
+					Str("request_id", requestID).
+					Str("extension", name).
+					Err(err).
+					Msg("Failed to unregister extension during refresh")
+				errors = append(errors, fmt.Sprintf("%s (unregister): %v", name, err))
+			} else {
+				removed = append(removed, name)
+				log.Info().
+					Str("request_id", requestID).
+					Str("extension", name).
+					Msg("Extension removed during refresh")
+			}
+		}
+	}
+
+	// Build response
+	responseData := gin.H{
+		"status":  "refreshed",
+		"added":   added,
+		"updated": updated,
+		"removed": removed,
+		"total":   len(manifests),
+	}
+
+	if len(errors) > 0 {
+		responseData["errors"] = errors
+		responseData["status"] = "partial"
+		c.JSON(http.StatusPartialContent, responseData)
+		return
+	}
+
+	log.Info().
+		Str("request_id", requestID).
+		Int("added", len(added)).
+		Int("updated", len(updated)).
+		Int("removed", len(removed)).
+		Int("total", len(manifests)).
+		Msg("Extension refresh complete")
+
+	c.JSON(http.StatusOK, responseData)
 }

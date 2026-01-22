@@ -100,3 +100,32 @@ func (r *Registry) GetByType(extType string) []*Manifest {
 
 	return manifests
 }
+
+// Unregister removes an extension from the registry
+func (r *Registry) Unregister(name string) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if _, exists := r.extensions[name]; !exists {
+		return fmt.Errorf("extension %s not found", name)
+	}
+
+	delete(r.extensions, name)
+	delete(r.enabled, name)
+	return nil
+}
+
+// RegisterOrUpdate registers a new extension or updates an existing one
+func (r *Registry) RegisterOrUpdate(manifest *Manifest) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if manifest.Name == "" {
+		return fmt.Errorf("extension name cannot be empty")
+	}
+
+	r.extensions[manifest.Name] = manifest
+	r.enabled[manifest.Name] = manifest.IsEnabled()
+
+	return nil
+}

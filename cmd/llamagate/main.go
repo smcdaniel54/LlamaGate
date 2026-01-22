@@ -202,6 +202,7 @@ func main() {
 			extensionsGroup.GET("", extensionHandler.ListExtensions)
 			extensionsGroup.GET("/:name", extensionHandler.GetExtension)
 			extensionsGroup.POST("/:name/execute", extensionHandler.ExecuteExtension)
+			extensionsGroup.POST("/refresh", extensionHandler.RefreshExtensions)
 		}
 	}
 

@@ -272,6 +272,11 @@ External tools (like OrchestratorPlus) can use these endpoints to:
    POST /v1/extensions/agenticmodule_runner/execute
    ```
 
+5. **Refresh extensions (after installation):**
+   ```bash
+   POST /v1/extensions/refresh
+   ```
+
 ### Example: Python Integration
 
 ```python
@@ -349,6 +354,7 @@ result = response.json()
 | Validate extension | Validate manifest YAML | `ext validate <path>` |
 | Execute extension | Run a workflow extension | `POST /v1/extensions/:name/execute` |
 | Run module | Execute an AgenticModule | `POST /v1/extensions/agenticmodule_runner/execute` |
+| Refresh extensions | Re-discover extensions after installation | `POST /v1/extensions/refresh` |
 
 ---
 

@@ -341,7 +341,13 @@ Each module should provide one cohesive capability. Split complex workflows into
 **Fix:**
 - Ensure extension is in `extensions/` directory
 - Verify extension name matches exactly
-- Restart LlamaGate to reload extensions
+- Refresh extensions via API (no restart needed):
+  ```bash
+  curl -X POST \
+    -H "X-API-Key: sk-llamagate" \
+    http://localhost:11435/v1/extensions/refresh
+  ```
+- Or restart LlamaGate to reload extensions
 
 ### Module Execution Timeout
 
