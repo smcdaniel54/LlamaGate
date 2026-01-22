@@ -521,13 +521,14 @@ func TestRouteManager_AllHTTPMethods(t *testing.T) {
 
 		// Most methods should return 200, but HEAD/OPTIONS might have different behavior
 		// HEAD returns 200 with no body, OPTIONS might return different status
-		if method == "HEAD" {
+		switch method {
+		case "HEAD":
 			// HEAD should return 200 but might not have body
 			assert.True(t, w.Code == http.StatusOK || w.Code == http.StatusNoContent)
-		} else if method == "OPTIONS" {
+		case "OPTIONS":
 			// OPTIONS might return 200, 204, or 405 depending on implementation
 			assert.True(t, w.Code == http.StatusOK || w.Code == http.StatusNoContent || w.Code == http.StatusMethodNotAllowed)
-		} else {
+		default:
 			assert.Equal(t, http.StatusOK, w.Code)
 		}
 	}
