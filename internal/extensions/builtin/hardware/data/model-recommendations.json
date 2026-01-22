@@ -1,0 +1,480 @@
+{
+  "version": "2.0.0",
+  "last_updated": "2026-01-22",
+  "source": "artificialanalysis.ai/models/open-source (verified Ollama availability)",
+  "description": "Open-source models verified available in Ollama, grouped by hardware requirements. All models have downloadable weights for local deployment.",
+  "hardware_groups": [
+    {
+      "id": "cpu_only_16_32gb",
+      "name": "CPU-only, 16-32GB RAM",
+      "description": "Minimum viable configuration for local LLMs",
+      "criteria": {
+        "min_ram_gb": 16,
+        "max_ram_gb": 32,
+        "requires_gpu": false
+      },
+      "models": [
+        {
+          "name": "Llama 3.2 3B",
+          "ollama_name": "llama3.2:3b",
+          "priority": 1,
+          "description": "Smallest, fastest option - best for very limited resources",
+          "intelligence_score": 10,
+          "parameters_b": 3,
+          "min_ram_gb": 6,
+          "min_vram_gb": 0,
+          "quantized": true,
+          "ollama_command": "ollama pull llama3.2:3b",
+          "use_cases": ["general chat", "fast responses", "edge deployments"],
+          "artificial_analysis_url": "https://artificialanalysis.ai/models/llama-3-2-instruct-3b"
+        },
+        {
+          "name": "Qwen 2.5 1.5B",
+          "ollama_name": "qwen2.5:1.5b",
+          "priority": 2,
+          "description": "Ultra-lightweight multilingual option",
+          "intelligence_score": 9,
+          "parameters_b": 1.5,
+          "min_ram_gb": 4,
+          "min_vram_gb": 0,
+          "quantized": true,
+          "ollama_command": "ollama pull qwen2.5:1.5b",
+          "use_cases": ["multilingual", "ultra-fast responses"],
+          "artificial_analysis_url": "https://artificialanalysis.ai/models/qwen2-5-1-5b-instruct"
+        },
+        {
+          "name": "Phi-3 Mini 3.8B",
+          "ollama_name": "phi3:mini",
+          "priority": 3,
+          "description": "Good alternative lightweight model",
+          "intelligence_score": 10,
+          "parameters_b": 3.8,
+          "min_ram_gb": 6,
+          "min_vram_gb": 0,
+          "quantized": true,
+          "ollama_command": "ollama pull phi3:mini",
+          "use_cases": ["general chat", "reasoning"],
+          "artificial_analysis_url": "https://artificialanalysis.ai/models/phi-3-mini"
+        }
+      ]
+    },
+    {
+      "id": "cpu_only_32_64gb",
+      "name": "CPU-only, 32-64GB RAM",
+      "description": "Most common business configuration (90% of businesses)",
+      "criteria": {
+        "min_ram_gb": 32,
+        "max_ram_gb": 64,
+        "requires_gpu": false
+      },
+      "models": [
+        {
+          "name": "Mistral 7B",
+          "ollama_name": "mistral",
+          "priority": 1,
+          "description": "Best default - fast, efficient, works on CPU",
+          "intelligence_score": 7,
+          "parameters_b": 7,
+          "min_ram_gb": 8,
+          "min_vram_gb": 0,
+          "quantized": true,
+          "ollama_command": "ollama pull mistral",
+          "use_cases": ["general chat", "fast responses", "production workloads"],
+          "artificial_analysis_url": "https://artificialanalysis.ai/models/mistral-7b-instruct"
+        },
+        {
+          "name": "Llama 3.2 3B",
+          "ollama_name": "llama3.2:3b",
+          "priority": 2,
+          "description": "Lightweight alternative - fastest option",
+          "intelligence_score": 10,
+          "parameters_b": 3,
+          "min_ram_gb": 6,
+          "min_vram_gb": 0,
+          "quantized": true,
+          "ollama_command": "ollama pull llama3.2:3b",
+          "use_cases": ["general chat", "fastest responses", "edge deployments"],
+          "artificial_analysis_url": "https://artificialanalysis.ai/models/llama-3-2-instruct-3b"
+        },
+        {
+          "name": "Qwen 2.5 7B",
+          "ollama_name": "qwen2.5:7b",
+          "priority": 3,
+          "description": "Multilingual option with structured output support",
+          "intelligence_score": 10,
+          "parameters_b": 7,
+          "min_ram_gb": 8,
+          "min_vram_gb": 0,
+          "quantized": true,
+          "ollama_command": "ollama pull qwen2.5:7b",
+          "use_cases": ["multilingual", "structured output", "code generation"],
+          "artificial_analysis_url": "https://artificialanalysis.ai/models/qwen2-5-7b-instruct"
+        }
+      ]
+    },
+    {
+      "id": "cpu_only_64gb_plus",
+      "name": "CPU-only, 64GB+ RAM",
+      "description": "High-end workstations with ample RAM",
+      "criteria": {
+        "min_ram_gb": 64,
+        "requires_gpu": false
+      },
+      "models": [
+        {
+          "name": "Llama 3.2 11B",
+          "ollama_name": "llama3.2:11b",
+          "priority": 1,
+          "description": "Balanced quality and speed - best for CPU-only high-end systems",
+          "intelligence_score": 11,
+          "parameters_b": 11,
+          "min_ram_gb": 16,
+          "min_vram_gb": 0,
+          "quantized": true,
+          "ollama_command": "ollama pull llama3.2:11b",
+          "use_cases": ["general chat", "balanced performance", "quality tasks"],
+          "artificial_analysis_url": "https://artificialanalysis.ai/models/llama-3-2-instruct-11b"
+        },
+        {
+          "name": "Qwen 2.5 14B",
+          "ollama_name": "qwen2.5:14b",
+          "priority": 2,
+          "description": "Multilingual powerhouse with excellent structured output",
+          "intelligence_score": 13,
+          "parameters_b": 14,
+          "min_ram_gb": 20,
+          "min_vram_gb": 0,
+          "quantized": true,
+          "ollama_command": "ollama pull qwen2.5:14b",
+          "use_cases": ["multilingual", "structured output", "code generation"],
+          "artificial_analysis_url": "https://artificialanalysis.ai/models/qwen2-5-14b-instruct"
+        },
+        {
+          "name": "Gemma 3 12B",
+          "ollama_name": "gemma3:12b",
+          "priority": 3,
+          "description": "Quality option with excellent translation capabilities",
+          "intelligence_score": 9,
+          "parameters_b": 12.2,
+          "min_ram_gb": 20,
+          "min_vram_gb": 0,
+          "quantized": true,
+          "ollama_command": "ollama pull gemma3:12b",
+          "use_cases": ["general tasks", "translation", "summarization"],
+          "artificial_analysis_url": "https://artificialanalysis.ai/models/gemma-3-12b"
+        }
+      ]
+    },
+    {
+      "id": "gpu_4_8gb_vram",
+      "name": "GPU with 4-8GB VRAM",
+      "description": "Entry-level GPUs",
+      "criteria": {
+        "min_vram_gb": 4,
+        "max_vram_gb": 8,
+        "requires_gpu": true
+      },
+      "models": [
+        {
+          "name": "Llama 3.2 3B",
+          "ollama_name": "llama3.2:3b",
+          "priority": 1,
+          "description": "Best fit for entry-level GPUs - quantized",
+          "intelligence_score": 10,
+          "parameters_b": 3,
+          "min_ram_gb": 6,
+          "min_vram_gb": 6,
+          "quantized": true,
+          "ollama_command": "ollama pull llama3.2:3b",
+          "use_cases": ["general chat", "fast responses"],
+          "artificial_analysis_url": "https://artificialanalysis.ai/models/llama-3-2-instruct-3b"
+        },
+        {
+          "name": "Mistral 7B",
+          "ollama_name": "mistral",
+          "priority": 2,
+          "description": "If 8GB VRAM available - quantized",
+          "intelligence_score": 7,
+          "parameters_b": 7,
+          "min_ram_gb": 8,
+          "min_vram_gb": 8,
+          "quantized": true,
+          "ollama_command": "ollama pull mistral",
+          "use_cases": ["general chat", "fast responses", "production workloads"],
+          "artificial_analysis_url": "https://artificialanalysis.ai/models/mistral-7b-instruct"
+        },
+        {
+          "name": "Qwen 2.5 7B",
+          "ollama_name": "qwen2.5:7b",
+          "priority": 3,
+          "description": "Multilingual option - quantized",
+          "intelligence_score": 10,
+          "parameters_b": 7,
+          "min_ram_gb": 8,
+          "min_vram_gb": 8,
+          "quantized": true,
+          "ollama_command": "ollama pull qwen2.5:7b",
+          "use_cases": ["multilingual", "structured output", "code generation"],
+          "artificial_analysis_url": "https://artificialanalysis.ai/models/qwen2-5-7b-instruct"
+        }
+      ]
+    },
+    {
+      "id": "gpu_8_16gb_vram",
+      "name": "GPU with 8-16GB VRAM",
+      "description": "Common mid-range GPUs (most common GPU configuration)",
+      "criteria": {
+        "min_vram_gb": 8,
+        "max_vram_gb": 16,
+        "requires_gpu": true
+      },
+      "models": [
+        {
+          "name": "Mistral 7B",
+          "ollama_name": "mistral",
+          "priority": 1,
+          "description": "Best balance - quantized for optimal performance",
+          "intelligence_score": 7,
+          "parameters_b": 7,
+          "min_ram_gb": 8,
+          "min_vram_gb": 8,
+          "quantized": true,
+          "ollama_command": "ollama pull mistral",
+          "use_cases": ["general chat", "fast responses", "production workloads"],
+          "artificial_analysis_url": "https://artificialanalysis.ai/models/mistral-7b-instruct"
+        },
+        {
+          "name": "Llama 3.2 11B",
+          "ollama_name": "llama3.2:11b",
+          "priority": 2,
+          "description": "Better quality - quantized (requires 12GB+ VRAM)",
+          "intelligence_score": 11,
+          "parameters_b": 11,
+          "min_ram_gb": 12,
+          "min_vram_gb": 12,
+          "quantized": true,
+          "ollama_command": "ollama pull llama3.2:11b",
+          "use_cases": ["general chat", "balanced performance", "quality tasks"],
+          "artificial_analysis_url": "https://artificialanalysis.ai/models/llama-3-2-instruct-11b"
+        },
+        {
+          "name": "Qwen 2.5 7B",
+          "ollama_name": "qwen2.5:7b",
+          "priority": 3,
+          "description": "Multilingual option - quantized",
+          "intelligence_score": 10,
+          "parameters_b": 7,
+          "min_ram_gb": 8,
+          "min_vram_gb": 8,
+          "quantized": true,
+          "ollama_command": "ollama pull qwen2.5:7b",
+          "use_cases": ["multilingual", "structured output", "code generation"],
+          "artificial_analysis_url": "https://artificialanalysis.ai/models/qwen2-5-7b-instruct"
+        },
+        {
+          "name": "Gemma 3 12B",
+          "ollama_name": "gemma3:12b",
+          "priority": 4,
+          "description": "Quality option - quantized (requires 12GB+ VRAM)",
+          "intelligence_score": 9,
+          "parameters_b": 12.2,
+          "min_ram_gb": 12,
+          "min_vram_gb": 12,
+          "quantized": true,
+          "ollama_command": "ollama pull gemma3:12b",
+          "use_cases": ["general tasks", "translation", "summarization"],
+          "artificial_analysis_url": "https://artificialanalysis.ai/models/gemma-3-12b"
+        }
+      ]
+    },
+    {
+      "id": "gpu_16_24gb_vram",
+      "name": "GPU with 16-24GB VRAM",
+      "description": "High-end consumer GPUs",
+      "criteria": {
+        "min_vram_gb": 16,
+        "max_vram_gb": 24,
+        "requires_gpu": true
+      },
+      "models": [
+        {
+          "name": "Llama 3.2 11B",
+          "ollama_name": "llama3.2:11b",
+          "priority": 1,
+          "description": "Best balance - full precision for optimal quality",
+          "intelligence_score": 11,
+          "parameters_b": 11,
+          "min_ram_gb": 16,
+          "min_vram_gb": 16,
+          "quantized": false,
+          "ollama_command": "ollama pull llama3.2:11b",
+          "use_cases": ["general chat", "balanced performance", "quality tasks"],
+          "artificial_analysis_url": "https://artificialanalysis.ai/models/llama-3-2-instruct-11b"
+        },
+        {
+          "name": "Gemma 3 12B",
+          "ollama_name": "gemma3:12b",
+          "priority": 2,
+          "description": "Excellent quality with great translation capabilities",
+          "intelligence_score": 9,
+          "parameters_b": 12.2,
+          "min_ram_gb": 16,
+          "min_vram_gb": 16,
+          "quantized": false,
+          "ollama_command": "ollama pull gemma3:12b",
+          "use_cases": ["general tasks", "translation", "summarization", "creative writing"],
+          "artificial_analysis_url": "https://artificialanalysis.ai/models/gemma-3-12b"
+        },
+        {
+          "name": "Qwen 2.5 14B",
+          "ollama_name": "qwen2.5:14b",
+          "priority": 3,
+          "description": "Multilingual option with excellent structured output",
+          "intelligence_score": 13,
+          "parameters_b": 14,
+          "min_ram_gb": 16,
+          "min_vram_gb": 16,
+          "quantized": false,
+          "ollama_command": "ollama pull qwen2.5:14b",
+          "use_cases": ["multilingual", "structured output", "code generation"],
+          "artificial_analysis_url": "https://artificialanalysis.ai/models/qwen2-5-14b-instruct"
+        },
+        {
+          "name": "Llama 3.3 70B",
+          "ollama_name": "llama3.3:70b",
+          "priority": 4,
+          "description": "Best overall quality - quantized (requires 20GB+ VRAM)",
+          "intelligence_score": 15,
+          "parameters_b": 70,
+          "min_ram_gb": 40,
+          "min_vram_gb": 20,
+          "quantized": true,
+          "ollama_command": "ollama pull llama3.3:70b",
+          "use_cases": ["general tasks", "code generation", "reasoning", "instruction following"],
+          "artificial_analysis_url": "https://artificialanalysis.ai/models/llama-3-3-instruct-70b"
+        }
+      ]
+    },
+    {
+      "id": "gpu_24_32gb_vram",
+      "name": "GPU with 24-32GB VRAM",
+      "description": "Professional/workstation GPUs",
+      "criteria": {
+        "min_vram_gb": 24,
+        "max_vram_gb": 32,
+        "requires_gpu": true
+      },
+      "models": [
+        {
+          "name": "Llama 3.2 11B",
+          "ollama_name": "llama3.2:11b",
+          "priority": 1,
+          "description": "Best balance - full precision",
+          "intelligence_score": 11,
+          "parameters_b": 11,
+          "min_ram_gb": 16,
+          "min_vram_gb": 16,
+          "quantized": false,
+          "ollama_command": "ollama pull llama3.2:11b",
+          "use_cases": ["general chat", "balanced performance", "quality tasks"],
+          "artificial_analysis_url": "https://artificialanalysis.ai/models/llama-3-2-instruct-11b"
+        },
+        {
+          "name": "Gemma 3 12B",
+          "ollama_name": "gemma3:12b",
+          "priority": 2,
+          "description": "Excellent quality - full precision",
+          "intelligence_score": 9,
+          "parameters_b": 12.2,
+          "min_ram_gb": 16,
+          "min_vram_gb": 16,
+          "quantized": false,
+          "ollama_command": "ollama pull gemma3:12b",
+          "use_cases": ["general tasks", "translation", "summarization"],
+          "artificial_analysis_url": "https://artificialanalysis.ai/models/gemma-3-12b"
+        },
+        {
+          "name": "Qwen 2.5 14B",
+          "ollama_name": "qwen2.5:14b",
+          "priority": 3,
+          "description": "Multilingual powerhouse - full precision",
+          "intelligence_score": 13,
+          "parameters_b": 14,
+          "min_ram_gb": 16,
+          "min_vram_gb": 16,
+          "quantized": false,
+          "ollama_command": "ollama pull qwen2.5:14b",
+          "use_cases": ["multilingual", "structured output", "code generation"],
+          "artificial_analysis_url": "https://artificialanalysis.ai/models/qwen2-5-14b-instruct"
+        },
+        {
+          "name": "Llama 3.3 70B",
+          "ollama_name": "llama3.3:70b",
+          "priority": 4,
+          "description": "Best overall quality - quantized",
+          "intelligence_score": 15,
+          "parameters_b": 70,
+          "min_ram_gb": 40,
+          "min_vram_gb": 20,
+          "quantized": true,
+          "ollama_command": "ollama pull llama3.3:70b",
+          "use_cases": ["general tasks", "code generation", "reasoning", "instruction following"],
+          "artificial_analysis_url": "https://artificialanalysis.ai/models/llama-3-3-instruct-70b"
+        }
+      ]
+    },
+    {
+      "id": "gpu_32gb_plus_vram",
+      "name": "GPU with 32GB+ VRAM",
+      "description": "Enterprise/server GPUs (rare)",
+      "criteria": {
+        "min_vram_gb": 32,
+        "requires_gpu": true
+      },
+      "models": [
+        {
+          "name": "Llama 3.3 70B",
+          "ollama_name": "llama3.3:70b",
+          "priority": 1,
+          "description": "Best overall quality - full precision",
+          "intelligence_score": 15,
+          "parameters_b": 70,
+          "min_ram_gb": 64,
+          "min_vram_gb": 48,
+          "quantized": false,
+          "ollama_command": "ollama pull llama3.3:70b",
+          "use_cases": ["general tasks", "code generation", "reasoning", "instruction following"],
+          "artificial_analysis_url": "https://artificialanalysis.ai/models/llama-3-3-instruct-70b"
+        },
+        {
+          "name": "Qwen 2.5 72B",
+          "ollama_name": "qwen2.5:72b",
+          "priority": 2,
+          "description": "Multilingual powerhouse - full precision",
+          "intelligence_score": 16,
+          "parameters_b": 72,
+          "min_ram_gb": 64,
+          "min_vram_gb": 48,
+          "quantized": false,
+          "ollama_command": "ollama pull qwen2.5:72b",
+          "use_cases": ["multilingual", "structured output", "code generation"],
+          "artificial_analysis_url": "https://artificialanalysis.ai/models/qwen2-5-72b-instruct"
+        },
+        {
+          "name": "Llama 3.1 70B",
+          "ollama_name": "llama3.1:70b",
+          "priority": 3,
+          "description": "Alternative high-end option - full precision",
+          "intelligence_score": 13,
+          "parameters_b": 70,
+          "min_ram_gb": 64,
+          "min_vram_gb": 48,
+          "quantized": false,
+          "ollama_command": "ollama pull llama3.1:70b",
+          "use_cases": ["general tasks", "balanced high performance"],
+          "artificial_analysis_url": "https://artificialanalysis.ai/models/llama-3-1-instruct-70b"
+        }
+      ]
+    }
+  ]
+}

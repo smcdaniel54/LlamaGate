@@ -1,8 +1,136 @@
-# Top 5 Model Recommendations for LlamaGate
+# Hardware-Based Model Recommendations for LlamaGate
 
-**Based on ArtificialAnalysis.ai Benchmarks (v4.0) & Typical Business Hardware**  
-**Date:** 2026-01-15  
-**Source:** [ArtificialAnalysis.ai](https://artificialanalysis.ai)
+**Based on ArtificialAnalysis.ai Open Source Models & Verified Ollama Availability**  
+**Date:** 2026-01-22  
+**Source:** [ArtificialAnalysis.ai Open Source Models](https://artificialanalysis.ai/models/open-source)  
+**Data Version:** 2.0.0
+
+## 🔍 Automatic Hardware Detection
+
+LlamaGate includes built-in hardware detection that automatically recommends models based on your system's capabilities:
+
+- **CPU Detection:** Cores and model information
+- **RAM Detection:** Total system memory
+- **GPU Detection:** GPU name and VRAM (when available)
+
+### API Endpoint
+
+```bash
+# Get hardware specs and recommended models
+curl http://localhost:11434/v1/hardware/recommendations
+```
+
+**Response includes:**
+- Detected hardware specifications
+- Hardware group classification
+- **Prioritized list of 3-4 recommended models** (sorted by priority) with:
+  - Priority ranking (1 = best match, 2 = second choice, etc.)
+  - Intelligence scores (from Artificial Analysis)
+  - Parameter counts
+  - Hardware requirements
+  - Ollama commands
+  - Use cases
+  - Links to detailed benchmarks
+
+**How to use the recommendations:**
+- **Priority 1** = Best overall match - start here for general use
+- **Priority 2-3** = Alternative options with different strengths (multilingual, coding, quality)
+- **Priority 4+** = Specialized options for specific use cases
+- Compare intelligence scores to see quality differences
+- Review use cases to match models to your needs
+
+### Example Response
+
+The API returns a **prioritized list of multiple models** (typically 3-4 options) sorted by recommendation priority. Priority 1 is the best match, Priority 2 is the second choice, etc. This gives users multiple options to choose from based on their specific needs.
+
+```json
+{
+  "success": true,
+  "data": {
+    "hardware": {
+      "cpu_cores": 8,
+      "cpu_model": "Intel Core i7-9700K",
+      "total_ram_gb": 32,
+      "gpu_detected": true,
+      "gpu_name": "NVIDIA GeForce RTX 3060",
+      "gpu_vram_gb": 12,
+      "detection_method": "nvidia-smi"
+    },
+    "hardware_group": "gpu_8_16gb_vram",
+    "recommendations": [
+      {
+        "name": "Mistral 7B",
+        "ollama_name": "mistral",
+        "priority": 1,
+        "description": "Best balance - quantized for optimal performance",
+        "intelligence_score": 7.0,
+        "parameters_b": 7.0,
+        "min_ram_gb": 8,
+        "min_vram_gb": 8,
+        "quantized": true,
+        "ollama_command": "ollama pull mistral",
+        "use_cases": ["general chat", "fast responses", "production workloads"],
+        "artificial_analysis_url": "https://artificialanalysis.ai/models/mistral-7b-instruct"
+      },
+      {
+        "name": "Llama 3.2 11B",
+        "ollama_name": "llama3.2:11b",
+        "priority": 2,
+        "description": "Better quality - quantized (requires 12GB+ VRAM)",
+        "intelligence_score": 11.0,
+        "parameters_b": 11.0,
+        "min_ram_gb": 12,
+        "min_vram_gb": 12,
+        "quantized": true,
+        "ollama_command": "ollama pull llama3.2:11b",
+        "use_cases": ["general chat", "balanced performance", "quality tasks"],
+        "artificial_analysis_url": "https://artificialanalysis.ai/models/llama-3-2-instruct-11b"
+      },
+      {
+        "name": "Qwen 2.5 7B",
+        "ollama_name": "qwen2.5:7b",
+        "priority": 3,
+        "description": "Multilingual option - quantized",
+        "intelligence_score": 10.0,
+        "parameters_b": 7.0,
+        "min_ram_gb": 8,
+        "min_vram_gb": 8,
+        "quantized": true,
+        "ollama_command": "ollama pull qwen2.5:7b",
+        "use_cases": ["multilingual", "structured output", "code generation"],
+        "artificial_analysis_url": "https://artificialanalysis.ai/models/qwen2-5-7b-instruct"
+      },
+      {
+        "name": "Gemma 3 12B",
+        "ollama_name": "gemma3:12b",
+        "priority": 4,
+        "description": "Quality option - quantized (requires 12GB+ VRAM)",
+        "intelligence_score": 9.0,
+        "parameters_b": 12.2,
+        "min_ram_gb": 12,
+        "min_vram_gb": 12,
+        "quantized": true,
+        "ollama_command": "ollama pull gemma3:12b",
+        "use_cases": ["general tasks", "translation", "summarization"],
+        "artificial_analysis_url": "https://artificialanalysis.ai/models/gemma-3-12b"
+      }
+    ]
+  }
+}
+```
+
+**Understanding the Recommendations:**
+- **Priority 1** = Best overall match for your hardware (recommended starting point)
+- **Priority 2** = Alternative option, often with different strengths (e.g., better quality, multilingual)
+- **Priority 3+** = Additional options for specific use cases (multilingual, coding, etc.)
+
+**How to Choose:**
+1. **Start with Priority 1** - This is the best general-purpose match
+2. **Review Priority 2-3** - Consider if you need specific features (multilingual, structured output, etc.)
+3. **Compare intelligence scores** - Higher scores indicate better quality
+4. **Check use cases** - Match models to your specific needs
+
+---
 
 ---
 
@@ -437,9 +565,21 @@ model="llama3.3:70b"
 
 ## Benchmark Sources
 
-- [ArtificialAnalysis.ai](https://artificialanalysis.ai) - Real-world capability benchmarks (v4.0)
-- [Ollama Models](https://ollama.com/library) - Available models and sizes
-- Performance data from community benchmarks and testing
+- [ArtificialAnalysis.ai Open Source Models](https://artificialanalysis.ai/models/open-source) - Comprehensive open-source model benchmarks with intelligence scores, parameter counts, and performance metrics
+- [Ollama Library](https://ollama.com/library) - Verified model availability and download commands
+- All models in recommendations are verified to be available in Ollama and sourced from open-source models with downloadable weights
+
+## Model Data Fields
+
+Each recommended model includes:
+
+- **Intelligence Score:** Artificial Analysis Intelligence Index (higher is better)
+- **Parameters:** Model size in billions of parameters
+- **Hardware Requirements:** Minimum RAM/VRAM needed
+- **Quantization Status:** Whether the model is quantized for efficiency
+- **Ollama Command:** Ready-to-use command to download the model
+- **Use Cases:** Recommended applications for the model
+- **Benchmark Links:** Direct links to detailed Artificial Analysis benchmarks
 
 ---
 

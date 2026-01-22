@@ -93,11 +93,132 @@ This ensures that secrets never appear in log files, even if accidentally includ
 
 ## Base URL
 
-All endpoints are prefixed with `/v1/mcp`:
+Most endpoints are prefixed with `/v1/mcp`. Hardware endpoints are under `/v1/hardware`:
 
 ```
 http://localhost:11435/v1/mcp
+http://localhost:11435/v1/hardware
 ```
+
+## Hardware Detection
+
+### Get Hardware Recommendations
+
+Automatically detect system hardware (CPU, RAM, GPU, VRAM) and get recommended local LLM models based on your hardware capabilities. All models are verified to be available in Ollama and sourced from [Artificial Analysis Open Source Models](https://artificialanalysis.ai/models/open-source).
+
+**Endpoint:** `GET /v1/hardware/recommendations`
+
+**Authentication:** Not required (public endpoint, similar to `/health`)
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "hardware": {
+      "cpu_cores": 8,
+      "cpu_model": "Intel Core i7-9700K",
+      "total_ram_gb": 32,
+      "gpu_detected": true,
+      "gpu_name": "NVIDIA GeForce RTX 3060",
+      "gpu_vram_gb": 12,
+      "detection_method": "nvidia-smi"
+    },
+    "hardware_group": "gpu_8_16gb_vram",
+    "recommendations": [
+      {
+        "name": "Mistral 7B",
+        "ollama_name": "mistral",
+        "priority": 1,
+        "description": "Best balance - quantized for optimal performance",
+        "intelligence_score": 7.0,
+        "parameters_b": 7.0,
+        "min_ram_gb": 8,
+        "min_vram_gb": 8,
+        "quantized": true,
+        "ollama_command": "ollama pull mistral",
+        "use_cases": ["general chat", "fast responses", "production workloads"],
+        "artificial_analysis_url": "https://artificialanalysis.ai/models/mistral-7b-instruct"
+      },
+      {
+        "name": "Llama 3.2 11B",
+        "ollama_name": "llama3.2:11b",
+        "priority": 2,
+        "description": "Better quality - quantized (requires 12GB+ VRAM)",
+        "intelligence_score": 11.0,
+        "parameters_b": 11.0,
+        "min_ram_gb": 12,
+        "min_vram_gb": 12,
+        "quantized": true,
+        "ollama_command": "ollama pull llama3.2:11b",
+        "use_cases": ["general chat", "balanced performance", "quality tasks"],
+        "artificial_analysis_url": "https://artificialanalysis.ai/models/llama-3-2-instruct-11b"
+      },
+      {
+        "name": "Qwen 2.5 7B",
+        "ollama_name": "qwen2.5:7b",
+        "priority": 3,
+        "description": "Multilingual option - quantized",
+        "intelligence_score": 10.0,
+        "parameters_b": 7.0,
+        "min_ram_gb": 8,
+        "min_vram_gb": 8,
+        "quantized": true,
+        "ollama_command": "ollama pull qwen2.5:7b",
+        "use_cases": ["multilingual", "structured output", "code generation"],
+        "artificial_analysis_url": "https://artificialanalysis.ai/models/qwen2-5-7b-instruct"
+      }
+    ]
+  }
+}
+```
+
+**Note:** The `recommendations` array contains **multiple models (typically 3-4) sorted by priority**. Priority 1 is the best overall match, Priority 2 is the second choice, etc. This gives users multiple options to choose from based on their specific needs (speed, quality, multilingual support, etc.).
+
+**Response Fields:**
+- `hardware`: Detected system specifications
+  - `cpu_cores`: Number of logical CPU cores
+  - `cpu_model`: CPU model name
+  - `total_ram_gb`: Total system RAM in GB
+  - `gpu_detected`: Whether a GPU was detected
+  - `gpu_name`: GPU name (if detected)
+  - `gpu_vram_gb`: GPU VRAM in GB (if detected)
+  - `detection_method`: Method used for GPU detection (nvidia-smi, wmi, lspci, system_profiler)
+- `hardware_group`: Classified hardware group ID
+- `recommendations`: **Array of 3-4 recommended models, sorted by priority** (Priority 1 = best match, Priority 2 = second choice, etc.). Each model includes:
+  - `name`: Human-readable model name
+  - `ollama_name`: Ollama model identifier
+  - `priority`: Recommendation priority (1 = highest, 2 = second choice, etc.). Models are sorted by this field.
+  - `description`: Model description
+  - `intelligence_score`: Artificial Analysis Intelligence Index (optional)
+  - `parameters_b`: Model size in billions of parameters (optional)
+  - `min_ram_gb`: Minimum RAM required
+  - `min_vram_gb`: Minimum VRAM required (0 for CPU-only)
+  - `quantized`: Whether the model is quantized
+  - `ollama_command`: Ready-to-use Ollama pull command
+  - `use_cases`: Recommended use cases
+  - `artificial_analysis_url`: Link to detailed benchmarks (optional)
+
+**Example:**
+```bash
+curl http://localhost:11435/v1/hardware/recommendations
+```
+
+**Hardware Groups:**
+- `cpu_only_16_32gb`: CPU-only systems with 16-32GB RAM
+- `cpu_only_32_64gb`: CPU-only systems with 32-64GB RAM (most common)
+- `cpu_only_64gb_plus`: CPU-only systems with 64GB+ RAM
+- `gpu_4_8gb_vram`: GPUs with 4-8GB VRAM
+- `gpu_8_16gb_vram`: GPUs with 8-16GB VRAM (most common GPU config)
+- `gpu_16_24gb_vram`: GPUs with 16-24GB VRAM
+- `gpu_24_32gb_vram`: GPUs with 24-32GB VRAM
+- `gpu_32gb_plus_vram`: GPUs with 32GB+ VRAM (enterprise)
+
+**Status Codes:**
+- `200 OK` - Hardware detected and recommendations provided
+- `500 Internal Server Error` - Hardware detection failed
+
+---
 
 ## Endpoints
 
