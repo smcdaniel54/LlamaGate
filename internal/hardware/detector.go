@@ -15,12 +15,12 @@ import (
 // Specs represents detected hardware specifications
 type Specs struct {
 	CPUCores        int    `json:"cpu_cores"`
-	CPUModel        string  `json:"cpu_model"`
-	TotalRAMGB      int     `json:"total_ram_gb"`
-	GPUDetected     bool    `json:"gpu_detected"`
-	GPUName         string  `json:"gpu_name"`
-	GPUVRAMGB       int     `json:"gpu_vram_gb"`
-	DetectionMethod string  `json:"detection_method"`
+	CPUModel        string `json:"cpu_model"`
+	TotalRAMGB      int    `json:"total_ram_gb"`
+	GPUDetected     bool   `json:"gpu_detected"`
+	GPUName         string `json:"gpu_name"`
+	GPUVRAMGB       int    `json:"gpu_vram_gb"`
+	DetectionMethod string `json:"detection_method"`
 }
 
 // Detector handles hardware detection
@@ -51,13 +51,13 @@ func (d *Detector) Detect(ctx context.Context) (*Specs, error) {
 	if err != nil || len(cpuInfo) == 0 {
 		return nil, fmt.Errorf("failed to detect CPU: %w", err)
 	}
-	
+
 	// Get logical CPU count
 	cpuCount, err := cpu.CountsWithContext(ctx, true) // true = logical cores
 	if err != nil {
 		cpuCount = len(cpuInfo) // Fallback
 	}
-	
+
 	specs.CPUCores = cpuCount
 	if len(cpuInfo) > 0 {
 		specs.CPUModel = cpuInfo[0].ModelName
@@ -120,7 +120,7 @@ func (d *Detector) detectNVIDIAGPU(ctx context.Context, specs *Specs) bool {
 	if len(parts) >= 2 {
 		specs.GPUDetected = true
 		specs.GPUName = strings.Trim(strings.TrimSpace(parts[0]), "\"")
-		
+
 		var vramMB int
 		if _, err := fmt.Sscanf(strings.TrimSpace(parts[1]), "%d", &vramMB); err == nil {
 			specs.GPUVRAMGB = vramMB / 1024
@@ -146,7 +146,7 @@ func (d *Detector) detectGPUWindows(ctx context.Context, specs *Specs) {
 	outputStr := string(output)
 	if strings.Contains(outputStr, "Name") {
 		specs.GPUDetected = true
-		
+
 		// Extract GPU name
 		if nameIdx := strings.Index(outputStr, `"Name"`); nameIdx > 0 {
 			nameStart := strings.Index(outputStr[nameIdx:], ":")
@@ -221,7 +221,7 @@ func (d *Detector) detectGPUMacOS(ctx context.Context, specs *Specs) {
 	outputStr := string(output)
 	if strings.Contains(outputStr, "Chipset Model:") {
 		specs.GPUDetected = true
-		
+
 		// Extract GPU name
 		lines := strings.Split(outputStr, "\n")
 		for _, line := range lines {

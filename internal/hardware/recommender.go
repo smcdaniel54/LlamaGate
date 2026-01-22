@@ -40,7 +40,7 @@ type ModelRecommendation struct {
 	Quantized             bool     `json:"quantized"`
 	OllamaCommand         string   `json:"ollama_command"`
 	UseCases              []string `json:"use_cases"`
-	ArtificialAnalysisURL string  `json:"artificial_analysis_url,omitempty"`
+	ArtificialAnalysisURL string   `json:"artificial_analysis_url,omitempty"`
 }
 
 // Recommender struct and methods are now in data.go (using embedded data)

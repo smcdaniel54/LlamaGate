@@ -64,9 +64,9 @@ func TestRouteManager_RegisterExtensionRoutes(t *testing.T) {
 	requiresAuth := false
 	manifest := createTestManifest("test-extension", []EndpointDefinition{
 		{
-			Path:        "/test",
-			Method:      "GET",
-			Description: "Test endpoint",
+			Path:         "/test",
+			Method:       "GET",
+			Description:  "Test endpoint",
 			RequiresAuth: &requiresAuth,
 		},
 	})

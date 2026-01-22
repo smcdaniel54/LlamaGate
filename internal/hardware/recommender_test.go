@@ -60,7 +60,7 @@ func TestRecommender_LoadRecommendations(t *testing.T) {
 	assert.Equal(t, "artificialanalysis.ai/models/open-source (verified Ollama availability)", r.recommendationsData.Source)
 	assert.Equal(t, "Test data", r.recommendationsData.Description)
 	assert.Len(t, r.recommendationsData.HardwareGroups, 1)
-	
+
 	// Verify model with new fields
 	model := r.recommendationsData.HardwareGroups[0].Models[0]
 	assert.Equal(t, "Test Model", model.Name)
@@ -142,12 +142,12 @@ func TestRecommender_ClassifyHardwareGroup_GPU(t *testing.T) {
 
 	// Test GPU classification
 	specs := &Specs{
-		CPUCores:       8,
-		CPUModel:       "Test CPU",
-		TotalRAMGB:     32,
-		GPUDetected:    true,
-		GPUName:        "Test GPU",
-		GPUVRAMGB:      10,
+		CPUCores:        8,
+		CPUModel:        "Test CPU",
+		TotalRAMGB:      32,
+		GPUDetected:     true,
+		GPUName:         "Test GPU",
+		GPUVRAMGB:       10,
 		DetectionMethod: "nvidia-smi",
 	}
 
@@ -227,7 +227,7 @@ func TestRecommender_GetRecommendations_MultipleModels(t *testing.T) {
 	recommendations, err := r.GetRecommendations("test_group")
 	require.NoError(t, err)
 	require.Len(t, recommendations, 3)
-	
+
 	// Verify models are sorted by priority (1, 2, 3)
 	assert.Equal(t, "Model B", recommendations[0].Name, "Priority 1 should be first")
 	assert.Equal(t, 1, recommendations[0].Priority)
@@ -280,7 +280,7 @@ func TestRecommender_GetRecommendations(t *testing.T) {
 	recommendations, err := r.GetRecommendations("test_group")
 	require.NoError(t, err)
 	require.Len(t, recommendations, 1)
-	
+
 	model := recommendations[0]
 	assert.Equal(t, "Test Model", model.Name)
 	assert.Equal(t, "test-model", model.OllamaName)
@@ -352,10 +352,10 @@ func TestModelRecommendation_OptionalFields(t *testing.T) {
 	recommendations, err := r.GetRecommendations("test_group")
 	require.NoError(t, err)
 	require.Len(t, recommendations, 1)
-	
+
 	model := recommendations[0]
 	assert.Equal(t, "Test Model", model.Name)
-	assert.Nil(t, model.IntelligenceScore) // Should be nil when omitted
-	assert.Nil(t, model.ParametersB)      // Should be nil when omitted
+	assert.Nil(t, model.IntelligenceScore)       // Should be nil when omitted
+	assert.Nil(t, model.ParametersB)             // Should be nil when omitted
 	assert.Empty(t, model.ArtificialAnalysisURL) // Should be empty when omitted
 }

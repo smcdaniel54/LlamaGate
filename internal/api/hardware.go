@@ -20,7 +20,7 @@ type HardwareHandler struct {
 func NewHardwareHandler() *HardwareHandler {
 	detector := hardware.NewDetector()
 	recommender := hardware.NewRecommender()
-	
+
 	// Load recommendations data (embedded, should always succeed)
 	if err := recommender.LoadRecommendations(); err != nil {
 		log.Warn().Err(err).Msg("Failed to load embedded hardware recommendations data")

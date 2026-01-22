@@ -56,13 +56,13 @@ type HookDefinition struct {
 
 // EndpointDefinition defines a custom HTTP endpoint for an extension
 type EndpointDefinition struct {
-	Path            string                 `yaml:"path"`
-	Method          string                 `yaml:"method"`
-	Description     string                 `yaml:"description"`
-	RequestSchema   map[string]interface{} `yaml:"request_schema,omitempty"`
-	ResponseSchema  map[string]interface{} `yaml:"response_schema,omitempty"`
-	RequiresAuth    *bool                  `yaml:"requires_auth,omitempty"`
-	RequiresRateLimit *bool                `yaml:"requires_rate_limit,omitempty"`
+	Path              string                 `yaml:"path"`
+	Method            string                 `yaml:"method"`
+	Description       string                 `yaml:"description"`
+	RequestSchema     map[string]interface{} `yaml:"request_schema,omitempty"`
+	ResponseSchema    map[string]interface{} `yaml:"response_schema,omitempty"`
+	RequiresAuth      *bool                  `yaml:"requires_auth,omitempty"`
+	RequiresRateLimit *bool                  `yaml:"requires_rate_limit,omitempty"`
 }
 
 // LoadManifest loads a manifest from a file path

@@ -30,8 +30,11 @@ type Recommender struct {
 func NewRecommender() *Recommender {
 	r := &Recommender{}
 	// Load embedded data immediately
-	if data, err := loadEmbeddedRecommendations(); err == nil {
+	data, err := loadEmbeddedRecommendations()
+	if err == nil {
+		r.mu.Lock()
 		r.recommendationsData = data
+		r.mu.Unlock()
 	}
 	return r
 }
@@ -144,7 +147,7 @@ func (r *Recommender) GetRecommendations(groupID string) ([]ModelRecommendation,
 			// Models are already stored in priority order in JSON, but we ensure they're sorted
 			models := make([]ModelRecommendation, len(group.Models))
 			copy(models, group.Models)
-			
+
 			// Sort by priority (ascending: 1, 2, 3...)
 			// Using insertion sort since the list is typically small (< 10 items)
 			for i := 1; i < len(models); i++ {
@@ -156,7 +159,7 @@ func (r *Recommender) GetRecommendations(groupID string) ([]ModelRecommendation,
 				}
 				models[j+1] = key
 			}
-			
+
 			return models, nil
 		}
 	}
