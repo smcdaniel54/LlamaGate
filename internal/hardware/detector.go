@@ -122,8 +122,9 @@ func (d *Detector) detectNVIDIAGPU(ctx context.Context, specs *Specs) bool {
 		specs.GPUName = strings.Trim(strings.TrimSpace(parts[0]), "\"")
 		
 		var vramMB int
-		fmt.Sscanf(strings.TrimSpace(parts[1]), "%d", &vramMB)
-		specs.GPUVRAMGB = vramMB / 1024
+		if _, err := fmt.Sscanf(strings.TrimSpace(parts[1]), "%d", &vramMB); err == nil {
+			specs.GPUVRAMGB = vramMB / 1024
+		}
 		specs.DetectionMethod = "nvidia-smi"
 		return true
 	}
@@ -166,8 +167,7 @@ func (d *Detector) detectGPUWindows(ctx context.Context, specs *Specs) {
 			if ramStart > 0 {
 				var ramBytes int64
 				ramPart := strings.TrimSpace(outputStr[ramIdx+ramStart+1:])
-				fmt.Sscanf(ramPart, "%d", &ramBytes)
-				if ramBytes > 0 {
+				if _, err := fmt.Sscanf(ramPart, "%d", &ramBytes); err == nil && ramBytes > 0 {
 					vramGB := int(ramBytes / (1024 * 1024 * 1024))
 					// Cap at reasonable maximum (some systems report shared memory)
 					if vramGB <= 128 {
@@ -238,8 +238,7 @@ func (d *Detector) detectGPUMacOS(ctx context.Context, specs *Specs) {
 		for _, line := range lines {
 			if strings.Contains(line, "VRAM") {
 				var vramMB int
-				fmt.Sscanf(line, "%*s VRAM: %d", &vramMB)
-				if vramMB > 0 {
+				if _, err := fmt.Sscanf(line, "%*s VRAM: %d", &vramMB); err == nil && vramMB > 0 {
 					specs.GPUVRAMGB = vramMB / 1024
 				}
 				break
