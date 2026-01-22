@@ -112,8 +112,8 @@ func main() {
 	// Hardware recommendations endpoint - register BEFORE auth middleware
 	// This allows clients to check hardware recommendations without API key
 	// Extensions can access this via HTTP calls to /v1/hardware/recommendations
-	dataFilePath := "internal/extensions/builtin/hardware/data/model-recommendations.json"
-	hardwareHandler := api.NewHardwareHandler(dataFilePath)
+	// Data is embedded in the binary, no external file needed
+	hardwareHandler := api.NewHardwareHandler()
 	router.GET("/v1/hardware/recommendations", hardwareHandler.GetRecommendations)
 
 	// Auth middleware (if API key is configured)

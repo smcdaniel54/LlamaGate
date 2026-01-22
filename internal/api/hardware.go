@@ -17,13 +17,13 @@ type HardwareHandler struct {
 }
 
 // NewHardwareHandler creates a new hardware handler
-func NewHardwareHandler(dataFilePath string) *HardwareHandler {
+func NewHardwareHandler() *HardwareHandler {
 	detector := hardware.NewDetector()
-	recommender := hardware.NewRecommender(dataFilePath)
+	recommender := hardware.NewRecommender()
 	
-	// Load recommendations data
+	// Load recommendations data (embedded, should always succeed)
 	if err := recommender.LoadRecommendations(); err != nil {
-		log.Warn().Err(err).Msg("Failed to load hardware recommendations data")
+		log.Warn().Err(err).Msg("Failed to load embedded hardware recommendations data")
 	}
 
 	return &HardwareHandler{
@@ -48,33 +48,29 @@ func (h *HardwareHandler) GetRecommendations(c *gin.Context) {
 		return
 	}
 
-	// Classify hardware group
-	groupID, err := h.recommender.ClassifyHardwareGroup(specs)
-	if err != nil {
-		log.Error().
-			Str("request_id", requestID).
-			Err(err).
-			Msg("Hardware classification failed")
-		response.InternalError(c, "Failed to classify hardware", requestID)
-		return
-	}
-
-	// Get recommendations
-	recommendations, err := h.recommender.GetRecommendations(groupID)
-	if err != nil {
-		log.Error().
-			Str("request_id", requestID).
-			Err(err).
-			Msg("Failed to get recommendations")
-		response.InternalError(c, "Failed to get recommendations", requestID)
-		return
-	}
-
-	// Build output
+	// Build output with hardware specs
 	output := map[string]interface{}{
-		"hardware":        specs,
-		"hardware_group":   groupID,
-		"recommendations": recommendations,
+		"hardware": specs,
+	}
+
+	// Get recommendations (data is embedded in binary)
+	groupID, err := h.recommender.ClassifyHardwareGroup(specs)
+	if err == nil {
+		recommendations, err := h.recommender.GetRecommendations(groupID)
+		if err == nil {
+			output["hardware_group"] = groupID
+			output["recommendations"] = recommendations
+		} else {
+			log.Debug().
+				Str("request_id", requestID).
+				Err(err).
+				Msg("Recommendations not available")
+		}
+	} else {
+		log.Debug().
+			Str("request_id", requestID).
+			Err(err).
+			Msg("Hardware classification not available")
 	}
 
 	// Return the result as JSON

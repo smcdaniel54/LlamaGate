@@ -49,8 +49,8 @@ func TestRecommender_LoadRecommendations(t *testing.T) {
 	}`
 	require.NoError(t, os.WriteFile(dataFile, []byte(testData), 0644))
 
-	r := NewRecommender(dataFile)
-	err := r.LoadRecommendations()
+	r := NewRecommender()
+	err := r.LoadFromFile(dataFile)
 	require.NoError(t, err)
 
 	// Verify data was loaded
@@ -96,8 +96,8 @@ func TestRecommender_ClassifyHardwareGroup_CPUOnly(t *testing.T) {
 	}`
 	require.NoError(t, os.WriteFile(dataFile, []byte(testData), 0644))
 
-	r := NewRecommender(dataFile)
-	require.NoError(t, r.LoadRecommendations())
+	r := NewRecommender()
+	require.NoError(t, r.LoadFromFile(dataFile))
 
 	// Test CPU-only classification
 	specs := &Specs{
@@ -137,8 +137,8 @@ func TestRecommender_ClassifyHardwareGroup_GPU(t *testing.T) {
 	}`
 	require.NoError(t, os.WriteFile(dataFile, []byte(testData), 0644))
 
-	r := NewRecommender(dataFile)
-	require.NoError(t, r.LoadRecommendations())
+	r := NewRecommender()
+	require.NoError(t, r.LoadFromFile(dataFile))
 
 	// Test GPU classification
 	specs := &Specs{
@@ -221,8 +221,8 @@ func TestRecommender_GetRecommendations_MultipleModels(t *testing.T) {
 	}`
 	require.NoError(t, os.WriteFile(dataFile, []byte(testData), 0644))
 
-	r := NewRecommender(dataFile)
-	require.NoError(t, r.LoadRecommendations())
+	r := NewRecommender()
+	require.NoError(t, r.LoadFromFile(dataFile))
 
 	recommendations, err := r.GetRecommendations("test_group")
 	require.NoError(t, err)
@@ -274,8 +274,8 @@ func TestRecommender_GetRecommendations(t *testing.T) {
 	}`
 	require.NoError(t, os.WriteFile(dataFile, []byte(testData), 0644))
 
-	r := NewRecommender(dataFile)
-	require.NoError(t, r.LoadRecommendations())
+	r := NewRecommender()
+	require.NoError(t, r.LoadFromFile(dataFile))
 
 	recommendations, err := r.GetRecommendations("test_group")
 	require.NoError(t, err)
@@ -303,8 +303,8 @@ func TestRecommender_GetRecommendations_NotFound(t *testing.T) {
 	}`
 	require.NoError(t, os.WriteFile(dataFile, []byte(testData), 0644))
 
-	r := NewRecommender(dataFile)
-	require.NoError(t, r.LoadRecommendations())
+	r := NewRecommender()
+	require.NoError(t, r.LoadFromFile(dataFile))
 
 	_, err := r.GetRecommendations("nonexistent")
 	require.Error(t, err)
@@ -346,8 +346,8 @@ func TestModelRecommendation_OptionalFields(t *testing.T) {
 	}`
 	require.NoError(t, os.WriteFile(dataFile, []byte(testData), 0644))
 
-	r := NewRecommender(dataFile)
-	require.NoError(t, r.LoadRecommendations())
+	r := NewRecommender()
+	require.NoError(t, r.LoadFromFile(dataFile))
 
 	recommendations, err := r.GetRecommendations("test_group")
 	require.NoError(t, err)

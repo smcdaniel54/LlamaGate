@@ -7,11 +7,12 @@
 
 ## 🔍 Automatic Hardware Detection
 
-LlamaGate includes built-in hardware detection that automatically recommends models based on your system's capabilities:
+LlamaGate includes built-in hardware detection that automatically recommends models based on your system's capabilities. **The model recommendations data is embedded directly in the LlamaGate binary** - no external files or configuration required.
 
 - **CPU Detection:** Cores and model information
 - **RAM Detection:** Total system memory
 - **GPU Detection:** GPU name and VRAM (when available)
+- **Data Source:** Model recommendations are compiled into the binary using embedded data
 
 ### API Endpoint
 

@@ -106,6 +106,8 @@ http://localhost:11435/v1/hardware
 
 Automatically detect system hardware (CPU, RAM, GPU, VRAM) and get recommended local LLM models based on your hardware capabilities. All models are verified to be available in Ollama and sourced from [Artificial Analysis Open Source Models](https://artificialanalysis.ai/models/open-source).
 
+**Note:** The model recommendations data is embedded directly in the LlamaGate binary - no external files or configuration required. The data is automatically loaded when the server starts.
+
 **Endpoint:** `GET /v1/hardware/recommendations`
 
 **Authentication:** Not required (public endpoint, similar to `/health`)
