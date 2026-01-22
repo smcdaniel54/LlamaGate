@@ -157,6 +157,20 @@ func (h *Handler) ExecuteExtension(c *gin.Context) {
 // POST /v1/extensions/refresh
 func (h *Handler) RefreshExtensions(c *gin.Context) {
 	requestID := middleware.GetRequestID(c)
+	
+	// Ensure we always send a response, even if something goes wrong
+	defer func() {
+		if r := recover(); r != nil {
+			log.Error().
+				Str("request_id", requestID).
+				Interface("panic", r).
+				Msg("Panic in RefreshExtensions handler")
+			// Only send error if response hasn't been written yet
+			if !c.Writer.Written() {
+				response.InternalError(c, fmt.Sprintf("Internal error during refresh: %v", r), requestID)
+			}
+		}
+	}()
 
 	// Get current extensions before refresh
 	currentManifests := h.registry.List()
@@ -165,8 +179,22 @@ func (h *Handler) RefreshExtensions(c *gin.Context) {
 		currentNames[manifest.Name] = true
 	}
 
-	// Re-discover extensions
-	manifests, discoverErr := DiscoverExtensions(h.baseDir)
+	// Re-discover extensions with panic recovery
+	var manifests []*Manifest
+	var discoverErr error
+	func() {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Error().
+					Str("request_id", requestID).
+					Interface("panic", r).
+					Msg("Panic during extension discovery")
+				discoverErr = fmt.Errorf("panic during discovery: %v", r)
+			}
+		}()
+		manifests, discoverErr = DiscoverExtensions(h.baseDir)
+	}()
+	
 	if discoverErr != nil {
 		log.Warn().
 			Str("request_id", requestID).
@@ -215,14 +243,27 @@ func (h *Handler) RefreshExtensions(c *gin.Context) {
 					h.routeManager.UnregisterExtensionRoutes(manifest.Name)
 					// Register new routes
 					if len(manifest.Endpoints) > 0 {
-						if err := h.routeManager.RegisterExtensionRoutes(manifest); err != nil {
-							log.Warn().
-								Str("request_id", requestID).
-								Str("extension", manifest.Name).
-								Err(err).
-								Msg("Failed to register extension routes during refresh")
-							errors = append(errors, fmt.Sprintf("%s (routes): %v", manifest.Name, err))
-						}
+						// Use recover to catch any panics during route registration
+						func() {
+							defer func() {
+								if r := recover(); r != nil {
+									log.Error().
+										Str("request_id", requestID).
+										Str("extension", manifest.Name).
+										Interface("panic", r).
+										Msg("Panic during route registration, continuing with refresh")
+									errors = append(errors, fmt.Sprintf("%s (routes): panic during registration: %v", manifest.Name, r))
+								}
+							}()
+							if err := h.routeManager.RegisterExtensionRoutes(manifest); err != nil {
+								log.Warn().
+									Str("request_id", requestID).
+									Str("extension", manifest.Name).
+									Err(err).
+									Msg("Failed to register extension routes during refresh")
+								errors = append(errors, fmt.Sprintf("%s (routes): %v", manifest.Name, err))
+							}
+						}()
 					}
 				}
 			}
@@ -247,14 +288,27 @@ func (h *Handler) RefreshExtensions(c *gin.Context) {
 
 				// Register routes if route manager is available
 				if h.routeManager != nil && len(manifest.Endpoints) > 0 {
-					if err := h.routeManager.RegisterExtensionRoutes(manifest); err != nil {
-						log.Warn().
-							Str("request_id", requestID).
-							Str("extension", manifest.Name).
-							Err(err).
-							Msg("Failed to register extension routes during refresh")
-						errors = append(errors, fmt.Sprintf("%s (routes): %v", manifest.Name, err))
-					}
+					// Use recover to catch any panics during route registration
+					func() {
+						defer func() {
+							if r := recover(); r != nil {
+								log.Error().
+									Str("request_id", requestID).
+									Str("extension", manifest.Name).
+									Interface("panic", r).
+									Msg("Panic during route registration, continuing with refresh")
+								errors = append(errors, fmt.Sprintf("%s (routes): panic during registration: %v", manifest.Name, r))
+							}
+						}()
+						if err := h.routeManager.RegisterExtensionRoutes(manifest); err != nil {
+							log.Warn().
+								Str("request_id", requestID).
+								Str("extension", manifest.Name).
+								Err(err).
+								Msg("Failed to register extension routes during refresh")
+							errors = append(errors, fmt.Sprintf("%s (routes): %v", manifest.Name, err))
+						}
+					}()
 				}
 			}
 		}
