@@ -135,3 +135,127 @@ func TestValidateManifest_ActionableErrors(t *testing.T) {
 		})
 	}
 }
+
+func TestValidateManifest_Endpoints(t *testing.T) {
+	tests := []struct {
+		name     string
+		manifest *Manifest
+		wantErr  bool
+		errMsg   string
+	}{
+		{
+			name: "non-workflow with endpoints",
+			manifest: &Manifest{
+				Name:        "test",
+				Version:     "1.0.0",
+				Description: "Test",
+				Type:        "middleware",
+				Hooks: []HookDefinition{
+					{On: "http.request", Action: "log"},
+				},
+				Endpoints: []EndpointDefinition{
+					{Path: "/test", Method: "GET", Description: "Test"},
+				},
+			},
+			wantErr: true,
+			errMsg:  "only workflow extensions can define endpoints",
+		},
+		{
+			name: "endpoint missing path",
+			manifest: &Manifest{
+				Name:        "test",
+				Version:     "1.0.0",
+				Description: "Test",
+				Type:        "workflow",
+				Steps: []WorkflowStep{
+					{Uses: "llm.chat"},
+				},
+				Endpoints: []EndpointDefinition{
+					{Method: "GET", Description: "Test"},
+				},
+			},
+			wantErr: true,
+			errMsg:  "missing 'path' field",
+		},
+		{
+			name: "endpoint path without leading slash",
+			manifest: &Manifest{
+				Name:        "test",
+				Version:     "1.0.0",
+				Description: "Test",
+				Type:        "workflow",
+				Steps: []WorkflowStep{
+					{Uses: "llm.chat"},
+				},
+				Endpoints: []EndpointDefinition{
+					{Path: "test", Method: "GET", Description: "Test"},
+				},
+			},
+			wantErr: true,
+			errMsg:  "Path must start with '/'",
+		},
+		{
+			name: "endpoint missing method",
+			manifest: &Manifest{
+				Name:        "test",
+				Version:     "1.0.0",
+				Description: "Test",
+				Type:        "workflow",
+				Steps: []WorkflowStep{
+					{Uses: "llm.chat"},
+				},
+				Endpoints: []EndpointDefinition{
+					{Path: "/test", Description: "Test"},
+				},
+			},
+			wantErr: true,
+			errMsg:  "missing 'method' field",
+		},
+		{
+			name: "endpoint invalid method",
+			manifest: &Manifest{
+				Name:        "test",
+				Version:     "1.0.0",
+				Description: "Test",
+				Type:        "workflow",
+				Steps: []WorkflowStep{
+					{Uses: "llm.chat"},
+				},
+				Endpoints: []EndpointDefinition{
+					{Path: "/test", Method: "INVALID", Description: "Test"},
+				},
+			},
+			wantErr: true,
+			errMsg:  "invalid method",
+		},
+		{
+			name: "valid endpoints",
+			manifest: &Manifest{
+				Name:        "test",
+				Version:     "1.0.0",
+				Description: "Test",
+				Type:        "workflow",
+				Steps: []WorkflowStep{
+					{Uses: "llm.chat"},
+				},
+				Endpoints: []EndpointDefinition{
+					{Path: "/test", Method: "GET", Description: "Test endpoint"},
+					{Path: "/post", Method: "POST", Description: "POST endpoint"},
+				},
+			},
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := ValidateManifest(tt.manifest)
+			if tt.wantErr {
+				assert.Error(t, err)
+				assert.Contains(t, err.Error(), tt.errMsg)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}

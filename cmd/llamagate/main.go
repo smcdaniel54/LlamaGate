@@ -155,6 +155,41 @@ func main() {
 	// Set response hooks in proxy (for cost-usage-reporter)
 	proxyInstance.SetResponseHook(extensionHookManager.ExecuteResponseHooks)
 
+	// Create LLM handler for extensions (needed for workflow executor)
+	llmHandler := proxyInstance.CreateExtensionLLMHandler()
+
+	// Create workflow executor for extension endpoints
+	workflowExecutor := extensions.NewWorkflowExecutor(llmHandler, extensionBaseDir)
+	workflowExecutor.SetRegistry(extensionRegistry) // Enable extension-to-extension calls
+
+	// Create route manager for dynamic extension endpoints
+	routeManager := extensions.NewRouteManager(
+		router,
+		extensionRegistry,
+		workflowExecutor,
+		extensionBaseDir,
+		cfg.APIKey,
+		rateLimitMiddleware,
+	)
+
+	// Register extension routes
+	for _, manifest := range manifests {
+		if len(manifest.Endpoints) > 0 {
+			if err := routeManager.RegisterExtensionRoutes(manifest); err != nil {
+				log.Error().
+					Str("extension", manifest.Name).
+					Err(err).
+					Msg("Failed to register extension routes")
+				// Continue with other extensions
+			} else {
+				log.Info().
+					Str("extension", manifest.Name).
+					Int("endpoints", len(manifest.Endpoints)).
+					Msg("Registered extension routes")
+			}
+		}
+	}
+
 	// All routes below will require authentication when API_KEY is set
 	// OpenAI-compatible endpoints
 	v1 := router.Group("/v1")
@@ -194,9 +229,8 @@ func main() {
 		}
 
 		// Extension system endpoints
-		// Create LLM handler for extensions
-		llmHandler := proxyInstance.CreateExtensionLLMHandler()
 		extensionHandler := extensions.NewHandler(extensionRegistry, llmHandler, extensionBaseDir)
+		extensionHandler.SetRouteManager(routeManager) // Set route manager for refresh endpoint
 		extensionsGroup := v1.Group("/extensions")
 		{
 			extensionsGroup.GET("", extensionHandler.ListExtensions)

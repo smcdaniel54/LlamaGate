@@ -1,0 +1,62 @@
+name: deck-builder
+version: 1.0.0
+description: Creates executive presentation structure and deck plan
+type: workflow
+enabled: true
+
+inputs:
+  - id: roi_summary
+    type: object
+    description: ROI summary
+    required: true
+  - id: recommendations
+    type: string
+    description: Recommendations text
+    required: true
+  - id: executive_summary
+    type: string
+    description: Executive summary
+    required: true
+  - id: business_process_data
+    type: object
+    description: Business process data
+    required: true
+
+outputs:
+  - id: deck_plan
+    type: object
+    description: Presentation deck structure (JSON)
+
+steps:
+  - name: build_deck_plan
+    uses: llm.chat
+    config:
+      model: mistral
+      system_prompt: |
+        You are a presentation design expert. Create executive presentation deck structures
+        for ROI assessments. Return JSON with slide structure.
+      user_prompt: |
+        Create a deck plan for this ROI assessment presentation:
+        
+        ROI Summary: {{inputs.roi_summary}}
+        Executive Summary: {{inputs.executive_summary}}
+        Recommendations: {{inputs.recommendations}}
+        Business Process: {{inputs.business_process_data.workflow_info.workflow_name}}
+        
+        Create a 10-15 slide deck structure with:
+        - Title slide
+        - Executive summary
+        - Current state
+        - Proposed solution
+        - Financial analysis (ROI, savings, payback)
+        - Risk assessment
+        - Recommendations
+        - Implementation timeline
+        - Next steps
+        - Appendix
+        
+        For each slide, provide: title, key_points, data_to_include, visualizations_needed.
+        
+        Return JSON structure.
+    outputs:
+      deck_plan: ${steps.build_deck_plan.output.content}

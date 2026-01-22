@@ -1,0 +1,57 @@
+name: productivity-analyst
+version: 1.0.0
+description: Assesses productivity improvements and time savings potential
+type: workflow
+enabled: true
+
+inputs:
+  - id: business_process_data
+    type: object
+    description: Business process data
+    required: true
+  - id: cost_analysis
+    type: object
+    description: Cost analysis from previous step
+    required: true
+
+outputs:
+  - id: productivity_analysis
+    type: object
+    description: Productivity analysis including time savings, efficiency gains, and capacity improvements
+
+steps:
+  - name: analyze_productivity
+    uses: llm.chat
+    config:
+      model: mistral
+      system_prompt: |
+        You are a productivity and efficiency analyst. Analyze business processes to identify
+        productivity improvement opportunities. Return structured JSON with:
+        - automation_potential (percentage)
+        - time_savings_hours_per_week
+        - efficiency_gains (percentage)
+        - capacity_improvements
+        - quality_improvements
+        - speed_improvements
+      user_prompt: |
+        Analyze productivity improvements for this business process:
+        
+        Business Process: {{inputs.business_process_data}}
+        Current Costs: {{inputs.cost_analysis}}
+        
+        Based on:
+        - Workflow type and complexity
+        - Industry benchmarks
+        - Automation potential
+        - Savings rate assumption
+        
+        Calculate:
+        1. Automation potential percentage
+        2. Time savings (hours per week)
+        3. Efficiency gains
+        4. Capacity improvements (can handle X% more volume)
+        5. Quality improvements (error reduction)
+        
+        Return JSON with all productivity metrics.
+    outputs:
+      productivity_analysis: ${steps.analyze_productivity.output.content}

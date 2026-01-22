@@ -22,6 +22,7 @@ type Manifest struct {
 	Outputs     []OutputDefinition     `yaml:"outputs,omitempty"`
 	Steps       []WorkflowStep         `yaml:"steps,omitempty"`
 	Hooks       []HookDefinition       `yaml:"hooks,omitempty"`
+	Endpoints   []EndpointDefinition   `yaml:"endpoints,omitempty"`
 }
 
 // InputDefinition defines an input parameter
@@ -51,6 +52,17 @@ type HookDefinition struct {
 	On     string                 `yaml:"on"` // "http.request", "llm.response"
 	Match  map[string]interface{} `yaml:"match,omitempty"`
 	Action string                 `yaml:"action"`
+}
+
+// EndpointDefinition defines a custom HTTP endpoint for an extension
+type EndpointDefinition struct {
+	Path            string                 `yaml:"path"`
+	Method          string                 `yaml:"method"`
+	Description     string                 `yaml:"description"`
+	RequestSchema   map[string]interface{} `yaml:"request_schema,omitempty"`
+	ResponseSchema  map[string]interface{} `yaml:"response_schema,omitempty"`
+	RequiresAuth    *bool                  `yaml:"requires_auth,omitempty"`
+	RequiresRateLimit *bool                `yaml:"requires_rate_limit,omitempty"`
 }
 
 // LoadManifest loads a manifest from a file path
@@ -152,6 +164,41 @@ func ValidateManifest(m *Manifest) error {
 		}
 		if !validInputTypes[input.Type] {
 			return fmt.Errorf("validation error: input '%s' in extension '%s' has invalid type '%s'. Must be one of: string, number, boolean, object, array", input.ID, m.Name, input.Type)
+		}
+	}
+
+	// Validate endpoints (only workflow extensions can have endpoints)
+	if len(m.Endpoints) > 0 && m.Type != "workflow" {
+		return fmt.Errorf("validation error: only workflow extensions can define endpoints. Extension '%s' is type '%s'", m.Name, m.Type)
+	}
+
+	// Validate endpoint definitions
+	validMethods := map[string]bool{
+		"GET":     true,
+		"POST":    true,
+		"PUT":     true,
+		"DELETE":  true,
+		"PATCH":   true,
+		"HEAD":    true,
+		"OPTIONS": true,
+	}
+
+	for i, endpoint := range m.Endpoints {
+		// Validate path
+		if endpoint.Path == "" {
+			return fmt.Errorf("validation error: endpoint %d in extension '%s' is missing 'path' field", i, m.Name)
+		}
+		if !strings.HasPrefix(endpoint.Path, "/") {
+			return fmt.Errorf("validation error: endpoint %d in extension '%s' has invalid path '%s'. Path must start with '/'", i, m.Name, endpoint.Path)
+		}
+
+		// Validate method
+		method := strings.ToUpper(endpoint.Method)
+		if endpoint.Method == "" {
+			return fmt.Errorf("validation error: endpoint %d in extension '%s' is missing 'method' field", i, m.Name)
+		}
+		if !validMethods[method] {
+			return fmt.Errorf("validation error: endpoint %d in extension '%s' has invalid method '%s'. Must be one of: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS", i, m.Name, endpoint.Method)
 		}
 	}
 

@@ -18,6 +18,7 @@ type Handler struct {
 	registry         *Registry
 	workflowExecutor *WorkflowExecutor
 	baseDir          string
+	routeManager     *RouteManager // Can be nil if not set
 }
 
 // NewHandler creates a new extension handler
@@ -28,7 +29,13 @@ func NewHandler(registry *Registry, llmHandler LLMHandlerFunc, baseDir string) *
 		registry:         registry,
 		workflowExecutor: executor,
 		baseDir:          baseDir,
+		routeManager:     nil, // Set via SetRouteManager
 	}
+}
+
+// SetRouteManager sets the route manager for refreshing routes
+func (h *Handler) SetRouteManager(rm *RouteManager) {
+	h.routeManager = rm
 }
 
 // ListExtensions lists all registered extensions
@@ -201,6 +208,23 @@ func (h *Handler) RefreshExtensions(c *gin.Context) {
 					Str("extension", manifest.Name).
 					Str("version", manifest.Version).
 					Msg("Extension updated during refresh")
+
+				// Update routes if route manager is available
+				if h.routeManager != nil {
+					// Unregister old routes first
+					h.routeManager.UnregisterExtensionRoutes(manifest.Name)
+					// Register new routes
+					if len(manifest.Endpoints) > 0 {
+						if err := h.routeManager.RegisterExtensionRoutes(manifest); err != nil {
+							log.Warn().
+								Str("request_id", requestID).
+								Str("extension", manifest.Name).
+								Err(err).
+								Msg("Failed to register extension routes during refresh")
+							errors = append(errors, fmt.Sprintf("%s (routes): %v", manifest.Name, err))
+						}
+					}
+				}
 			}
 		} else {
 			// New extension - register it
@@ -220,6 +244,18 @@ func (h *Handler) RefreshExtensions(c *gin.Context) {
 					Str("type", manifest.Type).
 					Bool("enabled", manifest.IsEnabled()).
 					Msg("Extension registered during refresh")
+
+				// Register routes if route manager is available
+				if h.routeManager != nil && len(manifest.Endpoints) > 0 {
+					if err := h.routeManager.RegisterExtensionRoutes(manifest); err != nil {
+						log.Warn().
+							Str("request_id", requestID).
+							Str("extension", manifest.Name).
+							Err(err).
+							Msg("Failed to register extension routes during refresh")
+						errors = append(errors, fmt.Sprintf("%s (routes): %v", manifest.Name, err))
+					}
+				}
 			}
 		}
 	}
@@ -240,6 +276,11 @@ func (h *Handler) RefreshExtensions(c *gin.Context) {
 					Str("request_id", requestID).
 					Str("extension", name).
 					Msg("Extension removed during refresh")
+
+				// Unregister routes if route manager is available
+				if h.routeManager != nil {
+					h.routeManager.UnregisterExtensionRoutes(name)
+				}
 			}
 		}
 	}

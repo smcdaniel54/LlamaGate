@@ -20,6 +20,10 @@ llamagate.log
 *.out
 coverage
 .out
+coverage*.txt
+full_coverage
+coverage_details.txt
+coverage_report.txt
 
 # Dependency directories
 vendor/

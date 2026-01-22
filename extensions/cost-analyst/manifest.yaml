@@ -1,0 +1,46 @@
+name: cost-analyst
+version: 1.0.0
+description: Analyzes current operational costs and calculates baseline financial metrics
+type: workflow
+enabled: true
+
+inputs:
+  - id: business_process_data
+    type: object
+    description: Business process data including workflow info and org info
+    required: true
+
+outputs:
+  - id: cost_analysis
+    type: object
+    description: Detailed cost analysis including current costs, annual costs, and breakdowns
+
+steps:
+  - name: analyze_costs
+    uses: llm.chat
+    config:
+      model: mistral
+      system_prompt: |
+        You are a financial cost analyst expert. Analyze business process data and calculate
+        comprehensive cost metrics. Return structured JSON with:
+        - current_weekly_cost
+        - current_monthly_cost
+        - current_annual_cost
+        - cost_breakdown (labor, overhead, error_costs)
+        - cost_per_transaction (if applicable)
+        - cost_trends (if historical data available)
+      user_prompt: |
+        Analyze costs for this business process:
+        
+        {{inputs.business_process_data}}
+        
+        Calculate:
+        1. Weekly cost: hours_per_week × hourly_cost
+        2. Monthly cost: weekly_cost × 4.33
+        3. Annual cost: monthly_cost × 12
+        4. Error costs: annual_cost × error_rate (if error_rate provided)
+        5. Total operational cost including errors
+        
+        Return JSON with all calculated metrics.
+    outputs:
+      cost_analysis: ${steps.analyze_costs.output.content}

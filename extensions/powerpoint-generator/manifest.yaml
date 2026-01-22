@@ -1,0 +1,145 @@
+name: powerpoint-generator
+version: 1.0.0
+description: Generates actual PowerPoint presentation file from assessment data
+type: workflow
+enabled: true
+
+inputs:
+  - id: roi_summary
+    type: object
+    description: ROI summary with financial metrics
+    required: true
+  - id: recommendations
+    type: string
+    description: Recommendations markdown
+    required: true
+  - id: deck_plan
+    type: object
+    description: Deck plan structure
+    required: true
+  - id: executive_summary
+    type: string
+    description: Executive summary
+    required: true
+  - id: cost_analysis
+    type: object
+    description: Cost analysis
+    required: true
+  - id: productivity_analysis
+    type: object
+    description: Productivity analysis
+    required: true
+  - id: risk_analysis
+    type: object
+    description: Risk analysis
+    required: true
+  - id: business_process_data
+    type: object
+    description: Business process data
+    required: true
+  - id: output_directory
+    type: string
+    description: Output directory path
+    required: false
+    default: ./output
+
+outputs:
+  - id: powerpoint_path
+    type: string
+    description: Path to generated PowerPoint file
+  - id: html_presentation_path
+    type: string
+    description: Path to HTML presentation (for easy viewing)
+
+steps:
+  - name: generate_powerpoint_content
+    uses: llm.chat
+    config:
+      model: mistral
+      system_prompt: |
+        You are a PowerPoint content generator. Create detailed slide content for each slide
+        in the deck plan. Return JSON with slide-by-slide content including:
+        - slide_number
+        - title
+        - content (bullet points, text)
+        - data_points (numbers, metrics to highlight)
+        - chart_specs (what charts to create)
+      user_prompt: |
+        Generate detailed PowerPoint slide content based on:
+        
+        Deck Plan: {{inputs.deck_plan}}
+        ROI Summary: {{inputs.roi_summary}}
+        Executive Summary: {{inputs.executive_summary}}
+        Recommendations: {{inputs.recommendations}}
+        Cost Analysis: {{inputs.cost_analysis}}
+        Productivity Analysis: {{inputs.productivity_analysis}}
+        Risk Analysis: {{inputs.risk_analysis}}
+        Business Process: {{inputs.business_process_data.workflow_info.workflow_name}}
+        
+        For each slide in the deck plan, create:
+        1. Title
+        2. Content (3-5 bullet points)
+        3. Key data points to highlight
+        4. Chart specifications (if needed)
+        
+        Return JSON array with all slides.
+    outputs:
+      slide_content: ${steps.generate_powerpoint_content.output.content}
+  
+  - name: create_powerpoint_file
+    uses: llm.chat
+    config:
+      model: mistral
+      system_prompt: |
+        You are a Python code generator. Generate Python code using python-pptx library
+        to create a PowerPoint presentation. The code should:
+        1. Create a presentation
+        2. Add slides with titles and content
+        3. Format slides professionally
+        4. Add charts where specified
+        5. Save to the output directory
+        
+        Return complete, runnable Python code.
+      user_prompt: |
+        Generate Python code to create PowerPoint presentation:
+        
+        Slide Content: {{steps.generate_powerpoint_content.outputs.slide_content}}
+        Output Directory: {{inputs.output_directory}}
+        File Name: valuegate_assessment.pptx
+        
+        Use python-pptx library. Create professional slides with:
+        - Title slides with company colors
+        - Content slides with bullet points
+        - Data slides with formatted numbers
+        - Chart slides (if specified)
+        - Professional formatting
+        
+        Return complete Python code that can be executed.
+    outputs:
+      python_code: ${steps.create_powerpoint_file.output.content}
+  
+  - name: generate_html_presentation
+    uses: llm.chat
+    config:
+      model: mistral
+      system_prompt: |
+        You are an HTML/CSS generator. Create a beautiful HTML presentation that can be
+        viewed in a browser. Use modern CSS and make it presentation-ready.
+      user_prompt: |
+        Create an HTML presentation from:
+        
+        Slide Content: {{steps.generate_powerpoint_content.outputs.slide_content}}
+        ROI Summary: {{inputs.roi_summary}}
+        Executive Summary: {{inputs.executive_summary}}
+        
+        Create a single-page HTML presentation with:
+        - Professional styling
+        - Slide navigation
+        - Responsive design
+        - Charts/visualizations (using Chart.js or similar)
+        - Print-friendly CSS
+        
+        Return complete HTML code.
+    outputs:
+      html_presentation: ${steps.generate_html_presentation.output.content}
+      html_path: ${inputs.output_directory}/presentation.html

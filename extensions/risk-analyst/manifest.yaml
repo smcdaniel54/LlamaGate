@@ -1,0 +1,57 @@
+name: risk-analyst
+version: 1.0.0
+description: Evaluates risks and mitigation strategies for automation implementation
+type: workflow
+enabled: true
+
+inputs:
+  - id: business_process_data
+    type: object
+    description: Business process data
+    required: true
+  - id: cost_analysis
+    type: object
+    description: Cost analysis
+    required: true
+  - id: productivity_analysis
+    type: object
+    description: Productivity analysis
+    required: true
+
+outputs:
+  - id: risk_analysis
+    type: object
+    description: Risk analysis including identified risks, mitigation strategies, and risk scores
+
+steps:
+  - name: analyze_risks
+    uses: llm.chat
+    config:
+      model: mistral
+      system_prompt: |
+        You are a risk assessment expert. Analyze risks associated with automating a business
+        process. Return structured JSON with:
+        - identified_risks (array of risk objects with: type, description, severity, probability)
+        - mitigation_strategies (array of strategies)
+        - overall_risk_score (0-10)
+        - risk_categories (technical, operational, financial, compliance)
+      user_prompt: |
+        Analyze risks for automating this business process:
+        
+        Business Process: {{inputs.business_process_data}}
+        Cost Analysis: {{inputs.cost_analysis}}
+        Productivity Analysis: {{inputs.productivity_analysis}}
+        
+        Consider:
+        - Industry-specific risks
+        - Process complexity
+        - Implementation timeline
+        - Privacy/security requirements
+        - Compliance needs
+        - Technical challenges
+        - Change management
+        
+        Identify risks and provide mitigation strategies.
+        Return JSON with comprehensive risk analysis.
+    outputs:
+      risk_analysis: ${steps.analyze_risks.output.content}

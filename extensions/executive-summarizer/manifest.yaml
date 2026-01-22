@@ -1,0 +1,86 @@
+name: executive-summarizer
+version: 1.0.0
+description: Generates executive summary and business recommendations
+type: workflow
+enabled: true
+
+inputs:
+  - id: roi_summary
+    type: object
+    description: ROI summary from calculator
+    required: true
+  - id: cost_analysis
+    type: object
+    description: Cost analysis
+    required: true
+  - id: productivity_analysis
+    type: object
+    description: Productivity analysis
+    required: true
+  - id: risk_analysis
+    type: object
+    description: Risk analysis
+    required: true
+  - id: business_process_data
+    type: object
+    description: Original business process data
+    required: true
+
+outputs:
+  - id: executive_summary
+    type: string
+    description: Executive summary text (Markdown format)
+  - id: recommendations
+    type: string
+    description: Business recommendations (Markdown format)
+
+steps:
+  - name: generate_executive_summary
+    uses: llm.chat
+    config:
+      model: mistral
+      system_prompt: |
+        You are an executive communication expert. Write clear, concise executive summaries
+        for business automation ROI assessments. Use Markdown format.
+      user_prompt: |
+        Generate an executive summary for this ROI assessment:
+        
+        ROI Summary: {{inputs.roi_summary}}
+        Business Process: {{inputs.business_process_data.workflow_info.workflow_name}}
+        Industry: {{inputs.business_process_data.org_info.industry}}
+        
+        Include:
+        1. Current situation (costs, time spent)
+        2. Proposed solution (automation)
+        3. Key financial metrics (savings, ROI, payback)
+        4. Recommendation (go/no-go)
+        
+        Write in executive language - clear, confident, data-driven.
+    outputs:
+      executive_summary: ${steps.generate_executive_summary.output.content}
+  
+  - name: generate_recommendations
+    uses: llm.chat
+    config:
+      model: mistral
+      system_prompt: |
+        You are a business strategy consultant. Generate actionable recommendations for
+        automation projects. Use Markdown format with clear sections.
+      user_prompt: |
+        Generate recommendations for this automation project:
+        
+        ROI Summary: {{inputs.roi_summary}}
+        Productivity Analysis: {{inputs.productivity_analysis}}
+        Risk Analysis: {{inputs.risk_analysis}}
+        Business Process: {{inputs.business_process_data}}
+        
+        Include:
+        1. Automation Opportunities (what to automate)
+        2. Implementation Approach (how to implement)
+        3. Risk Mitigation (how to address risks)
+        4. Success Metrics (how to measure success)
+        5. Next Steps (immediate actions)
+        
+        Make recommendations specific, actionable, and prioritized.
+    outputs:
+      recommendations: ${steps.generate_recommendations.output.content}
