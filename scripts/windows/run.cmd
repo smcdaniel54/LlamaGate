@@ -4,6 +4,9 @@ REM This script runs LlamaGate with configurable environment variables
 REM Note: If a .env file exists, it will be loaded automatically
 REM Environment variables set here will override .env file values
 
+REM Change to project root directory (where this script is located)
+cd /d "%~dp0\..\.."
+
 REM Set default environment variables if not already set
 if "%OLLAMA_HOST%"=="" set OLLAMA_HOST=http://localhost:11434
 if "%API_KEY%"=="" set API_KEY=

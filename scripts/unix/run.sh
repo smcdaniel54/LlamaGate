@@ -47,5 +47,13 @@ echo "Press Ctrl+C to stop"
 echo "========================================"
 echo ""
 
-./llamagate
+# Try to use binary if it exists, otherwise use go run
+if [ -f "./llamagate" ]; then
+    ./llamagate
+elif [ -f "./llamagate.exe" ]; then
+    ./llamagate.exe
+else
+    echo "Binary not found, using 'go run'..."
+    go run ./cmd/llamagate
+fi
 

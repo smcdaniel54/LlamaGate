@@ -2,6 +2,9 @@
 REM LlamaGate Runner with Authentication Enabled
 REM This script runs LlamaGate with API key authentication
 
+REM Change to project root directory (where this script is located)
+cd /d "%~dp0\..\.."
+
 REM Set environment variables
 set OLLAMA_HOST=http://localhost:11434
 set API_KEY=sk-llamagate
