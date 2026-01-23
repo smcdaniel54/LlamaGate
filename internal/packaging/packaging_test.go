@@ -64,7 +64,7 @@ func TestExport_Extension(t *testing.T) {
 	// Verify zip contains manifest
 	reader, err := zip.OpenReader(exportPath)
 	require.NoError(t, err)
-	defer reader.Close()
+	defer func() { _ = reader.Close() }()
 
 	foundManifest := false
 	for _, file := range reader.File {
@@ -135,10 +135,10 @@ steps:
 func createTestExtensionZip(t *testing.T, zipPath, name, version string) {
 	zipFile, err := os.Create(zipPath)
 	require.NoError(t, err)
-	defer zipFile.Close()
+	defer func() { _ = zipFile.Close() }()
 
 	zipWriter := zip.NewWriter(zipFile)
-	defer zipWriter.Close()
+	defer func() { _ = zipWriter.Close() }()
 
 	// Add manifest.yaml
 	manifestContent := `name: ` + name + `

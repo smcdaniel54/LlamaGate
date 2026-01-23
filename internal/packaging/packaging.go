@@ -52,7 +52,7 @@ func Import(zipPath string) (*ImportResult, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to create staging directory: %w", err)
 	}
-	defer os.RemoveAll(stagingPath) // Clean up staging on exit
+	defer func() { _ = os.RemoveAll(stagingPath) }() // Clean up staging on exit
 
 	// Extract zip to staging
 	if err := extractZip(zipPath, stagingPath); err != nil {
@@ -170,7 +170,7 @@ func installExtension(pkgManifest *ExtensionPackageManifest, stagingPath string)
 	tempInstallPath := filepath.Join(installStagingDir, pkgManifest.ID)
 	
 	// Remove temp path if it exists
-	os.RemoveAll(tempInstallPath)
+	_ = os.RemoveAll(tempInstallPath)
 
 	// Copy staging to temp install path
 	if err := copyDirectory(stagingPath, tempInstallPath); err != nil {
@@ -283,7 +283,7 @@ func installModule(pkgManifest *ModulePackageManifest, stagingPath string) (*Imp
 	tempInstallPath := filepath.Join(installStagingDir, pkgManifest.ID)
 	
 	// Remove temp path if it exists
-	os.RemoveAll(tempInstallPath)
+	_ = os.RemoveAll(tempInstallPath)
 
 	// Copy staging to temp install path
 	if err := copyDirectory(stagingPath, tempInstallPath); err != nil {
@@ -374,10 +374,10 @@ func Export(id string, outputPath string) error {
 	if err != nil {
 		return fmt.Errorf("failed to create zip file: %w", err)
 	}
-	defer zipFile.Close()
+	defer func() { _ = zipFile.Close() }()
 
 	zipWriter := zip.NewWriter(zipFile)
-	defer zipWriter.Close()
+	defer func() { _ = zipWriter.Close() }()
 
 	// Walk directory and add files to zip
 	var checksums []string
@@ -405,7 +405,7 @@ func Export(id string, outputPath string) error {
 		if err != nil {
 			return err
 		}
-		defer file.Close()
+		defer func() { _ = file.Close() }()
 
 		// Read file content
 		content, err := io.ReadAll(file)
@@ -493,7 +493,7 @@ func extractZip(zipPath, destDir string) error {
 	if err != nil {
 		return err
 	}
-	defer reader.Close()
+	defer func() { _ = reader.Close() }()
 
 	for _, file := range reader.File {
 		path := filepath.Join(destDir, file.Name)
@@ -504,7 +504,7 @@ func extractZip(zipPath, destDir string) error {
 		}
 
 		if file.FileInfo().IsDir() {
-			os.MkdirAll(path, file.FileInfo().Mode())
+			_ = os.MkdirAll(path, file.FileInfo().Mode())
 			continue
 		}
 
@@ -519,13 +519,13 @@ func extractZip(zipPath, destDir string) error {
 
 		rc, err := file.Open()
 		if err != nil {
-			outFile.Close()
+			_ = outFile.Close()
 			return err
 		}
 
 		_, err = io.Copy(outFile, rc)
-		outFile.Close()
-		rc.Close()
+		_ = outFile.Close()
+		_ = rc.Close()
 
 		if err != nil {
 			return err
@@ -558,13 +558,13 @@ func copyDirectory(src, dst string) error {
 		if err != nil {
 			return err
 		}
-		defer srcFile.Close()
+		defer func() { _ = srcFile.Close() }()
 
 		dstFile, err := os.Create(dstPath)
 		if err != nil {
 			return err
 		}
-		defer dstFile.Close()
+		defer func() { _ = dstFile.Close() }()
 
 		_, err = io.Copy(dstFile, srcFile)
 		return err
@@ -622,7 +622,7 @@ func attemptHotReload() {
 		log.Debug().Err(err).Msg("Hot reload skipped (server not running or unreachable)")
 		return
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusPartialContent {
 		log.Info().Msg("Hot reload triggered successfully")

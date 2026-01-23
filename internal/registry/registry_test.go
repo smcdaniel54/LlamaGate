@@ -10,9 +10,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const (
-	testTimeTolerance = 2 * time.Second
-)
 
 func TestNewRegistry(t *testing.T) {
 	reg, err := NewRegistry()
