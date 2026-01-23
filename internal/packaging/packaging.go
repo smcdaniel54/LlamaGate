@@ -89,10 +89,8 @@ func Import(zipPath string) (*ImportResult, error) {
 			return nil, fmt.Errorf("failed to install extension: %w", err)
 		}
 
-		// Attempt hot reload if enabled and server is running
-		if pkgManifest.HotReload != nil && *pkgManifest.HotReload {
-			attemptHotReload()
-		}
+		// Always trigger automatic discovery after import
+		AttemptHotReload()
 
 	case PackageTypeAgenticModule:
 		pkgManifest, err := LoadModulePackageManifest(stagingPath)
@@ -114,10 +112,8 @@ func Import(zipPath string) (*ImportResult, error) {
 			return nil, fmt.Errorf("failed to install module: %w", err)
 		}
 
-		// Attempt hot reload if enabled and server is running
-		if pkgManifest.HotReload != nil && *pkgManifest.HotReload {
-			attemptHotReload()
-		}
+		// Always trigger automatic discovery after import
+		AttemptHotReload()
 
 	default:
 		return nil, fmt.Errorf("unknown package type")
@@ -596,9 +592,9 @@ func cleanupOldBackups(backupDir string, keepCount int) {
 	}
 }
 
-// attemptHotReload attempts to trigger a hot reload by calling the refresh endpoint
+// AttemptHotReload attempts to trigger automatic discovery by calling the refresh endpoint
 // This is a best-effort operation - if the server is not running, it fails silently
-func attemptHotReload() {
+func AttemptHotReload() {
 	// Default LlamaGate API endpoint
 	refreshURL := "http://localhost:11435/v1/extensions/refresh"
 	

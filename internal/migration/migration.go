@@ -9,6 +9,7 @@ import (
 
 	"github.com/llamagate/llamagate/internal/discovery"
 	"github.com/llamagate/llamagate/internal/homedir"
+	"github.com/llamagate/llamagate/internal/packaging"
 	"github.com/llamagate/llamagate/internal/registry"
 	"github.com/rs/zerolog/log"
 )
@@ -168,6 +169,11 @@ func MigrateLegacyExtensions(legacyExtDir string) (*MigrationResult, error) {
 		Int("migrated", result.MigratedExtensions).
 		Int("failed", len(result.Failed)).
 		Msg("Migration complete")
+
+	// Trigger automatic discovery if extensions were migrated
+	if result.MigratedExtensions > 0 {
+		packaging.AttemptHotReload()
+	}
 
 	return result, nil
 }
