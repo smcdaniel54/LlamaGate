@@ -985,17 +985,20 @@ curl -X POST \
 - This endpoint is typically called by install tools after installing extensions
 
 **Use Case:**
-After installing a new extension (e.g., via `agentic-module-tool`), call this endpoint to make it immediately available without restarting LlamaGate:
+After installing a new extension (e.g., via `llamagate-cli`), call this endpoint to make it immediately available without restarting LlamaGate:
 
 ```bash
-# Install extension (example)
-agentic-module-tool install my-module
+# Install extension using the new CLI tool
+llamagate import extension my-extension.zip
 
-# Refresh extensions to discover the new extension
+# If hot_reload is enabled in the manifest, refresh happens automatically
+# Otherwise, manually refresh extensions to discover the new extension:
 curl -X POST \
   -H "X-API-Key: sk-llamagate" \
   http://localhost:11435/v1/extensions/refresh
 ```
+
+**Note:** The new `llamagate-cli` tool replaces the previous `agentic-module-tool`. Use `llamagate import` for installing extensions and modules.
 
 ## Health Endpoint
 
