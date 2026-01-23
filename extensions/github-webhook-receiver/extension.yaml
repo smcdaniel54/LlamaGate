@@ -1,0 +1,125 @@
+name: github-webhook-receiver
+version: 1.0.0
+description: Receives GitHub webhooks and processes them with LLM analysis
+type: workflow
+enabled: true
+
+# Dynamic endpoint definition
+# Creates: POST /v1/extensions/github-webhook-receiver/webhooks/github
+endpoints:
+  - path: /webhooks/github
+    method: POST
+    description: Receives GitHub webhook events (PRs, issues, pushes, etc.)
+    requires_auth: false  # GitHub signs requests with X-Hub-Signature-256
+    requires_rate_limit: true
+    request_schema:
+      type: object
+      properties:
+        action:
+          type: string
+          description: The action that was performed (opened, closed, synchronize, etc.)
+        repository:
+          type: object
+          description: Repository information
+        sender:
+          type: object
+          description: User who triggered the event
+        pull_request:
+          type: object
+          description: Pull request data (if applicable)
+        issue:
+          type: object
+          description: Issue data (if applicable)
+
+inputs:
+  - id: webhook_payload
+    type: object
+    required: true
+    description: Full GitHub webhook payload
+  - id: github_signature
+    type: string
+    required: false
+    description: X-Hub-Signature-256 header for verification
+  - id: event_type
+    type: string
+    required: false
+    description: X-GitHub-Event header (pull_request, issues, push, etc.)
+
+outputs:
+  - id: processed_event
+    type: object
+    description: Processed event with LLM analysis
+  - id: response_message
+    type: string
+    description: Human-readable response message
+  - id: event_stored
+    type: boolean
+    description: Whether event was stored successfully
+  - id: event_id
+    type: string
+    description: Unique identifier for stored event
+
+steps:
+  # Step 1: Analyze the webhook event with LLM
+  - uses: llm.chat
+    with:
+      model: mistral
+      temperature: 0.3
+      messages:
+        - role: system
+          content: |
+            You are a GitHub webhook analyzer. Analyze the incoming webhook event
+            and provide a clear, concise summary of what happened.
+            
+            Focus on:
+            - What action was performed
+            - Who performed it
+            - What repository/issue/PR is affected
+            - Any important details or context
+            
+            Keep the summary brief but informative.
+        - role: user
+          content: |
+            GitHub Event Type: {{inputs.event_type}}
+            Action: {{inputs.webhook_payload.action}}
+            
+            Repository: {{inputs.webhook_payload.repository.full_name}}
+            Sender: {{inputs.webhook_payload.sender.login}}
+            
+            Full Event Payload:
+            {{inputs.webhook_payload}}
+    id: analyze_event
+    
+  # Step 2: Store the event for history/audit
+  - uses: file.write
+    with:
+      path: ./var/github-events/{{inputs.webhook_payload.repository.full_name}}/{{timestamp}}-{{inputs.webhook_payload.action}}.json
+      content: "{{inputs.webhook_payload}}"
+    id: store_event
+    
+  # Step 3: Generate a friendly response message
+  - uses: llm.chat
+    with:
+      model: mistral
+      temperature: 0.5
+      messages:
+        - role: system
+          content: |
+            Generate a friendly, professional acknowledgment message for the GitHub webhook.
+            Acknowledge receipt of the event and summarize what action was taken.
+            Keep it brief (1-2 sentences).
+        - role: user
+          content: |
+            Event analyzed: {{steps.analyze_event.outputs.content}}
+            Action taken: Stored event and analyzed with LLM
+            
+            Generate a brief acknowledgment message.
+    id: generate_response
+
+guardrails:
+  - type: no_network_access
+    enabled: false  # Webhook receiver needs to accept external requests
+  - type: max_execution_time
+    value: 30s
+  - type: max_output_length
+    value: 10000

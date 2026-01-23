@@ -62,13 +62,20 @@ func (r *Recommender) LoadFromFile(filePath string) error {
 // LoadRecommendations is a no-op for embedded data (data is loaded in NewRecommender)
 // Kept for API compatibility
 func (r *Recommender) LoadRecommendations() error {
-	if r.recommendationsData == nil {
+	r.mu.RLock()
+	needsLoad := r.recommendationsData == nil
+	r.mu.RUnlock()
+
+	if needsLoad {
 		data, err := loadEmbeddedRecommendations()
 		if err != nil {
 			return err
 		}
 		r.mu.Lock()
-		r.recommendationsData = data
+		// Double-check after acquiring write lock (another goroutine might have loaded it)
+		if r.recommendationsData == nil {
+			r.recommendationsData = data
+		}
 		r.mu.Unlock()
 	}
 	return nil

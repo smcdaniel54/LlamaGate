@@ -18,6 +18,7 @@ import (
 	"github.com/llamagate/llamagate/internal/extensions"
 	"github.com/llamagate/llamagate/internal/logger"
 	"github.com/llamagate/llamagate/internal/middleware"
+	"github.com/llamagate/llamagate/internal/startup"
 	"github.com/llamagate/llamagate/internal/proxy"
 	"github.com/llamagate/llamagate/internal/setup"
 	"github.com/rs/zerolog/log"
@@ -133,25 +134,35 @@ func main() {
 	extensionRegistry := extensions.NewRegistry()
 	extensionBaseDir := "extensions"
 
-	// Discover and load extensions
-	manifests, discoverErr := extensions.DiscoverExtensions(extensionBaseDir)
-	if discoverErr != nil {
-		log.Warn().Err(discoverErr).Msg("Failed to discover extensions")
-	} else {
-		for _, manifest := range manifests {
-			if err := extensionRegistry.Register(manifest); err != nil {
-				log.Warn().Err(err).Str("extension", manifest.Name).Msg("Failed to register extension")
-			} else {
-				log.Info().
-					Str("extension", manifest.Name).
-					Str("version", manifest.Version).
-					Str("type", manifest.Type).
-					Bool("enabled", manifest.IsEnabled()).
-					Msg("Extension registered")
-			}
-		}
-		log.Info().Int("count", len(manifests)).Msg("Extension discovery complete")
+	// Load installed extensions (from ~/.llamagate/extensions/installed/) and legacy extensions (from extensions/)
+	loadedCount, failures := startup.LoadInstalledExtensions(extensionRegistry, extensionBaseDir)
+	if len(failures) > 0 {
+		log.Warn().
+			Int("failure_count", len(failures)).
+			Strs("failures", failures).
+			Msg("Some extensions failed to load")
 	}
+	log.Info().
+		Int("loaded", loadedCount).
+		Int("failures", len(failures)).
+		Msg("Extension loading complete")
+
+	// Discover installed modules (for logging/info, execution still uses agenticmodule_runner)
+	moduleCount, moduleFailures := startup.LoadInstalledModules()
+	if len(moduleFailures) > 0 {
+		log.Warn().
+			Int("failure_count", len(moduleFailures)).
+			Strs("failures", moduleFailures).
+			Msg("Some modules failed to load")
+	}
+	if moduleCount > 0 {
+		log.Info().
+			Int("modules", moduleCount).
+			Msg("Discovered installed modules")
+	}
+
+	// Get all registered manifests for route registration
+	manifests := extensionRegistry.List()
 
 	// Create extension hook manager
 	extensionHookManager := extensions.NewHookManager(extensionRegistry, extensionBaseDir)
