@@ -985,14 +985,14 @@ curl -X POST \
 - This endpoint is typically called by install tools after installing extensions
 
 **Use Case:**
-After installing a new extension (e.g., via `llamagate-cli`), call this endpoint to make it immediately available without restarting LlamaGate:
+After installing a new extension (e.g., via `llamagate-cli`), discovery happens automatically:
 
 ```bash
 # Install extension using the new CLI tool
 llamagate import extension my-extension.zip
+# Discovery is automatically triggered - no manual refresh needed!
 
-# If hot_reload is enabled in the manifest, refresh happens automatically
-# Otherwise, manually refresh extensions to discover the new extension:
+# The refresh endpoint is still available for manual refresh if needed:
 curl -X POST \
   -H "X-API-Key: sk-llamagate" \
   http://localhost:11435/v1/extensions/refresh

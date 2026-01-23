@@ -461,16 +461,16 @@ The import/export system integrates with the existing extension system:
 
 - **Installed extensions** are loaded on startup
 - **Legacy extensions** are loaded as fallback
-- **Refresh endpoint** (`POST /v1/extensions/refresh`) can reload extensions
-- **Hot reload** (future): Automatic refresh for extensions marked `hot_reload: true`
+- **Automatic discovery**: Discovery is automatically triggered after import and migration
+- **Refresh endpoint** (`POST /v1/extensions/refresh`) is available for manual refresh if needed
 
 ---
 
 ## Limitations
 
 - **Route removal:** Gin doesn't support route removal at runtime. Routes remain until server restart.
-- **Hot reload:** Full hot reload is deferred to future versions. Current: "active on next restart".
 - **Concurrent imports:** Protected by mutex (process-level, not file-level locking).
+- **Discovery:** Automatic discovery is best-effort. If the server is not running during import, extensions will be discovered on next server startup.
 
 ---
 

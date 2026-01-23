@@ -40,7 +40,7 @@ This document outlines the plan for implementing a minimal, file-based Import/Ex
    - ✅ `ValidatePackageManifest()` - Validates packaging manifest fields
   - ✅ Atomic install with staging directory
   - ✅ Zip slip protection
-  - ✅ Hot reload support (calls /v1/extensions/refresh if hot_reload: true)
+  - ✅ Automatic discovery support (always calls /v1/extensions/refresh after import)
   - ✅ Tests implemented
 
 4. **internal/discovery** - Discovery scan
@@ -82,10 +82,12 @@ This document outlines the plan for implementing a minimal, file-based Import/Ex
     - Log summary of loaded counts and failures
     - Support legacy extensions directory (repo-based) as fallback
 
-9. **Hot Reload Support**
-  - ✅ Automatic hot reload on import if `hot_reload: true` in manifest
+9. **Automatic Discovery Support**
+  - ✅ Automatic discovery always triggers after import (extensions and modules)
+  - ✅ Automatic discovery triggers after legacy extension migration
   - ✅ Calls `/v1/extensions/refresh` endpoint (best-effort, fails silently if server not running)
   - ✅ Respects `LLAMAGATE_API_KEY` environment variable for authentication
+  - ✅ Manual refresh endpoint calls are now obsolete for normal operations
 
 10. **Manifest Schema Updates**
   - ✅ Support for new manifest fields:
