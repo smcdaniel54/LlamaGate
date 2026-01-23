@@ -14,6 +14,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/joho/godotenv"
 	"github.com/llamagate/llamagate/internal/extensions"
 	"github.com/llamagate/llamagate/internal/homedir"
 	"github.com/llamagate/llamagate/internal/registry"
@@ -595,8 +596,15 @@ func cleanupOldBackups(backupDir string, keepCount int) {
 // AttemptHotReload attempts to trigger automatic discovery by calling the refresh endpoint
 // This is a best-effort operation - if the server is not running, it fails silently
 func AttemptHotReload() {
-	// Default LlamaGate API endpoint
-	refreshURL := "http://localhost:11435/v1/extensions/refresh"
+	// Load .env file if it exists (for development - reads PORT from .env)
+	_ = godotenv.Load()
+	
+	// Get port from environment variable (reads from .env file or env var)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "11435" // Default port
+	}
+	refreshURL := fmt.Sprintf("http://localhost:%s/v1/extensions/refresh", port)
 	
 	client := &http.Client{
 		Timeout: 5 * time.Second,
