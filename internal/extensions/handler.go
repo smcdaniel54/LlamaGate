@@ -6,9 +6,13 @@ package extensions
 import (
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	"github.com/gin-gonic/gin"
+	"github.com/llamagate/llamagate/internal/homedir"
 	"github.com/llamagate/llamagate/internal/middleware"
+	"github.com/llamagate/llamagate/internal/registry"
 	"github.com/llamagate/llamagate/internal/response"
 	"github.com/rs/zerolog/log"
 )
@@ -179,7 +183,8 @@ func (h *Handler) RefreshExtensions(c *gin.Context) {
 		currentNames[manifest.Name] = true
 	}
 
-	// Re-discover extensions with panic recovery
+	// Re-discover extensions from both installed directory (~/.llamagate/extensions/installed/)
+	// and legacy directory (extensions/)
 	var manifests []*Manifest
 	var discoverErr error
 	func() {
@@ -192,10 +197,78 @@ func (h *Handler) RefreshExtensions(c *gin.Context) {
 				discoverErr = fmt.Errorf("panic during discovery: %v", r)
 			}
 		}()
-		manifests, discoverErr = DiscoverExtensions(h.baseDir)
+		
+		// First, discover installed extensions from ~/.llamagate/extensions/installed/
+		installedManifests := []*Manifest{}
+		extDir, err := homedir.GetExtensionsDir()
+		if err == nil {
+			entries, err := os.ReadDir(extDir)
+			if err == nil {
+				reg, _ := registry.NewRegistry()
+				for _, entry := range entries {
+					if !entry.IsDir() {
+						continue
+					}
+					
+					extPath := filepath.Join(extDir, entry.Name())
+					
+					// Try to load manifest.yaml directly (avoids import cycle with packaging)
+					manifestPath := filepath.Join(extPath, "manifest.yaml")
+					manifest, err := LoadManifest(manifestPath)
+					if err != nil {
+						continue // Skip if not a valid extension
+					}
+					
+					// Check if enabled (from registry)
+					enabled := true
+					if reg != nil {
+						// Try to get ID from registry (use name as fallback)
+						if regItem, exists := reg.Get(manifest.Name); exists {
+							enabled = regItem.Enabled
+						} else if regItem, exists := reg.Get(entry.Name()); exists {
+							enabled = regItem.Enabled
+						}
+					}
+					
+					// Only include enabled extensions
+					if enabled {
+						installedManifests = append(installedManifests, manifest)
+					}
+				}
+			}
+		}
+		
+		// Also discover legacy extensions from extensions/ directory
+		legacyManifests, err := DiscoverExtensions(h.baseDir)
+		if err != nil {
+			if len(installedManifests) == 0 {
+				discoverErr = err
+			}
+		}
+		
+		// Combine manifests, with installed taking precedence
+		installedNames := make(map[string]bool)
+		for _, m := range installedManifests {
+			installedNames[m.Name] = true
+			manifests = append(manifests, m)
+		}
+		
+		// Add legacy extensions that aren't already installed
+		for _, manifest := range legacyManifests {
+			if !installedNames[manifest.Name] {
+				manifests = append(manifests, manifest)
+			}
+		}
+		
+		log.Debug().
+			Str("request_id", requestID).
+			Int("installed", len(installedManifests)).
+			Int("legacy", len(legacyManifests)).
+			Int("total", len(manifests)).
+			Msg("Discovered extensions during refresh")
 	}()
 	
-	if discoverErr != nil {
+	if discoverErr != nil && len(manifests) == 0 {
 		log.Warn().
 			Str("request_id", requestID).
 			Err(discoverErr).
