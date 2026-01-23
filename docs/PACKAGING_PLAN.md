@@ -179,7 +179,7 @@ hot_reload: true           # Optional: allow hot reload (default: true)
    - Remove old installation if exists
    - Rename staging to `~/.llamagate/extensions/installed/<id>/` or `~/.llamagate/agentic-modules/installed/<id>/`
 5. **Update registry**: Add/update entry in `installed.json`
-6. **Hot reload** (optional): If server running and `hot_reload: true`, trigger refresh
+6. **Automatic discovery**: Always trigger discovery by calling `/v1/extensions/refresh` (best-effort, fails silently if server not running)
 
 ## Export Semantics
 
