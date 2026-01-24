@@ -158,6 +158,342 @@ go install ./cmd/llamagate
 
 **Note:** Git writes progress messages to stderr even on success. In PowerShell with `$ErrorActionPreference = "Stop"`, this can cause failures. See [Troubleshooting](#troubleshooting) section below for details.
 
+## Development Setup
+
+> **Note**: This section enhances LlamaGate's existing installation methods by adding a developer-focused one-command workflow. It complements (does not replace) the existing binary installer, source installer, and manual build methods documented above.
+
+For developers integrating LlamaGate into projects, the **one-command setup process** provides a single command that automates the complete development workflow:
+
+1. ✅ **Validates environment** (Go, Ollama, ports) - Catches issues before build
+2. ✅ **Auto-clones LlamaGate** if missing (standardized sibling directory)
+3. ✅ **Smart build** - Only rebuilds if source is newer than binary
+4. ✅ **Auto-starts LlamaGate** - No manual start needed
+5. ✅ **Verifies it's running** - Health check confirmation
+
+**This enhances existing methods by**:
+- Adding developer workflow automation (complements installation methods)
+- Providing standardized directory structure guidance
+- Enabling smart rebuilds (only when needed)
+- Automating the complete setup-to-running workflow
+
+### Standardized Directory Structure
+
+For integration projects, use this **recommended** structure for consistency:
+
+```
+YourProjectParent/
+├── LlamaGate/           # ← Clone LlamaGate here (sibling directory)
+└── YourProject/         # ← Your application
+```
+
+**Why sibling directory?**
+- Consistent across all integration projects
+- Easy to reference with relative paths
+- Works well with version control
+- Standard practice for integration workflows
+
+### One-Command Setup
+
+**Windows PowerShell:**
+
+Save this script to your project (e.g., `scripts/setup-llamagate-dev.ps1`):
+
+```powershell
+# One-Command LlamaGate Development Setup
+# Standardized process: Validate → Clone (if needed) → Build → Start → Verify
+# Based on community best practices for LlamaGate integration
+
+param(
+    [string]$LlamaGatePath = "..\LlamaGate",
+    [int]$LlamaGatePort = 11435,
+    [switch]$SkipClone,
+    [switch]$SkipBuild
+)
+
+$ErrorActionPreference = "Stop"
+
+Write-Host ""
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host "LlamaGate One-Command Development Setup" -ForegroundColor Cyan
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host ""
+
+# Step 1: Environment Validation
+Write-Host "[1/6] Validating environment..." -ForegroundColor Yellow
+
+# Check Go
+try {
+    $goVersion = go version 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "  ✗ Go is not installed" -ForegroundColor Red
+        Write-Host "  Please install Go 1.19+ from: https://go.dev/dl/" -ForegroundColor Yellow
+        exit 1
+    }
+    Write-Host "  ✓ Go: $goVersion" -ForegroundColor Green
+} catch {
+    Write-Host "  ✗ Go is not installed" -ForegroundColor Red
+    Write-Host "  Please install Go 1.19+ from: https://go.dev/dl/" -ForegroundColor Yellow
+    exit 1
+}
+
+# Check Ollama
+try {
+    $ollamaResponse = Invoke-WebRequest -Uri "http://localhost:11434/api/tags" -Method GET -TimeoutSec 2 -ErrorAction SilentlyContinue
+    if ($ollamaResponse.StatusCode -eq 200) {
+        Write-Host "  ✓ Ollama is running" -ForegroundColor Green
+    } else {
+        Write-Host "  ✗ Ollama is not responding" -ForegroundColor Red
+        Write-Host "  Please start Ollama: ollama serve" -ForegroundColor Yellow
+        exit 1
+    }
+} catch {
+    Write-Host "  ✗ Ollama is not running" -ForegroundColor Red
+    Write-Host "  Please start Ollama: ollama serve" -ForegroundColor Yellow
+    exit 1
+}
+
+# Check if LlamaGate is already running
+Write-Host "[2/6] Checking if LlamaGate is already running..." -ForegroundColor Yellow
+try {
+    $response = Invoke-WebRequest -Uri "http://localhost:$LlamaGatePort/health" -Method GET -TimeoutSec 2 -ErrorAction SilentlyContinue
+    if ($response.StatusCode -eq 200) {
+        Write-Host "  ✓ LlamaGate is already running" -ForegroundColor Green
+        Write-Host ""
+        Write-Host "LlamaGate is ready!" -ForegroundColor Green
+        Write-Host "URL: http://localhost:$LlamaGatePort" -ForegroundColor Cyan
+        exit 0
+    }
+} catch {
+    Write-Host "  LlamaGate is not running" -ForegroundColor Yellow
+}
+
+# Step 3: Find or Clone LlamaGate (Standardized: Sibling Directory)
+Write-Host "[3/6] Locating LlamaGate source..." -ForegroundColor Yellow
+
+# Standardized approach: Primary is sibling directory
+$siblingPath = Resolve-Path "..\LlamaGate" -ErrorAction SilentlyContinue
+$foundPath = $null
+
+if ($siblingPath -and (Test-Path (Join-Path $siblingPath "cmd\llamagate"))) {
+    $foundPath = $siblingPath
+    Write-Host "  ✓ Found at sibling directory: $foundPath" -ForegroundColor Green
+} else {
+    # Check environment variable override
+    $envPath = $env:LLAMAGATE_PATH
+    if ($envPath -and (Test-Path (Join-Path $envPath "cmd\llamagate"))) {
+        $foundPath = Resolve-Path $envPath
+        Write-Host "  ✓ Found via LLAMAGATE_PATH: $foundPath" -ForegroundColor Green
+    } else {
+        if ($SkipClone) {
+            Write-Host "  ✗ LlamaGate source not found" -ForegroundColor Red
+            Write-Host "  Expected location: $(Resolve-Path ".." -ErrorAction SilentlyContinue)\LlamaGate" -ForegroundColor Yellow
+            Write-Host "  Or set LLAMAGATE_PATH environment variable" -ForegroundColor Yellow
+            exit 1
+        } else {
+            Write-Host "  LlamaGate source not found" -ForegroundColor Yellow
+            Write-Host "  Cloning LlamaGate as sibling directory..." -ForegroundColor Yellow
+            
+            # Clone as sibling directory (standardized)
+            $parentDir = Resolve-Path ".." -ErrorAction Stop
+            $clonePath = Join-Path $parentDir "LlamaGate"
+            
+            if (Test-Path $clonePath) {
+                Write-Host "  ✗ Directory already exists: $clonePath" -ForegroundColor Red
+                Write-Host "  Please remove it or use -SkipClone to skip cloning" -ForegroundColor Yellow
+                exit 1
+            }
+            
+            Push-Location $parentDir
+            try {
+                Write-Host "  Cloning from GitHub..." -ForegroundColor Gray
+                git clone https://github.com/smcdaniel54/LlamaGate.git
+                if ($LASTEXITCODE -ne 0) {
+                    Write-Host "  ✗ Clone failed" -ForegroundColor Red
+                    Pop-Location
+                    exit 1
+                }
+                $foundPath = Resolve-Path "LlamaGate"
+                Write-Host "  ✓ Cloned successfully to: $foundPath" -ForegroundColor Green
+            } catch {
+                Write-Host "  ✗ Clone failed: $_" -ForegroundColor Red
+                Pop-Location
+                exit 1
+            } finally {
+                Pop-Location
+            }
+        }
+    }
+}
+
+# Step 4: Check Port Availability
+Write-Host "[4/6] Checking port availability..." -ForegroundColor Yellow
+try {
+    $tcpClient = New-Object System.Net.Sockets.TcpClient
+    $asyncResult = $tcpClient.BeginConnect("localhost", $LlamaGatePort, $null, $null)
+    $wait = $asyncResult.AsyncWaitHandle.WaitOne(500, $false)
+    if ($wait) {
+        $tcpClient.EndConnect($asyncResult)
+        $tcpClient.Close()
+        Write-Host "  ✗ Port $LlamaGatePort is already in use" -ForegroundColor Red
+        Write-Host "  Please stop the process using this port or use a different port" -ForegroundColor Yellow
+        exit 1
+    }
+} catch {
+    # Port is free (connection failed is expected)
+}
+Write-Host "  ✓ Port $LlamaGatePort is available" -ForegroundColor Green
+
+# Step 5: Build LlamaGate
+if (-not $SkipBuild) {
+    Write-Host "[5/6] Building LlamaGate from source..." -ForegroundColor Yellow
+    Push-Location $foundPath
+    
+    try {
+        # Check if binary exists and is newer than source
+        $binaryPath = Join-Path $foundPath "llamagate.exe"
+        $needsBuild = $true
+        
+        if (Test-Path $binaryPath) {
+            $binaryTime = (Get-Item $binaryPath).LastWriteTime
+            $sourceTime = (Get-ChildItem -Path (Join-Path $foundPath "cmd\llamagate") -Recurse -File | 
+                          Measure-Object -Property LastWriteTime -Maximum).Maximum
+            
+            if ($binaryTime -gt $sourceTime) {
+                Write-Host "  Binary is up to date, skipping build" -ForegroundColor Gray
+                $needsBuild = $false
+            }
+        }
+        
+        if ($needsBuild) {
+            Write-Host "  Building (this may take a few minutes)..." -ForegroundColor Gray
+            $buildOutput = go build -o llamagate.exe ./cmd/llamagate 2>&1
+            
+            if ($LASTEXITCODE -ne 0) {
+                Write-Host "  ✗ Build failed" -ForegroundColor Red
+                Write-Host $buildOutput -ForegroundColor Red
+                Pop-Location
+                exit 1
+            }
+            
+            if (-not (Test-Path "llamagate.exe")) {
+                Write-Host "  ✗ Binary not found after build" -ForegroundColor Red
+                Pop-Location
+                exit 1
+            }
+            
+            Write-Host "  ✓ Build successful" -ForegroundColor Green
+        }
+    } catch {
+        Write-Host "  ✗ Build error: $_" -ForegroundColor Red
+        Pop-Location
+        exit 1
+    } finally {
+        Pop-Location
+    }
+} else {
+    Write-Host "[5/6] Skipping build (requested)" -ForegroundColor Yellow
+}
+
+# Step 6: Start LlamaGate
+Write-Host "[6/6] Starting LlamaGate..." -ForegroundColor Yellow
+Push-Location $foundPath
+
+try {
+    $binaryPath = Join-Path $foundPath "llamagate.exe"
+    if (-not (Test-Path $binaryPath)) {
+        Write-Host "  ✗ Binary not found: $binaryPath" -ForegroundColor Red
+        Write-Host "  Please build first or remove -SkipBuild flag" -ForegroundColor Yellow
+        Pop-Location
+        exit 1
+    }
+    
+    Write-Host "  Starting process..." -ForegroundColor Gray
+    $process = Start-Process -FilePath ".\llamagate.exe" -PassThru -WindowStyle Hidden
+    
+    # Wait for LlamaGate to be ready
+    $maxWait = 30
+    $waited = 0
+    $started = $false
+    
+    Write-Host "  Waiting for LlamaGate to be ready..." -ForegroundColor Gray -NoNewline
+    while ($waited -lt $maxWait) {
+        Start-Sleep -Seconds 1
+        $waited++
+        Write-Host "." -ForegroundColor Gray -NoNewline
+        
+        try {
+            $testResponse = Invoke-WebRequest -Uri "http://localhost:$LlamaGatePort/health" -Method GET -TimeoutSec 1 -ErrorAction SilentlyContinue
+            if ($testResponse.StatusCode -eq 200) {
+                $started = $true
+                Write-Host ""
+                Write-Host "  ✓ LlamaGate started successfully" -ForegroundColor Green
+                Write-Host "  PID: $($process.Id)" -ForegroundColor Cyan
+                break
+            }
+        } catch {
+            continue
+        }
+    }
+    
+    if (-not $started) {
+        Write-Host ""
+        Write-Host "  ✗ LlamaGate failed to start within $maxWait seconds" -ForegroundColor Red
+        Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
+        Pop-Location
+        exit 1
+    }
+    
+} catch {
+    Write-Host "  ✗ Error starting LlamaGate: $_" -ForegroundColor Red
+    Pop-Location
+    exit 1
+} finally {
+    Pop-Location
+}
+
+# Success
+Write-Host ""
+Write-Host "========================================" -ForegroundColor Green
+Write-Host "LlamaGate is ready for development!" -ForegroundColor Green
+Write-Host "========================================" -ForegroundColor Green
+Write-Host ""
+Write-Host "PID: $($process.Id)" -ForegroundColor Cyan
+Write-Host "URL: http://localhost:$LlamaGatePort" -ForegroundColor Cyan
+Write-Host "Health: http://localhost:$LlamaGatePort/health" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "To stop: Stop-Process -Id $($process.Id)" -ForegroundColor Gray
+Write-Host ""
+
+exit 0
+```
+
+Then run from your project directory:
+```powershell
+.\scripts\setup-llamagate-dev.ps1
+```
+
+**Unix/macOS:**
+
+[Unix script if available, or instructions to adapt]
+
+### When to Use
+
+**Use one-command setup when**:
+- Integrating LlamaGate into your project
+- Development workflow automation
+- Standardized setup process
+- Frequent rebuilds during development
+
+**Use installation methods when**:
+- End-user installation
+- Production deployment
+- Quick setup without Go
+- One-time installation
+
+---
+
+**Note**: This one-command process enhances LlamaGate's existing installation methods. For end-user installation, use the binary or source installers documented above.
+
 ### Windows Quick Start
 
 For Windows users, convenient batch files are provided:
