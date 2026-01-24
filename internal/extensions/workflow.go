@@ -120,11 +120,11 @@ func (e *WorkflowExecutor) resolveStepWith(with map[string]interface{}, state ma
 	return resolved
 }
 
-// resolveTemplateString resolves template variables like {{var}} in a string
-// Uses deterministic iteration order to ensure consistent behavior
+// resolveTemplateString resolves template variables like {{var}} in a string.
+// It guarantees deterministic resolution order and prevents nested resolution
+// of values that themselves contain template syntax (e.g. \"{{password}}\").
 func (e *WorkflowExecutor) resolveTemplateString(template string, state map[string]interface{}) string {
 	// Extract all placeholders first to ensure deterministic resolution order
-	// This prevents non-deterministic behavior when state values contain template syntax
 	placeholders := make([]string, 0, len(state))
 	for key := range state {
 		placeholders = append(placeholders, key)
@@ -132,29 +132,42 @@ func (e *WorkflowExecutor) resolveTemplateString(template string, state map[stri
 	// Sort keys for deterministic iteration order
 	sort.Strings(placeholders)
 
-	// Resolve placeholders in sorted order
+	// Precompute string values and a combined string to pick collision-free escape markers.
+	combined := template
+	valueStrings := make(map[string]string, len(state))
+	for k, v := range state {
+		vs := fmt.Sprintf(\"%v\", v)
+		valueStrings[k] = vs
+		combined += vs
+	}
+
+	// Choose escape markers that do not appear in the template or any value.
+	markerOpen := \"__LLAMAGATE_ESCAPED_OPEN__\"
+	for strings.Contains(combined, markerOpen) {
+		markerOpen += \"X\"
+	}
+	markerClose := \"__LLAMAGATE_ESCAPED_CLOSE__\"
+	for strings.Contains(combined, markerClose) {
+		markerClose += \"X\"
+	}
+
+	// Resolve placeholders in sorted order, escaping inner template syntax in values
+	// so that nested {{var}} sequences are not resolved during this pass.
 	result := template
 	for _, key := range placeholders {
-		value := state[key]
-		placeholder := fmt.Sprintf("{{%s}}", key)
+		placeholder := fmt.Sprintf(\"{{%s}}\", key)
 		if strings.Contains(result, placeholder) {
-			// Convert value to string and escape template syntax to prevent nested resolution
-			// This prevents values containing {{var}} from being interpreted as templates
-			// in subsequent resolution iterations, which could leak sensitive data
-			valueStr := fmt.Sprintf("%v", value)
-			// Escape {{ and }} in the value to prevent nested template resolution
-			// Use markers that won't match the {{key}} pattern used by the template system
-			// during this resolution pass
-			valueStr = strings.ReplaceAll(valueStr, "{{", "__LLAMAGATE_ESCAPED_OPEN__")
-			valueStr = strings.ReplaceAll(valueStr, "}}", "__LLAMAGATE_ESCAPED_CLOSE__")
-			result = strings.ReplaceAll(result, placeholder, valueStr)
+			valueStr := valueStrings[key]
+			escaped := strings.ReplaceAll(valueStr, \"{{\", markerOpen)
+			escaped = strings.ReplaceAll(escaped, \"}}\", markerClose)
+			result = strings.ReplaceAll(result, placeholder, escaped)
 		}
 	}
 
-	// Unescape any escaped template markers back to their original form
-	// so downstream processing sees the original values
-	result = strings.ReplaceAll(result, "__LLAMAGATE_ESCAPED_OPEN__", "{{")
-	result = strings.ReplaceAll(result, "__LLAMAGATE_ESCAPED_CLOSE__", "}}")
+	// Unescape markers back to their original form. Because the markers were chosen
+	// not to exist in the original template or values, this cannot corrupt legitimate data.
+	result = strings.ReplaceAll(result, markerOpen, \"{{\")
+	result = strings.ReplaceAll(result, markerClose, \"}}\")
 
 	return result
 }
