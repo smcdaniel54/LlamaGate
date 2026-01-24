@@ -179,13 +179,18 @@ func (h *Handler) RefreshExtensions(c *gin.Context) {
 	// Get current extensions before refresh
 	currentManifests := h.registry.List()
 	currentNames := make(map[string]bool)
+	builtinNames := make(map[string]bool) // Track builtin extensions to prevent removal
 	for _, manifest := range currentManifests {
 		currentNames[manifest.Name] = true
+		if manifest.Builtin {
+			builtinNames[manifest.Name] = true
+		}
 	}
 
 	// Re-discover extensions from both installed directory (~/.llamagate/extensions/installed/)
 	// and legacy directory (extensions/)
 	var manifests []*Manifest
+	var builtinManifests []*Manifest
 	var discoverErr error
 	func() {
 		defer func() {
@@ -198,7 +203,18 @@ func (h *Handler) RefreshExtensions(c *gin.Context) {
 			}
 		}()
 		
-		// First, discover installed extensions from ~/.llamagate/extensions/installed/
+		// 1. Load builtin YAML extensions first (priority loading, same as startup)
+		builtinDir := filepath.Join(h.baseDir, "builtin")
+		discoveredBuiltin, err := DiscoverExtensions(builtinDir)
+		if err == nil {
+			for _, manifest := range discoveredBuiltin {
+				manifest.Builtin = true
+				builtinManifests = append(builtinManifests, manifest)
+				builtinNames[manifest.Name] = true
+			}
+		}
+		
+		// 2. Discover installed extensions from ~/.llamagate/extensions/installed/
 		installedManifests := []*Manifest{}
 		extDir, err := homedir.GetExtensionsDir()
 		if err == nil {
@@ -238,32 +254,53 @@ func (h *Handler) RefreshExtensions(c *gin.Context) {
 			}
 		}
 		
-		// Also discover legacy extensions from extensions/ directory
+		// 3. Discover legacy extensions from extensions/ directory
 		legacyManifests, err := DiscoverExtensions(h.baseDir)
 		if err != nil {
-			if len(installedManifests) == 0 {
+			if len(installedManifests) == 0 && len(builtinManifests) == 0 {
 				discoverErr = err
 			}
 		}
 		
-		// Combine manifests, with installed taking precedence
-		installedNames := make(map[string]bool)
-		for _, m := range installedManifests {
-			installedNames[m.Name] = true
-			manifests = append(manifests, m)
+		// Filter out builtin extensions from legacy discovery (they're already loaded)
+		filteredLegacyManifests := []*Manifest{}
+		for _, manifest := range legacyManifests {
+			// Skip if it's a builtin extension (already loaded or marked as builtin)
+			if manifest.Builtin || builtinNames[manifest.Name] {
+				log.Debug().
+					Str("request_id", requestID).
+					Str("extension", manifest.Name).
+					Msg("Skipping builtin extension from legacy discovery (already loaded)")
+				continue
+			}
+			filteredLegacyManifests = append(filteredLegacyManifests, manifest)
 		}
 		
-		// Add legacy extensions that aren't already installed
-		for _, manifest := range legacyManifests {
-			if !installedNames[manifest.Name] {
+		// Combine manifests in priority order: builtin first, then installed, then legacy
+		installedNames := make(map[string]bool)
+		for _, m := range builtinManifests {
+			manifests = append(manifests, m)
+		}
+		for _, m := range installedManifests {
+			installedNames[m.Name] = true
+			// Skip if already added as builtin
+			if !builtinNames[m.Name] {
+				manifests = append(manifests, m)
+			}
+		}
+		
+		// Add legacy extensions that aren't already installed or builtin
+		for _, manifest := range filteredLegacyManifests {
+			if !installedNames[manifest.Name] && !builtinNames[manifest.Name] {
 				manifests = append(manifests, manifest)
 			}
 		}
 		
 		log.Debug().
 			Str("request_id", requestID).
+			Int("builtin", len(builtinManifests)).
 			Int("installed", len(installedManifests)).
-			Int("legacy", len(legacyManifests)).
+			Int("legacy", len(filteredLegacyManifests)).
 			Int("total", len(manifests)).
 			Msg("Discovered extensions during refresh")
 	}()
@@ -387,9 +424,18 @@ func (h *Handler) RefreshExtensions(c *gin.Context) {
 		}
 	}
 
-	// Remove extensions that no longer exist
+	// Remove extensions that no longer exist (but protect builtin extensions)
 	for name := range currentNames {
 		if !discoveredNames[name] {
+			// Prevent removal of builtin extensions
+			if builtinNames[name] {
+				log.Debug().
+					Str("request_id", requestID).
+					Str("extension", name).
+					Msg("Skipping removal of builtin extension during refresh")
+				continue
+			}
+			
 			if err := h.registry.Unregister(name); err != nil {
 				log.Warn().
 					Str("request_id", requestID).
@@ -419,6 +465,7 @@ func (h *Handler) RefreshExtensions(c *gin.Context) {
 		"updated": updated,
 		"removed": removed,
 		"total":   len(manifests),
+		"builtin": len(builtinManifests), // Include builtin extension count
 	}
 
 	if len(errors) > 0 {

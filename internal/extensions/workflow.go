@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"text/template"
 	"time"
@@ -88,6 +89,8 @@ func (e *WorkflowExecutor) executeStep(ctx *ExecutionContext, step WorkflowStep,
 		return e.renderTemplate(ctx, step, resolvedWith, state, manifest)
 	case "llm.chat":
 		return e.callLLM(ctx, step, resolvedWith, state)
+	case "file.read":
+		return e.readFile(ctx, step, resolvedWith, state, manifest)
 	case "file.write":
 		return e.writeFile(ctx, step, resolvedWith, state, manifest)
 	case "extension.call":
@@ -107,19 +110,41 @@ func (e *WorkflowExecutor) executeStep(ctx *ExecutionContext, step WorkflowStep,
 func (e *WorkflowExecutor) resolveStepWith(with map[string]interface{}, state map[string]interface{}) map[string]interface{} {
 	resolved := make(map[string]interface{})
 	for k, v := range with {
-		// If value is a string that references state, resolve it
+		// If value is a string, resolve template variables like {{var}}
 		if str, ok := v.(string); ok {
-			// Check if it's a state reference (simple implementation)
-			if val, exists := state[str]; exists {
-				resolved[k] = val
-			} else {
-				resolved[k] = v
-			}
+			resolved[k] = e.resolveTemplateString(str, state)
 		} else {
 			resolved[k] = v
 		}
 	}
 	return resolved
+}
+
+// resolveTemplateString resolves template variables like {{var}} in a string
+// Uses deterministic iteration order to ensure consistent behavior
+func (e *WorkflowExecutor) resolveTemplateString(template string, state map[string]interface{}) string {
+	// Extract all placeholders first to ensure deterministic resolution order
+	// This prevents non-deterministic behavior when state values contain template syntax
+	placeholders := make([]string, 0, len(state))
+	for key := range state {
+		placeholders = append(placeholders, key)
+	}
+	// Sort keys for deterministic iteration order
+	sort.Strings(placeholders)
+	
+	// Resolve placeholders in sorted order
+	result := template
+	for _, key := range placeholders {
+		value := state[key]
+		placeholder := fmt.Sprintf("{{%s}}", key)
+		if strings.Contains(result, placeholder) {
+			// Convert value to string, but escape any template syntax in the value itself
+			// to prevent nested template resolution issues
+			valueStr := fmt.Sprintf("%v", value)
+			result = strings.ReplaceAll(result, placeholder, valueStr)
+		}
+	}
+	return result
 }
 
 // loadTemplate loads a template file
@@ -212,6 +237,37 @@ func (e *WorkflowExecutor) renderTemplate(_ *ExecutionContext, _ WorkflowStep, r
 	}, nil
 }
 
+// readFile reads a file from the file system
+func (e *WorkflowExecutor) readFile(_ context.Context, _ WorkflowStep, resolvedWith map[string]interface{}, state map[string]interface{}, manifest *Manifest) (map[string]interface{}, error) {
+	// Get file path from resolvedWith or state
+	filePath, ok := resolvedWith["path"].(string)
+	if !ok {
+		if fp, ok := state["path"].(string); ok {
+			filePath = fp
+		} else {
+			return nil, fmt.Errorf("file path is required")
+		}
+	}
+
+	// Resolve and validate path to prevent directory traversal attacks
+	extDir := GetExtensionDir(e.baseDir, manifest.Name)
+	resolvedPath, err := e.resolveAndValidatePath(filePath, extDir, false)
+	if err != nil {
+		return nil, fmt.Errorf("invalid file path: %w", err)
+	}
+
+	// Read file
+	data, err := os.ReadFile(resolvedPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read file: %w", err)
+	}
+
+	return map[string]interface{}{
+		"file_content": string(data),
+		"content":      string(data), // Also set as content for convenience
+	}, nil
+}
+
 // callLLM calls the LLM with the rendered prompt
 func (e *WorkflowExecutor) callLLM(ctx *ExecutionContext, _ WorkflowStep, resolvedWith map[string]interface{}, state map[string]interface{}) (map[string]interface{}, error) {
 	if e.llmHandler == nil {
@@ -265,11 +321,64 @@ func (e *WorkflowExecutor) callLLM(ctx *ExecutionContext, _ WorkflowStep, resolv
 	}, nil
 }
 
+// resolveAndValidatePath resolves a file path and validates it stays within allowed directories
+// to prevent directory traversal attacks.
+// For read operations: path must stay within extension directory
+// For write operations: path can be within extension directory or repository root (for docs/ output)
+func (e *WorkflowExecutor) resolveAndValidatePath(path string, extDir string, allowWrite bool) (string, error) {
+	// Absolute paths are not allowed for security
+	if filepath.IsAbs(path) {
+		return "", fmt.Errorf("absolute paths are not allowed")
+	}
+
+	// Resolve path relative to extension directory first
+	resolvedPath := filepath.Join(extDir, path)
+	resolvedPath = filepath.Clean(resolvedPath)
+
+	// Normalize paths for comparison
+	extDirNormalized := filepath.Clean(extDir)
+	baseDirNormalized := filepath.Clean(e.baseDir)
+
+	// Check if path is within extension directory
+	relToExt, err := filepath.Rel(extDirNormalized, resolvedPath)
+	if err != nil {
+		return "", fmt.Errorf("path resolution failed: %w", err)
+	}
+
+	// If path escapes extension directory (starts with "..")
+	if strings.HasPrefix(relToExt, "..") {
+		if !allowWrite {
+			// Read operations: must stay within extension directory
+			return "", fmt.Errorf("path escapes extension directory: %s", path)
+		}
+
+		// Write operations: check if path is within repository root (for docs/ output)
+		relToBase, err := filepath.Rel(baseDirNormalized, resolvedPath)
+		if err != nil {
+			return "", fmt.Errorf("path resolution failed: %w", err)
+		}
+
+		// If path escapes repository root, reject it
+		if strings.HasPrefix(relToBase, "..") {
+			return "", fmt.Errorf("path escapes repository root: %s", path)
+		}
+
+		// Path is within repository root but outside extension directory
+		// This is allowed for write operations (e.g., writing to docs/)
+		return resolvedPath, nil
+	}
+
+	// Path is within extension directory - always allowed
+	return resolvedPath, nil
+}
+
 // writeFile writes output to a file
 func (e *WorkflowExecutor) writeFile(_ context.Context, _ WorkflowStep, resolvedWith map[string]interface{}, state map[string]interface{}, manifest *Manifest) (map[string]interface{}, error) {
-	// Get output path from resolvedWith or manifest outputs
+	// Get output path from resolvedWith, state, or manifest outputs
 	outputPath := ""
-	if path, ok := resolvedWith["path"].(string); ok {
+	if path, ok := resolvedWith["path"].(string); ok && path != "" {
+		outputPath = path
+	} else if path, ok := state["output_path"].(string); ok && path != "" {
 		outputPath = path
 	} else {
 		// Find output definition
@@ -279,17 +388,25 @@ func (e *WorkflowExecutor) writeFile(_ context.Context, _ WorkflowStep, resolved
 				break
 			}
 		}
+		// If still no path and we have a target in state, construct default
+		if outputPath == "" {
+			if target, ok := state["target"].(string); ok && target != "" {
+				outputPath = fmt.Sprintf("../../docs/extensions/%s.md", target)
+			}
+		}
 	}
 
 	if outputPath == "" {
 		return nil, fmt.Errorf("output path not specified")
 	}
 
-	// Make path relative to extension directory if relative
-	if !filepath.IsAbs(outputPath) {
-		extDir := GetExtensionDir(e.baseDir, manifest.Name)
-		outputPath = filepath.Join(extDir, outputPath)
+	// Resolve and validate path to prevent directory traversal attacks
+	extDir := GetExtensionDir(e.baseDir, manifest.Name)
+	resolvedPath, err := e.resolveAndValidatePath(outputPath, extDir, true)
+	if err != nil {
+		return nil, fmt.Errorf("invalid output path: %w", err)
 	}
+	outputPath = resolvedPath
 
 	// Ensure output directory exists
 	outputDir := filepath.Dir(outputPath)

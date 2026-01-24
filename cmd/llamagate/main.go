@@ -18,6 +18,7 @@ import (
 	"github.com/llamagate/llamagate/internal/extensions"
 	"github.com/llamagate/llamagate/internal/logger"
 	"github.com/llamagate/llamagate/internal/middleware"
+	"github.com/llamagate/llamagate/internal/ollama"
 	"github.com/llamagate/llamagate/internal/startup"
 	"github.com/llamagate/llamagate/internal/proxy"
 	"github.com/llamagate/llamagate/internal/setup"
@@ -41,6 +42,14 @@ func main() {
 		Bool("debug", cfg.Debug).
 		Bool("tls_enabled", cfg.TLSEnabled).
 		Msg("Starting LlamaGate")
+
+	// Ensure Ollama is running (start if not running)
+	if running, err := ollama.EnsureRunning(cfg.OllamaHost); !running {
+		log.Fatal().
+			Err(err).
+			Str("ollama_host", cfg.OllamaHost).
+			Msg("Failed to ensure Ollama is running")
+	}
 
 	// Initialize cache
 	cacheInstance := cache.New()

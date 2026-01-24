@@ -91,6 +91,60 @@ curl -X POST http://localhost:11435/v1/extensions/my-first-extension/execute \
 
 ## Extension Types
 
+LlamaGate has three types of extensions:
+
+### Builtin Extensions (Go Code)
+- Core functionality compiled into binary
+- Location: `internal/extensions/builtin/`
+- Examples: `validation`, `tools`, `state`, `human`, `events`
+
+### Builtin Extensions (YAML-based)
+- Core workflow capabilities included in repo
+- Location: `extensions/builtin/`
+- Manifest flag: `builtin: true`
+- Examples: `extension-doc-generator`
+- Loaded with priority, can't be disabled
+
+### Default Extensions (YAML-based)
+- Workflow extensions included in repo
+- Location: `extensions/` (not in `builtin/` subdirectory)
+- Examples: `agenticmodule_runner`, `prompt-template-executor`
+- Discovered at startup
+
+---
+
+## Builtin Extensions
+
+### Extension Documentation Generator
+
+**Purpose:** Generate comprehensive markdown documentation for extensions and modules
+
+**Type:** Builtin Extension (YAML-based)
+
+**Location:** `extensions/builtin/extension-doc-generator/`
+
+**Usage:**
+```bash
+curl -X POST http://localhost:11435/v1/extensions/extension-doc-generator/execute \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: sk-llamagate" \
+  -d '{
+    "target": "prompt-template-executor",
+    "output_path": "docs/extensions/prompt-template-executor.md"
+  }'
+```
+
+**Inputs:**
+- `target` (required): Extension or module name
+- `output_path` (optional): Where to save documentation (default: `docs/extensions/{target}.md`)
+- `format` (optional): markdown, html, or json
+- `include_examples` (optional): Include usage examples
+- `include_api_details` (optional): Include API endpoint details
+
+---
+
+## Extension Types (by Functionality)
+
 ### 1. Workflow Extensions
 
 Execute sequences of steps (LLM calls, file operations, etc.)

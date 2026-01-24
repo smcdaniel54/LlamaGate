@@ -773,6 +773,14 @@ When the rate limit is exceeded:
 
 LlamaGate provides a RESTful API for managing and executing extensions. All extension endpoints are available under the `/v1/extensions` prefix.
 
+### Extension Types
+
+LlamaGate has three types of extensions:
+
+1. **Builtin Extensions (Go Code)**: Core functionality compiled into binary (`internal/extensions/builtin/`)
+2. **Builtin Extensions (YAML-based)**: Core workflow capabilities in `extensions/builtin/` (e.g., `extension-doc-generator`)
+3. **Default Extensions (YAML-based)**: Workflow extensions in `extensions/` directory
+
 ### List All Extensions
 
 Get information about all registered extensions.
@@ -932,6 +940,66 @@ curl -X POST \
 - Middleware and observer extensions run automatically (no API call needed)
 - All required inputs must be provided
 - Output files are written to the extension's output directory
+
+### Extension Documentation Generator (Builtin Extension)
+
+Generate comprehensive markdown documentation for extensions and modules using the builtin `extension-doc-generator` extension.
+
+**Endpoint:** `POST /v1/extensions/extension-doc-generator/execute`
+
+**Request Body:**
+```json
+{
+  "target": "prompt-template-executor",
+  "output_path": "docs/extensions/prompt-template-executor.md",
+  "format": "markdown",
+  "include_examples": true,
+  "include_api_details": true
+}
+```
+
+**Parameters:**
+- `target` (required, string) - Extension or module name to document
+- `output_path` (optional, string) - Path to save generated markdown (default: `docs/extensions/{target}.md`)
+- `format` (optional, string) - Output format: `markdown`, `html`, or `json` (default: `markdown`)
+- `include_examples` (optional, boolean) - Include usage examples in documentation (default: `true`)
+- `include_api_details` (optional, boolean) - Include API endpoint details (default: `true`)
+
+**Response (Success):**
+```json
+{
+  "success": true,
+  "data": {
+    "documentation": "# Prompt Template Executor\n\n...",
+    "file_path": "docs/extensions/prompt-template-executor.md"
+  }
+}
+```
+
+**Example:**
+```bash
+curl -X POST \
+  -H "X-API-Key: sk-llamagate" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "target": "prompt-template-executor",
+    "output_path": "docs/extensions/prompt-template-executor.md"
+  }' \
+  http://localhost:11435/v1/extensions/extension-doc-generator/execute
+```
+
+**Status Codes:**
+- `200 OK` - Documentation generated successfully
+- `400 Bad Request` - Invalid input (e.g., missing `target`)
+- `404 Not Found` - Target extension not found
+- `500 Internal Server Error` - Generation failed
+
+**Notes:**
+- This is a builtin extension (YAML-based) located in `extensions/builtin/extension-doc-generator/`
+- Always available - no installation needed
+- Cannot be disabled (builtin extension protection)
+- Generated documentation includes: overview, API endpoints, inputs/outputs, configuration, usage examples, workflow steps/hooks
+- Documentation is saved to the specified path (or default location)
 
 ### Refresh Extensions
 

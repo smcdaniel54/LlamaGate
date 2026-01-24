@@ -34,21 +34,31 @@ Extensions are stored in the **`extensions/`** directory (replacing `plugins/`):
 
 ```
 extensions/
+├── builtin/               # Builtin YAML extensions (core capabilities)
+│   └── extension-doc-generator/
+│       └── manifest.yaml  # builtin: true
 ├── manifest.yaml          # Extension manifest (required)
 ├── config.yaml            # Extension-specific configuration (optional)
 └── [executable files]     # Optional executable logic (if needed)
 ```
 
+**Extension Types:**
+- **Builtin Extensions (Go Code)**: `internal/extensions/builtin/` - Core functionality compiled into binary
+- **Builtin Extensions (YAML-based)**: `extensions/builtin/` - Core workflow capabilities, `builtin: true` flag
+- **Default Extensions (YAML-based)**: `extensions/` - Regular workflow extensions
+
 ### Discovery
 
 Extensions are discovered at **server startup** by:
 
-1. Scanning the `extensions/` directory for `manifest.yaml` files
-2. Validating each manifest against the Extension Manifest Schema
-3. Loading extension configuration from `config.yaml` (if present) or from main config file under `extensions.configs.<extension_name>`
-4. Registering valid extensions in the Extension Registry
+1. **First**: Scanning the `extensions/builtin/` directory for builtin YAML extensions (priority loading)
+2. **Then**: Scanning the `extensions/` directory for default extensions
+3. Validating each manifest against the Extension Manifest Schema
+4. Loading extension configuration from `config.yaml` (if present) or from main config file under `extensions.configs.<extension_name>`
+5. Registering valid extensions in the Extension Registry
 
 **Discovery Process:**
+- Builtin YAML extensions are discovered **first** (priority loading)
 - Extensions are discovered **synchronously** during server initialization
 - Invalid extensions are **logged as errors** and **skipped** (server continues to start)
 - Discovery failures are **non-fatal** (server starts with available extensions)
@@ -74,6 +84,7 @@ Extensions support **enable/disable** functionality:
 - **Disable via environment** – Set `EXTENSION_<NAME>_ENABLED=false`
 - **When disabled** – Extension is discovered and registered but **not executed**; API endpoints return 503 Service Unavailable
 - **Zero side effects when disabled** – Disabled extensions consume minimal resources (registry entry only)
+- **Builtin extensions cannot be disabled** – Extensions with `builtin: true` are always enabled and cannot be disabled via API or configuration
 
 ### Hot-Reload
 
@@ -108,7 +119,9 @@ name: string                    # Required: Unique identifier (alphanumeric + un
 version: string                 # Required: Semantic version (e.g., "1.0.0")
 description: string             # Required: What this extension does
 author: string                  # Optional: Extension author
+builtin: boolean                # Optional: Mark as builtin extension (YAML-based, default: false)
 enabled: boolean                # Optional: Enable/disable (default: true)
+                                  # Note: Builtin extensions cannot be disabled
 
 # Input/Output Schemas
 input_schema:                   # Optional: JSON Schema for inputs

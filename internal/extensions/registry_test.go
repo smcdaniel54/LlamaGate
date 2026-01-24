@@ -129,6 +129,120 @@ func TestRegistry_SetEnabled(t *testing.T) {
 	}
 }
 
+func TestRegistry_SetEnabled_BuiltinCannotBeDisabled(t *testing.T) {
+	registry := NewRegistry()
+
+	builtin := &Manifest{
+		Name:        "builtin-ext",
+		Version:     "1.0.0",
+		Description: "Builtin extension",
+		Builtin:     true,
+		Enabled:     boolPtr(true),
+	}
+
+	require.NoError(t, registry.Register(builtin))
+
+	// Verify it's enabled
+	if !registry.IsEnabled("builtin-ext") {
+		t.Error("Expected builtin extension to be enabled")
+	}
+
+	// Try to disable it - should fail
+	err := registry.SetEnabled("builtin-ext", false)
+	if err == nil {
+		t.Error("Expected error when trying to disable builtin extension")
+	}
+	if err != nil && err.Error() != "cannot disable builtin extension builtin-ext" {
+		t.Errorf("Expected specific error message, got: %v", err)
+	}
+
+	// Verify it's still enabled
+	if !registry.IsEnabled("builtin-ext") {
+		t.Error("Expected builtin extension to still be enabled after failed disable attempt")
+	}
+
+	// Can still enable it (no-op but should work)
+	err = registry.SetEnabled("builtin-ext", true)
+	if err != nil {
+		t.Errorf("Should be able to enable builtin extension: %v", err)
+	}
+}
+
+func TestRegistry_Unregister_BuiltinCannotBeUnregistered(t *testing.T) {
+	registry := NewRegistry()
+
+	builtin := &Manifest{
+		Name:        "builtin-ext",
+		Version:     "1.0.0",
+		Description: "Builtin extension",
+		Builtin:     true,
+	}
+
+	require.NoError(t, registry.Register(builtin))
+
+	// Try to unregister it - should fail
+	err := registry.Unregister("builtin-ext")
+	if err == nil {
+		t.Error("Expected error when trying to unregister builtin extension")
+	}
+	if err != nil && err.Error() != "cannot unregister builtin extension builtin-ext" {
+		t.Errorf("Expected specific error message, got: %v", err)
+	}
+
+	// Verify it's still registered
+	_, err = registry.Get("builtin-ext")
+	if err != nil {
+		t.Error("Expected builtin extension to still be registered after failed unregister attempt")
+	}
+}
+
+func TestRegistry_Register_BuiltinAlwaysEnabled(t *testing.T) {
+	registry := NewRegistry()
+
+	// Test that builtin extension is always enabled, even if manifest says disabled
+	builtin := &Manifest{
+		Name:        "builtin-ext",
+		Version:     "1.0.0",
+		Description: "Builtin extension",
+		Builtin:     true,
+		Enabled:     boolPtr(false), // Try to set as disabled in manifest
+	}
+
+	require.NoError(t, registry.Register(builtin))
+
+	// Should be enabled despite manifest saying disabled
+	if !registry.IsEnabled("builtin-ext") {
+		t.Error("Expected builtin extension to be enabled even if manifest says disabled")
+	}
+}
+
+func TestRegistry_RegisterOrUpdate_BuiltinAlwaysEnabled(t *testing.T) {
+	registry := NewRegistry()
+
+	// Test RegisterOrUpdate with builtin extension
+	builtin := &Manifest{
+		Name:        "builtin-ext",
+		Version:     "1.0.0",
+		Description: "Builtin extension",
+		Builtin:     true,
+		Enabled:     boolPtr(false), // Try to set as disabled
+	}
+
+	require.NoError(t, registry.RegisterOrUpdate(builtin))
+
+	// Should be enabled despite manifest saying disabled
+	if !registry.IsEnabled("builtin-ext") {
+		t.Error("Expected builtin extension to be enabled via RegisterOrUpdate even if manifest says disabled")
+	}
+
+	// Update the extension - should still be enabled
+	builtin.Version = "2.0.0"
+	require.NoError(t, registry.RegisterOrUpdate(builtin))
+	if !registry.IsEnabled("builtin-ext") {
+		t.Error("Expected builtin extension to remain enabled after update")
+	}
+}
+
 func TestRegistry_GetByType(t *testing.T) {
 	registry := NewRegistry()
 

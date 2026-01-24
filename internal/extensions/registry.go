@@ -34,7 +34,12 @@ func (r *Registry) Register(manifest *Manifest) error {
 	}
 
 	r.extensions[manifest.Name] = manifest
-	r.enabled[manifest.Name] = manifest.IsEnabled()
+	// Builtin extensions are always enabled
+	if manifest.Builtin {
+		r.enabled[manifest.Name] = true
+	} else {
+		r.enabled[manifest.Name] = manifest.IsEnabled()
+	}
 
 	return nil
 }
@@ -74,12 +79,19 @@ func (r *Registry) IsEnabled(name string) bool {
 }
 
 // SetEnabled sets the enabled state of an extension
+// Builtin extensions cannot be disabled
 func (r *Registry) SetEnabled(name string, enabled bool) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if _, exists := r.extensions[name]; !exists {
+	manifest, exists := r.extensions[name]
+	if !exists {
 		return fmt.Errorf("extension %s not found", name)
+	}
+
+	// Prevent disabling builtin extensions
+	if manifest.Builtin && !enabled {
+		return fmt.Errorf("cannot disable builtin extension %s", name)
 	}
 
 	r.enabled[name] = enabled
@@ -102,12 +114,19 @@ func (r *Registry) GetByType(extType string) []*Manifest {
 }
 
 // Unregister removes an extension from the registry
+// Builtin extensions cannot be unregistered
 func (r *Registry) Unregister(name string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if _, exists := r.extensions[name]; !exists {
+	manifest, exists := r.extensions[name]
+	if !exists {
 		return fmt.Errorf("extension %s not found", name)
+	}
+
+	// Prevent unregistering builtin extensions
+	if manifest.Builtin {
+		return fmt.Errorf("cannot unregister builtin extension %s", name)
 	}
 
 	delete(r.extensions, name)
@@ -125,7 +144,12 @@ func (r *Registry) RegisterOrUpdate(manifest *Manifest) error {
 	}
 
 	r.extensions[manifest.Name] = manifest
-	r.enabled[manifest.Name] = manifest.IsEnabled()
+	// Builtin extensions are always enabled
+	if manifest.Builtin {
+		r.enabled[manifest.Name] = true
+	} else {
+		r.enabled[manifest.Name] = manifest.IsEnabled()
+	}
 
 	return nil
 }

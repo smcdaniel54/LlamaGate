@@ -1,0 +1,20 @@
+[
+  {
+    "completion_tokens": 0,
+    "estimated_cost": 0,
+    "model": "mistral:latest",
+    "prompt_tokens": 0,
+    "request_id": "4597a09f-083f-4673-8119-7a9aa40cef12",
+    "timestamp": "2026-01-24T05:02:31Z",
+    "total_tokens": 0
+  },
+  {
+    "completion_tokens": 0,
+    "estimated_cost": 0,
+    "model": "mistral:latest",
+    "prompt_tokens": 0,
+    "request_id": "dabb3922-9780-44ee-a7cd-68b60654d6aa",
+    "timestamp": "2026-01-24T05:08:35Z",
+    "total_tokens": 0
+  }
+]

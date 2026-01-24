@@ -4,9 +4,11 @@
 
 The Extension Foundation provides a standardized way to extend LlamaGate with custom functionality for building agentic workflows. It consists of core interfaces, a registration system, and **builtin extensions** that are always available.
 
-## Builtin Extensions
+**Note:** This document describes the **Go-based Extension Foundation** system. LlamaGate also has a **YAML-based extension system** (v0.9.1+) with its own builtin extensions. See [Extensions Quick Start](../EXTENSIONS_QUICKSTART.md) for YAML extensions.
 
-LlamaGate includes **10 builtin extensions** that provide core functionality:
+## Builtin Extensions (Go Code)
+
+LlamaGate includes **10 builtin extensions** (Go code) that provide core functionality:
 
 1. **Agent Caller** - Local LLM calls (Ollama)
 2. **Tool Framework** - MCP tool execution
@@ -19,7 +21,14 @@ LlamaGate includes **10 builtin extensions** that provide core functionality:
 9. **Debug Logger** - Comprehensive logging
 10. **Visual Debugger** - Visual workflow execution
 
-All builtin extensions are part of LlamaGate core and are always available. See [Builtin Extensions Guide](../BUILTIN_EXTENSIONS.md) for complete documentation.
+All builtin extensions (Go code) are part of LlamaGate core and are always available. See [Builtin Extensions Guide](../BUILTIN_EXTENSIONS.md) for complete documentation.
+
+**Extension Types in LlamaGate:**
+- **Builtin Extensions (Go Code)**: This Extension Foundation system - `internal/extensions/builtin/` - Core functionality compiled into binary
+- **Builtin Extensions (YAML-based)**: YAML extension system - `extensions/builtin/` - Core workflow capabilities, `builtin: true` flag
+- **Default Extensions (YAML-based)**: YAML extension system - `extensions/` - Regular workflow extensions
+
+See [Extensions Quick Start](../EXTENSIONS_QUICKSTART.md) for information about YAML-based extensions.
 
 ## Core Components
 
