@@ -131,19 +131,31 @@ func (e *WorkflowExecutor) resolveTemplateString(template string, state map[stri
 	}
 	// Sort keys for deterministic iteration order
 	sort.Strings(placeholders)
-	
+
 	// Resolve placeholders in sorted order
 	result := template
 	for _, key := range placeholders {
 		value := state[key]
 		placeholder := fmt.Sprintf("{{%s}}", key)
 		if strings.Contains(result, placeholder) {
-			// Convert value to string, but escape any template syntax in the value itself
-			// to prevent nested template resolution issues
+			// Convert value to string and escape template syntax to prevent nested resolution
+			// This prevents values containing {{var}} from being interpreted as templates
+			// in subsequent resolution iterations, which could leak sensitive data
 			valueStr := fmt.Sprintf("%v", value)
+			// Escape {{ and }} in the value to prevent nested template resolution
+			// Use markers that won't match the {{key}} pattern used by the template system
+			// during this resolution pass
+			valueStr = strings.ReplaceAll(valueStr, "{{", "__LLAMAGATE_ESCAPED_OPEN__")
+			valueStr = strings.ReplaceAll(valueStr, "}}", "__LLAMAGATE_ESCAPED_CLOSE__")
 			result = strings.ReplaceAll(result, placeholder, valueStr)
 		}
 	}
+
+	// Unescape any escaped template markers back to their original form
+	// so downstream processing sees the original values
+	result = strings.ReplaceAll(result, "__LLAMAGATE_ESCAPED_OPEN__", "{{")
+	result = strings.ReplaceAll(result, "__LLAMAGATE_ESCAPED_CLOSE__", "}}")
+
 	return result
 }
 
@@ -324,7 +336,7 @@ func (e *WorkflowExecutor) callLLM(ctx *ExecutionContext, _ WorkflowStep, resolv
 // resolveAndValidatePath resolves a file path and validates it stays within allowed directories
 // to prevent directory traversal attacks.
 // For read operations: path must stay within extension directory
-// For write operations: path can be within extension directory or repository root (for docs/ output)
+// For write operations: path can be within extension directory or docs/ subdirectory only
 func (e *WorkflowExecutor) resolveAndValidatePath(path string, extDir string, allowWrite bool) (string, error) {
 	// Absolute paths are not allowed for security
 	if filepath.IsAbs(path) {
@@ -352,20 +364,31 @@ func (e *WorkflowExecutor) resolveAndValidatePath(path string, extDir string, al
 			return "", fmt.Errorf("path escapes extension directory: %s", path)
 		}
 
-		// Write operations: check if path is within repository root (for docs/ output)
-		relToBase, err := filepath.Rel(baseDirNormalized, resolvedPath)
+		// Write operations: only allow writing to docs/ subdirectory for security
+		// baseDir is "extensions/", so repository root is one level up
+		repoRoot := filepath.Dir(baseDirNormalized)
+		relToRepo, err := filepath.Rel(repoRoot, resolvedPath)
 		if err != nil {
 			return "", fmt.Errorf("path resolution failed: %w", err)
 		}
 
 		// If path escapes repository root, reject it
-		if strings.HasPrefix(relToBase, "..") {
+		if strings.HasPrefix(relToRepo, "..") {
 			return "", fmt.Errorf("path escapes repository root: %s", path)
 		}
 
-		// Path is within repository root but outside extension directory
-		// This is allowed for write operations (e.g., writing to docs/)
-		return resolvedPath, nil
+		// For write operations outside extension directory, only allow docs/ subdirectory
+		// This prevents writing to sensitive files like config, source code, etc.
+		docsDir := filepath.Join(repoRoot, "docs")
+		relToDocs, err := filepath.Rel(docsDir, resolvedPath)
+		if err == nil && !strings.HasPrefix(relToDocs, "..") {
+			// Path is within docs/ directory - allowed
+			return resolvedPath, nil
+		}
+
+		// Path is within repository root but not in docs/ directory
+		// Reject for security (prevents writing to config files, source code, etc.)
+		return "", fmt.Errorf("write operations outside extension directory are only allowed to docs/ subdirectory: %s", path)
 	}
 
 	// Path is within extension directory - always allowed
