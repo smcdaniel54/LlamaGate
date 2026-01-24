@@ -586,15 +586,19 @@ LlamaGate can be configured via:
 Create a `.env` file in the project root (copy from `.env.example`):
 
 ```bash
-# .env
+# .env (recommended for documentation examples)
 OLLAMA_HOST=http://localhost:11434
 API_KEY=sk-llamagate
 RATE_LIMIT_RPS=50
 DEBUG=false
 PORT=11435
-LOG_FILE=llamagate.log
+LOG_FILE=
 TIMEOUT=5m
 ```
+
+**Note:** Set `API_KEY=sk-llamagate` to match all documentation examples. Leave it empty (`API_KEY=`) to disable authentication. For development/testing, you may also want to set:
+- `DEBUG=true` (to enable debug logging)
+- `LOG_FILE=llamagate.log` (to log to file)
 
 The `.env` file is automatically loaded when the application starts. Environment variables set directly will override `.env` file values, making it easy to override settings for specific runs.
 
@@ -620,6 +624,8 @@ The `X-API-Key` header is checked first. If not present, `Authorization: Bearer`
 
 ### Example (Linux/Mac)
 
+**Note:** These are testing/development values. For production, use defaults or configure via `.env` file.
+
 ```bash
 export OLLAMA_HOST="http://localhost:11434"
 export API_KEY="sk-llamagate"
@@ -631,6 +637,8 @@ llamagate
 ```
 
 ### Example (Windows)
+
+**Note:** These are testing/development values. For production, use defaults or configure via `.env` file.
 
 ```cmd
 set OLLAMA_HOST=http://localhost:11434

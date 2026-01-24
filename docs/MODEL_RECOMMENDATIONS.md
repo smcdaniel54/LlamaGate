@@ -182,7 +182,7 @@ from openai import OpenAI
 
 client = OpenAI(
     base_url="http://localhost:11435/v1",
-    api_key="not-needed"
+    api_key="sk-llamagate"
 )
 
 # Default for most businesses
@@ -281,7 +281,7 @@ from openai import OpenAI
 
 client = OpenAI(
     base_url="http://localhost:11435/v1",
-    api_key="not-needed"
+    api_key="sk-llamagate"
 )
 
 response = client.chat.completions.create(
@@ -526,7 +526,7 @@ response = client.chat.completions.create(
    
    client = OpenAI(
        base_url="http://localhost:11435/v1",
-       api_key="not-needed"
+       api_key="sk-llamagate"
    )
    
    # Default for most businesses

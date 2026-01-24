@@ -264,8 +264,9 @@ try {
 # Ollama server URL
 OLLAMA_HOST=http://localhost:11434
 
-# API key for authentication (leave empty to disable authentication)
-API_KEY=
+# API key for authentication (set to sk-llamagate to match documentation examples)
+# Leave empty to disable authentication
+API_KEY=sk-llamagate
 
 # Rate limit (requests per second)
 RATE_LIMIT_RPS=50
@@ -380,7 +381,7 @@ from openai import OpenAI
 # Standard configuration
 client = OpenAI(
     base_url="http://localhost:11435/v1",  # LlamaGate endpoint
-    api_key="not-needed"  # Unless authentication configured
+    api_key="sk-llamagate"  # Match your .env API_KEY setting
 )
 
 # Basic chat completion
@@ -553,7 +554,7 @@ from dataclasses import dataclass
 class LlamaGateConfig:
     """LlamaGate configuration settings."""
     base_url: str = "http://localhost:11435/v1"
-    api_key: str = "not-needed"
+    api_key: str = "sk-llamagate"
     default_model: str = "mistral"
     timeout: int = 30
     max_retries: int = 3

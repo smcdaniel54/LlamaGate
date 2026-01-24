@@ -12,7 +12,7 @@ fi
 
 # Set defaults if not set
 export OLLAMA_HOST="${OLLAMA_HOST:-http://localhost:11434}"
-export API_KEY="${API_KEY:-}"
+export API_KEY="${API_KEY:-sk-llamagate}"
 export RATE_LIMIT_RPS="${RATE_LIMIT_RPS:-50}"
 export DEBUG="${DEBUG:-false}"
 export PORT="${PORT:-11435}"

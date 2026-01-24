@@ -212,7 +212,7 @@ from openai import OpenAI
 
 client = OpenAI(
     base_url="http://localhost:11435/v1",
-    api_key="your-api-key"
+    api_key="sk-llamagate"
 )
 
 response = client.chat.completions.create(

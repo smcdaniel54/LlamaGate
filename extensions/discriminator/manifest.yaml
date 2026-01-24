@@ -1,0 +1,85 @@
+name: discriminator
+version: 1.0.0
+description: Evaluates outputs, finds imperfections, balances exploration vs stability, promotes simplicity, creates evaluation reports
+type: workflow
+enabled: true
+
+inputs:
+  - id: design
+    type: object
+    description: Workflow design or output to evaluate
+    required: true
+  - id: evaluation_criteria
+    type: object
+    description: Specific criteria for evaluation
+    required: false
+
+outputs:
+  - id: evaluation_report
+    type: object
+    description: Complete evaluation report with quality assessment
+  - id: quality_metrics
+    type: object
+    description: Quality metrics and scores
+  - id: improvement_suggestions
+    type: array
+    description: List of improvement suggestions
+  - id: evaluation_log
+    type: string
+    description: Evaluation log entry
+
+steps:
+  - name: evaluate_design
+    uses: llm.chat
+    config:
+      model: mistral
+      system_prompt: |
+        You are an expert quality discriminator. Your role is to evaluate workflow designs
+        and outputs for quality, simplicity, and effectiveness.
+        
+        Evaluation criteria:
+        1. **Simplicity**: Is the design simple and maintainable?
+        2. **Completeness**: Are all required components present?
+        3. **Quality**: Is the design well-structured and follows best practices?
+        4. **Over-engineering**: Are there unnecessary complexities?
+        5. **Exploration vs Stability**: Balance between innovation and reliability
+        
+        Always create:
+        - Detailed evaluation reports
+        - Quality metrics and scores
+        - Specific improvement suggestions
+        - Evaluation logs for monitoring
+        
+        Output format:
+        {
+          "evaluation_report": {
+            "overall_quality": "score",
+            "simplicity_score": "score",
+            "completeness_score": "score",
+            "issues_found": [...],
+            "strengths": [...]
+          },
+          "quality_metrics": {
+            "simplicity": 0-10,
+            "completeness": 0-10,
+            "maintainability": 0-10,
+            "over_engineering_risk": 0-10
+          },
+          "improvement_suggestions": [
+            {"area": "...", "suggestion": "...", "priority": "high|medium|low"}
+          ],
+          "evaluation_log": "timestamp: [evaluation details]"
+        }
+      user_prompt: |
+        Evaluate this design:
+        
+        Design: {{inputs.design}}
+        Criteria: {{inputs.evaluation_criteria}}
+        
+        Provide comprehensive evaluation with metrics, issues, and improvements.
+        Create logs and artifacts for monitoring.
+    outputs:
+      evaluation_report: ${steps.evaluate_design.output.evaluation_report}
+      quality_metrics: ${steps.evaluate_design.output.quality_metrics}
+      improvement_suggestions: ${steps.evaluate_design.output.improvement_suggestions}
+      evaluation_log: ${steps.evaluate_design.output.evaluation_log}

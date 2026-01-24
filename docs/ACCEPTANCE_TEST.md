@@ -102,13 +102,13 @@ _________________________________________________________________
 | Test configuration loading | No errors when loading config | ☐ | |
 
 **Configuration Checklist:**
-- ☐ `OLLAMA_URL` configured
-- ☐ `PORT` configured (default: 11435)
-- ☐ `API_KEY` configured (if authentication enabled)
-- ☐ `RATE_LIMIT_RPS` configured (if rate limiting enabled)
-- ☐ `CACHE_ENABLED` configured (if caching enabled)
-- ☐ `LOG_LEVEL` configured
-- ☐ `LOG_FILE` configured (optional)
+- ☐ `OLLAMA_HOST` configured (default: `http://localhost:11434`)
+- ☐ `PORT` configured (default: `11435`)
+- ☐ `API_KEY` configured (optional, leave empty to disable authentication)
+- ☐ `RATE_LIMIT_RPS` configured (default: `50`)
+- ☐ `DEBUG` configured (default: `false`)
+- ☐ `LOG_FILE` configured (optional, leave empty for console only)
+- ☐ `TIMEOUT` configured (default: `5m`)
 
 **Notes:**
 ```

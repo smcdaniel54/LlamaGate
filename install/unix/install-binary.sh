@@ -119,8 +119,11 @@ if [ ! -f "$ENV_FILE" ]; then
 # Ollama server URL
 OLLAMA_HOST=http://localhost:11434
 
-# API key for authentication (leave empty to disable authentication)
-API_KEY=
+# API key for authentication
+# Set to sk-llamagate to match documentation examples
+# IMPORTANT: Change this to a secure key for production use
+# Leave empty to disable authentication
+API_KEY=sk-llamagate
 
 # Rate limit (requests per second)
 RATE_LIMIT_RPS=50

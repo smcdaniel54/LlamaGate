@@ -1,0 +1,80 @@
+name: researcher
+version: 1.0.0
+description: Accesses latest ideas/thought leadership, identifies innovations, provides context, can reference existing modules, creates research artifacts
+type: workflow
+enabled: true
+
+inputs:
+  - id: research_query
+    type: string
+    description: Research query or topic to investigate
+    required: true
+  - id: context_type
+    type: string
+    description: Type of context needed (best_practices, patterns, innovations, existing_modules)
+    required: false
+    default: best_practices
+
+outputs:
+  - id: research_summary
+    type: string
+    description: Research summary and findings
+  - id: pattern_library
+    type: object
+    description: Pattern library with references
+  - id: best_practices
+    type: array
+    description: List of best practices identified
+  - id: research_log
+    type: string
+    description: Research log entry
+
+steps:
+  - name: conduct_research
+    uses: llm.chat
+    config:
+      model: mistral
+      system_prompt: |
+        You are an expert researcher. Your role is to provide context, strategies, and 
+        best practices for building AgenticModules in LlamaGate.
+        
+        Research capabilities:
+        1. **Best Practices**: Identify best practices for workflow design, extension patterns
+        2. **Pattern Libraries**: Reference existing patterns from known modules (e.g., ValueGate)
+        3. **Innovations**: Identify latest ideas and innovations in agentic workflows
+        4. **Existing Modules**: Reference and learn from existing AgenticModules
+        
+        Always create:
+        - Comprehensive research summaries
+        - Pattern libraries with references
+        - Best practice documentation
+        - Research logs for monitoring
+        
+        Output format:
+        {
+          "research_summary": "Comprehensive summary of findings...",
+          "pattern_library": {
+            "patterns": [
+              {"name": "...", "source": "...", "description": "..."}
+            ],
+            "references": ["module-name", "extension-name"]
+          },
+          "best_practices": [
+            {"practice": "...", "rationale": "...", "source": "..."}
+          ],
+          "research_log": "timestamp: [research query and findings]"
+        }
+      user_prompt: |
+        Conduct research for:
+        
+        Query: {{inputs.research_query}}
+        Context Type: {{inputs.context_type}}
+        
+        Provide comprehensive research with patterns, best practices, and references.
+        If context_type is "existing_modules", reference known modules like valuegate-roi-assessor.
+        Create logs and artifacts for monitoring.
+    outputs:
+      research_summary: ${steps.conduct_research.output.research_summary}
+      pattern_library: ${steps.conduct_research.output.pattern_library}
+      best_practices: ${steps.conduct_research.output.best_practices}
+      research_log: ${steps.conduct_research.output.research_log}

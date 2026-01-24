@@ -88,7 +88,7 @@ from langchain_openai import ChatOpenAI
 llm = ChatOpenAI(
     model="mistral",
     base_url="http://localhost:11435/v1",  # Use base_url instead of openai_api_base
-    api_key="not-needed"  # Optional: only if API_KEY is set
+    api_key="sk-llamagate"  # Match your .env API_KEY setting
 )
 ```
 
@@ -190,7 +190,7 @@ from openai import OpenAI
 
 # Configure via environment variables
 os.environ["OPENAI_BASE_URL"] = "http://localhost:11435/v1"
-os.environ["OPENAI_API_KEY"] = os.getenv("LLAMAGATE_API_KEY", "not-needed")
+os.environ["OPENAI_API_KEY"] = os.getenv("LLAMAGATE_API_KEY", "sk-llamagate")
 
 client = OpenAI()  # Automatically uses env vars
 
