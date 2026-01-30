@@ -411,3 +411,81 @@ steps:
 	_, err = registry.Get("ext2")
 	assert.Error(t, err)
 }
+
+func TestHandler_UpsertExtension_Disabled(t *testing.T) {
+	registry := NewRegistry()
+	llmHandler := func(_ context.Context, _ string, _ []map[string]interface{}, _ map[string]interface{}) (map[string]interface{}, error) {
+		return nil, nil
+	}
+	handler := NewHandler(registry, llmHandler, "")
+	// upsert disabled by default
+
+	gin.SetMode(gin.TestMode)
+	router := gin.New()
+	router.PUT("/extensions/:name", handler.UpsertExtension)
+
+	body := bytes.NewBufferString(`name: test-ext
+version: 1.0.0
+description: Test
+type: workflow
+enabled: true
+steps: []
+`)
+	req := httptest.NewRequest("PUT", "/extensions/test-ext", body)
+	req.Header.Set("Content-Type", "application/yaml")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNotImplemented, w.Code)
+	var resp map[string]interface{}
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
+	assert.Equal(t, "UPSERT_NOT_CONFIGURED", resp["code"])
+	assert.Equal(t, "Workflow upsert is not enabled", resp["error"])
+}
+
+func TestHandler_UpsertExtension_Enabled(t *testing.T) {
+	tmpDir := t.TempDir()
+	extDir := filepath.Join(tmpDir, "extensions")
+	require.NoError(t, os.MkdirAll(extDir, 0755))
+
+	registry := NewRegistry()
+	llmHandler := func(_ context.Context, _ string, _ []map[string]interface{}, _ map[string]interface{}) (map[string]interface{}, error) {
+		return nil, nil
+	}
+	handler := NewHandler(registry, llmHandler, extDir)
+	handler.SetUpsertEnabled(true)
+	handler.SetInstalledExtensionsDir(extDir)
+
+	gin.SetMode(gin.TestMode)
+	router := gin.New()
+	router.PUT("/extensions/:name", handler.UpsertExtension)
+
+	manifestYAML := `name: upserted-ext
+version: 1.0.0
+description: Upserted extension
+type: workflow
+enabled: true
+steps:
+  - uses: llm.chat
+`
+	req := httptest.NewRequest("PUT", "/extensions/upserted-ext", bytes.NewBufferString(manifestYAML))
+	req.Header.Set("Content-Type", "application/yaml")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	var resp map[string]interface{}
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
+	assert.Equal(t, "ok", resp["status"])
+	assert.Equal(t, "upserted-ext", resp["name"])
+
+	manifestPath := filepath.Join(extDir, "upserted-ext", "manifest.yaml")
+	require.FileExists(t, manifestPath)
+	loaded, err := LoadManifest(manifestPath)
+	require.NoError(t, err)
+	assert.Equal(t, "upserted-ext", loaded.Name)
+	assert.Equal(t, "1.0.0", loaded.Version)
+	assert.Equal(t, "workflow", loaded.Type)
+	assert.Len(t, loaded.Steps, 1)
+	assert.Equal(t, "llm.chat", loaded.Steps[0].Uses)
+}

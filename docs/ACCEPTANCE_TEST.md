@@ -800,6 +800,35 @@ _________________________________________________________________
 _________________________________________________________________
 ```
 
+### Test 8.4: Upsert Extension (Optional)
+
+**Note:** Upsert is disabled by default (`EXTENSIONS_UPSERT_ENABLED=false`). When disabled, `PUT /v1/extensions/:name` returns 501 with `code: UPSERT_NOT_CONFIGURED`. When enabled, use this test to verify upsert and then refresh.
+
+| Test Step | Expected Result | Status | Notes |
+|-----------|----------------|--------|-------|
+| PUT `/v1/extensions/:name` (upsert disabled) | Returns 501, body has `code: UPSERT_NOT_CONFIGURED` | ☐ | Default behavior |
+| (Optional) Enable `EXTENSIONS_UPSERT_ENABLED=true`, PUT valid YAML manifest | Returns 200, manifest written to installed dir | ☐ | |
+| POST `/v1/extensions/refresh` after upsert | New/updated extension appears in list | ☐ | |
+
+**Test Command (upsert disabled, expect 501):**
+```bash
+curl -X PUT -H "X-API-Key: sk-llamagate" \
+  -H "Content-Type: application/yaml" \
+  -d 'name: test-upsert
+version: 1.0.0
+description: Test
+type: workflow
+enabled: true
+steps: []' \
+  http://localhost:11435/v1/extensions/test-upsert
+```
+
+**Actual Result:**
+```
+_________________________________________________________________
+_________________________________________________________________
+```
+
 ---
 
 ## Error Handling

@@ -51,7 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Docs**: Installation and contributing docs updated to recommend `go build ./...` before tests and to document valid Go string literal usage so downstream build-from-source remains reliable.
 
 ### Added
-- Future features and improvements
+- **Optional workflow upsert**: `PUT /v1/extensions/:name` to create or update an extension manifest in `~/.llamagate/extensions/installed/`. Disabled by default; enable with `EXTENSIONS_UPSERT_ENABLED=true`. Clients (e.g. LlamaGate Control) can save workflows to LlamaGate; after upsert, call `POST /v1/extensions/refresh` to load. When disabled, the endpoint returns 501 with `code: UPSERT_NOT_CONFIGURED`. See [API.md](docs/API.md#upsert-extension-optional) and `.env.example`.
 
 ## [0.9.0] - 2026-01-05
 

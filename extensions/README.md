@@ -246,6 +246,20 @@ GET /v1/extensions/:name
 }
 ```
 
+### Upsert Extension (Optional)
+
+Create or update an extension manifest. **Disabled by default**; enable with `EXTENSIONS_UPSERT_ENABLED=true`. Writes to `~/.llamagate/extensions/installed/:name/manifest.yaml`. After upsert, call `POST /v1/extensions/refresh` to load the extension.
+
+```bash
+PUT /v1/extensions/:name
+```
+
+**Request Body:** YAML or JSON manifest (same schema as `manifest.yaml`). The path `:name` overrides `name` in the body.
+
+**When disabled:** Returns `501 Not Implemented` with `{"code": "UPSERT_NOT_CONFIGURED", "error": "Workflow upsert is not enabled"}`.
+
+See [API.md](docs/API.md) for full request/response and examples.
+
 ### Execute Workflow Extension
 
 ```bash

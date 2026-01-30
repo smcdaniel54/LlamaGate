@@ -352,6 +352,7 @@ result = response.json()
 | List extensions | Show all registered extensions | `GET /v1/extensions` or `ext list` |
 | Show extension | Get extension details | `GET /v1/extensions/:name` or `ext show <name>` |
 | Validate extension | Validate manifest YAML | `ext validate <path>` |
+| Upsert extension (optional) | Create/update manifest (when `EXTENSIONS_UPSERT_ENABLED=true`) | `PUT /v1/extensions/:name` |
 | Execute extension | Run a workflow extension | `POST /v1/extensions/:name/execute` |
 | Run module | Execute an AgenticModule | `POST /v1/extensions/agenticmodule_runner/execute` |
 | Refresh extensions | Re-discover extensions after installation | `POST /v1/extensions/refresh` |

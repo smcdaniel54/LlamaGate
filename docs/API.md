@@ -1001,6 +1001,57 @@ curl -X POST \
 - Generated documentation includes: overview, API endpoints, inputs/outputs, configuration, usage examples, workflow steps/hooks
 - Documentation is saved to the specified path (or default location)
 
+### Upsert Extension (Optional)
+
+Create or update an extension manifest by writing to `~/.llamagate/extensions/installed/:name/`. **Disabled by default**; enable with `EXTENSIONS_UPSERT_ENABLED=true`. Used by clients (e.g. LlamaGate Control) to save workflows to LlamaGate. After upsert, call `POST /v1/extensions/refresh` to load the extension.
+
+**Endpoint:** `PUT /v1/extensions/:name`
+
+**Request Body:** YAML or JSON manifest (same schema as `manifest.yaml`). The path `:name` overrides `name` in the body.
+
+**Response (Success, upsert enabled):**
+```json
+{
+  "status": "ok",
+  "name": "my-workflow",
+  "path": "/path/to/.llamagate/extensions/installed/my-workflow/manifest.yaml"
+}
+```
+
+**Response (Upsert not enabled):**
+```json
+{
+  "error": "Workflow upsert is not enabled",
+  "code": "UPSERT_NOT_CONFIGURED"
+}
+```
+
+**Example (when enabled):**
+```bash
+curl -X PUT \
+  -H "X-API-Key: sk-llamagate" \
+  -H "Content-Type: application/yaml" \
+  -d 'name: my-workflow
+version: 1.0.0
+description: My workflow
+type: workflow
+enabled: true
+steps:
+  - uses: llm.chat' \
+  http://localhost:11435/v1/extensions/my-workflow
+```
+
+**Status Codes:**
+- `200 OK` - Manifest written successfully
+- `400 Bad Request` - Invalid name or manifest body
+- `501 Not Implemented` - Upsert not enabled (`EXTENSIONS_UPSERT_ENABLED` is false)
+- `500 Internal Server Error` - Failed to write manifest
+
+**Notes:**
+- Extension name in the path must be alphanumeric, underscore, or hyphen only
+- Writes to `~/.llamagate/extensions/installed/:name/manifest.yaml` (or configured installed dir)
+- Call `POST /v1/extensions/refresh` after upsert to load the extension without restart
+
 ### Refresh Extensions
 
 Re-discover extensions from the `extensions/` directory and update the registry. This is useful after installing new extensions or updating existing ones, as it allows extensions to be discovered without restarting the server.

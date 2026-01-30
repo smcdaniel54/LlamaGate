@@ -85,6 +85,21 @@ func LoadManifest(path string) (*Manifest, error) {
 	return &manifest, nil
 }
 
+// WriteManifest writes a manifest to a file path as YAML. The manifest must already be validated.
+func WriteManifest(path string, m *Manifest) error {
+	data, err := yaml.Marshal(m)
+	if err != nil {
+		return fmt.Errorf("failed to marshal manifest: %w", err)
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+		return fmt.Errorf("failed to create manifest directory: %w", err)
+	}
+	if err := os.WriteFile(path, data, 0644); err != nil {
+		return fmt.Errorf("failed to write manifest: %w", err)
+	}
+	return nil
+}
+
 // ValidateManifest validates a manifest with actionable error messages
 func ValidateManifest(m *Manifest) error {
 	if m.Name == "" {

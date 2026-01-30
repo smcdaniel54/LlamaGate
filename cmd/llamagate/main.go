@@ -258,10 +258,12 @@ func main() {
 		// Extension system endpoints
 		extensionHandler := extensions.NewHandler(extensionRegistry, llmHandler, extensionBaseDir)
 		extensionHandler.SetRouteManager(routeManager) // Set route manager for refresh endpoint
+		extensionHandler.SetUpsertEnabled(cfg.ExtensionsUpsertEnabled)
 		extensionsGroup := v1.Group("/extensions")
 		{
 			extensionsGroup.GET("", extensionHandler.ListExtensions)
 			extensionsGroup.GET("/:name", extensionHandler.GetExtension)
+			extensionsGroup.PUT("/:name", extensionHandler.UpsertExtension)
 			extensionsGroup.POST("/:name/execute", extensionHandler.ExecuteExtension)
 			extensionsGroup.POST("/refresh", extensionHandler.RefreshExtensions)
 		}

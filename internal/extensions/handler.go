@@ -5,9 +5,11 @@ package extensions
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 
 	"github.com/gin-gonic/gin"
 	"github.com/llamagate/llamagate/internal/homedir"
@@ -15,6 +17,7 @@ import (
 	"github.com/llamagate/llamagate/internal/registry"
 	"github.com/llamagate/llamagate/internal/response"
 	"github.com/rs/zerolog/log"
+	"gopkg.in/yaml.v3"
 )
 
 // Handler handles extension-related HTTP requests
@@ -25,6 +28,8 @@ type Handler struct {
 	routeManager     *RouteManager // Can be nil if not set
 	// installedExtDir overrides homedir for discovery when set (e.g. in tests). Empty = use homedir.GetExtensionsDir().
 	installedExtDir string
+	// upsertEnabled allows PUT /v1/extensions/:name to create/update extension manifests (optional; disabled by default).
+	upsertEnabled bool
 }
 
 // NewHandler creates a new extension handler
@@ -48,6 +53,11 @@ func (h *Handler) SetRouteManager(rm *RouteManager) {
 // When empty, RefreshExtensions uses homedir.GetExtensionsDir().
 func (h *Handler) SetInstalledExtensionsDir(dir string) {
 	h.installedExtDir = dir
+}
+
+// SetUpsertEnabled enables or disables PUT /v1/extensions/:name (workflow/extension upsert). Default false.
+func (h *Handler) SetUpsertEnabled(enabled bool) {
+	h.upsertEnabled = enabled
 }
 
 // ListExtensions lists all registered extensions
@@ -95,6 +105,80 @@ func (h *Handler) GetExtension(c *gin.Context) {
 		"enabled":     h.registry.IsEnabled(manifest.Name),
 		"inputs":      manifest.Inputs,
 		"outputs":     manifest.Outputs,
+	})
+}
+
+// UpsertExtension creates or updates an extension manifest (optional; enabled via EXTENSIONS_UPSERT_ENABLED).
+// PUT /v1/extensions/:name
+// Body: YAML or JSON manifest. Writes to ~/.llamagate/extensions/installed/:name/manifest.yaml.
+// Call POST /v1/extensions/refresh to load the extension after upsert.
+func (h *Handler) UpsertExtension(c *gin.Context) {
+	requestID := middleware.GetRequestID(c)
+	extensionName := c.Param("name")
+
+	if !h.upsertEnabled {
+		c.JSON(http.StatusNotImplemented, gin.H{
+			"error": "Workflow upsert is not enabled",
+			"code":  "UPSERT_NOT_CONFIGURED",
+		})
+		return
+	}
+
+	// Validate name (same as manifest name: alphanumeric, underscore, hyphen)
+	nameRegex := regexp.MustCompile(`^[a-zA-Z0-9_-]+$`)
+	if !nameRegex.MatchString(extensionName) {
+		response.BadRequest(c, "Invalid extension name: only alphanumeric characters, underscores, and hyphens are allowed", requestID)
+		return
+	}
+
+	body, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		response.BadRequest(c, "Failed to read request body", requestID)
+		return
+	}
+	if len(body) == 0 {
+		response.BadRequest(c, "Request body is required (YAML or JSON manifest)", requestID)
+		return
+	}
+
+	var manifest Manifest
+	if err := yaml.Unmarshal(body, &manifest); err != nil {
+		response.BadRequest(c, fmt.Sprintf("Invalid manifest YAML/JSON: %v", err), requestID)
+		return
+	}
+	// Ensure path name and manifest name agree
+	manifest.Name = extensionName
+	if err := ValidateManifest(&manifest); err != nil {
+		response.BadRequest(c, err.Error(), requestID)
+		return
+	}
+
+	installedDir := h.installedExtDir
+	if installedDir == "" {
+		installedDir, err = homedir.GetExtensionsDir()
+		if err != nil {
+			log.Error().Err(err).Str("request_id", requestID).Msg("Failed to get extensions directory")
+			response.InternalError(c, "Failed to resolve extensions directory", requestID)
+			return
+		}
+	}
+	manifestPath := filepath.Join(installedDir, extensionName, "manifest.yaml")
+	if err := WriteManifest(manifestPath, &manifest); err != nil {
+		log.Error().Err(err).Str("request_id", requestID).Str("extension", extensionName).Msg("Failed to write manifest")
+		response.InternalError(c, fmt.Sprintf("Failed to write manifest: %v", err), requestID)
+		return
+	}
+
+	log.Info().
+		Str("request_id", requestID).
+		Str("extension", extensionName).
+		Str("version", manifest.Version).
+		Msg("Extension upserted; call POST /v1/extensions/refresh to load")
+
+	c.JSON(http.StatusOK, gin.H{
+		"status": "ok",
+		"name":   extensionName,
+		"path":   manifestPath,
 	})
 }
 
