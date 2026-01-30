@@ -127,13 +127,18 @@ This downloads and runs the source installer, which handles Go installation and 
 
 **Option B: Manual Build (If You Have Go Installed)**
 
+A full build of all packages (`go build ./...`) must succeed so that downstream tooling (CI, E2E, forked automation) that builds LlamaGate from source does not break. Then build the main binary:
+
 **Unix/Linux/macOS:**
 ```bash
 # Clone the repository
 git clone https://github.com/smcdaniel54/LlamaGate.git
 cd LlamaGate
 
-# Build
+# Build all packages (required for CI/E2E/build-from-source integrators)
+go build ./...
+
+# Build main binary
 go build -o llamagate ./cmd/llamagate
 
 # Or install to $GOPATH/bin
@@ -149,7 +154,10 @@ $ErrorActionPreference = "Stop"  # Restore if needed
 
 cd LlamaGate
 
-# Build
+# Build all packages (required for CI/E2E/build-from-source integrators)
+go build ./...
+
+# Build main binary
 go build -o llamagate.exe ./cmd/llamagate
 
 # Or install to $GOPATH/bin

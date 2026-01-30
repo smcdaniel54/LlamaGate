@@ -122,7 +122,7 @@ func (e *WorkflowExecutor) resolveStepWith(with map[string]interface{}, state ma
 
 // resolveTemplateString resolves template variables like {{var}} in a string.
 // It guarantees deterministic resolution order and prevents nested resolution
-// of values that themselves contain template syntax (e.g. \"{{password}}\").
+// of values that themselves contain template syntax (e.g. "{{password}}").
 func (e *WorkflowExecutor) resolveTemplateString(template string, state map[string]interface{}) string {
 	// Extract all placeholders first to ensure deterministic resolution order
 	placeholders := make([]string, 0, len(state))
@@ -136,38 +136,38 @@ func (e *WorkflowExecutor) resolveTemplateString(template string, state map[stri
 	combined := template
 	valueStrings := make(map[string]string, len(state))
 	for k, v := range state {
-		vs := fmt.Sprintf(\"%v\", v)
+		vs := fmt.Sprintf("%v", v)
 		valueStrings[k] = vs
 		combined += vs
 	}
 
 	// Choose escape markers that do not appear in the template or any value.
-	markerOpen := \"__LLAMAGATE_ESCAPED_OPEN__\"
+	markerOpen := "__LLAMAGATE_ESCAPED_OPEN__"
 	for strings.Contains(combined, markerOpen) {
-		markerOpen += \"X\"
+		markerOpen += "X"
 	}
-	markerClose := \"__LLAMAGATE_ESCAPED_CLOSE__\"
+	markerClose := "__LLAMAGATE_ESCAPED_CLOSE__"
 	for strings.Contains(combined, markerClose) {
-		markerClose += \"X\"
+		markerClose += "X"
 	}
 
 	// Resolve placeholders in sorted order, escaping inner template syntax in values
 	// so that nested {{var}} sequences are not resolved during this pass.
 	result := template
 	for _, key := range placeholders {
-		placeholder := fmt.Sprintf(\"{{%s}}\", key)
+		placeholder := fmt.Sprintf("{{%s}}", key)
 		if strings.Contains(result, placeholder) {
 			valueStr := valueStrings[key]
-			escaped := strings.ReplaceAll(valueStr, \"{{\", markerOpen)
-			escaped = strings.ReplaceAll(escaped, \"}}\", markerClose)
+			escaped := strings.ReplaceAll(valueStr, "{{", markerOpen)
+			escaped = strings.ReplaceAll(escaped, "}}", markerClose)
 			result = strings.ReplaceAll(result, placeholder, escaped)
 		}
 	}
 
 	// Unescape markers back to their original form. Because the markers were chosen
 	// not to exist in the original template or values, this cannot corrupt legitimate data.
-	result = strings.ReplaceAll(result, markerOpen, \"{{\")
-	result = strings.ReplaceAll(result, markerClose, \"}}\")
+	result = strings.ReplaceAll(result, markerOpen, "{{")
+	result = strings.ReplaceAll(result, markerClose, "}}")
 
 	return result
 }

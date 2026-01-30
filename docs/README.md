@@ -16,7 +16,7 @@ Welcome to the LlamaGate documentation! This directory contains detailed guides 
 
 ## Development
 - [Architecture](ARCHITECTURE.md) - System architecture and design
-- [Testing Guide](TESTING.md) - How to test your setup
+- [Testing Guide](TESTING.md) - How to test your setup (includes build-from-source for CI/E2E/integrators)
 - [Manual Acceptance Test](ACCEPTANCE_TEST.md) - Comprehensive acceptance test checklist for human verification
 - [Project Structure](STRUCTURE.md) - Understanding the codebase
 - [Installer Testing](INSTALLER_TESTING.md) - Testing installation scripts

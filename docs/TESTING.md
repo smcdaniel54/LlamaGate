@@ -2,6 +2,10 @@
 
 This guide explains how to test LlamaGate to ensure everything is working correctly.
 
+## Build from source (CI / E2E / integrators)
+
+Downstream tooling that builds LlamaGate from source (CI, E2E tests, forked automation) must run **`go build ./...`** before tests or packaging. The repository CI runs this step explicitly so that syntax or compile errors fail the build early. If your pipeline builds from a clone or `LLAMAGATE_SOURCE_DIR`, run `go build ./...` first; see [Installation Guide](INSTALL.md) Method 3 (Build from Source) and [Contributing](../CONTRIBUTING.md) for the recommended sequence.
+
 ## Prerequisites
 
 1. **Ollama must be running**

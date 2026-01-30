@@ -83,7 +83,7 @@ This downloads and runs the source installer, which handles Go installation and 
 
 ### Option B: Manual Build (If You Have Go Installed)
 
-If you already have Go installed and want to build manually:
+If you already have Go installed and want to build manually: run `go build ./...` first so that all packages compile (required for downstream CI, E2E, and build-from-source tooling), then build the main binary.
 
 **Unix/Linux/macOS:**
 ```bash
@@ -91,7 +91,10 @@ If you already have Go installed and want to build manually:
 git clone https://github.com/smcdaniel54/LlamaGate.git
 cd LlamaGate
 
-# Build
+# Build all packages (required for CI/E2E/build-from-source integrators)
+go build ./...
+
+# Build main binary
 go build -o llamagate ./cmd/llamagate
 
 # Or install to $GOPATH/bin
@@ -107,14 +110,17 @@ $ErrorActionPreference = "Stop"  # Restore if needed
 
 cd LlamaGate
 
-# Build
+# Build all packages (required for CI/E2E/build-from-source integrators)
+go build ./...
+
+# Build main binary
 go build -o llamagate.exe ./cmd/llamagate
 
 # Or install to $GOPATH/bin
 go install ./cmd/llamagate
 ```
 
-**Note:** Git writes progress messages to stderr even on success. In PowerShell with `$ErrorActionPreference = "Stop"`, this can cause failures. See [Troubleshooting](#troubleshooting) section below for details.
+**Note:** Git writes progress messages to stderr even on success. For integrators (CI, E2E, forked automation), ensuring `go build ./...` succeeds is required; see [Testing Guide](TESTING.md) for test commands. In PowerShell with `$ErrorActionPreference = "Stop"`, this can cause failures. See [Troubleshooting](#troubleshooting) section below for details.
 
 ## Configuration
 

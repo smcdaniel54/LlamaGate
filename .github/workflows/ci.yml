@@ -45,7 +45,12 @@ jobs:
     
     - name: Download dependencies
       run: go mod download
-    
+
+    - name: Build from source (all packages)
+      run: go build ./...
+      # Ensures downstream (CI, E2E, forked automation) can build LlamaGate from source;
+      # fails fast on syntax/compile errors before running tests.
+
     - name: Clean up coverage files
       run: |
         rm -f coverage.out 2>/dev/null || true

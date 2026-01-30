@@ -44,7 +44,10 @@ jobs:
     
     - name: Download dependencies
       run: go mod download
-    
+
+    - name: Build from source (all packages)
+      run: go build ./...
+
     - name: Build binary
       env:
         GOOS: ${{ matrix.goos }}

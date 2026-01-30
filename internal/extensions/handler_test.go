@@ -307,6 +307,7 @@ func TestHandler_RefreshExtensions(t *testing.T) {
 	}
 
 	handler := NewHandler(registry, llmHandler, extDir)
+	handler.SetInstalledExtensionsDir(extDir) // isolate discovery to temp dir so only ext1/ext2 are found
 
 	// Create initial extension
 	ext1Dir := filepath.Join(extDir, "ext1")

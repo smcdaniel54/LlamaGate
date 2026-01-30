@@ -43,6 +43,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Build from source**: Resolved invalid string literals in `internal/extensions/workflow.go` (`resolveTemplateString`) that caused Go compile errors on some environments (e.g. Windows) and broke downstream tooling (CI, E2E tests, forked automation) that build LlamaGate from source. Runtime behavior was unchanged; the fix ensures `go build ./...` succeeds everywhere.
+
+### Changed
+- **CI / Build**: CI and build-binaries workflows now run an explicit `go build ./...` step so that build-from-source is validated before tests and release builds; failures are caught early for integrators.
+- **Docs**: Installation and contributing docs updated to recommend `go build ./...` before tests and to document valid Go string literal usage so downstream build-from-source remains reliable.
+
 ### Added
 - Future features and improvements
 

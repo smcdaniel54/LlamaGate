@@ -32,8 +32,9 @@ Feature suggestions are welcome! Please open an issue describing:
    - Update documentation as needed
 4. **Test your changes:**
    ```bash
+   go build ./...   # Must succeed for downstream CI, E2E, and build-from-source tooling
    go test ./...
-   go build ./cmd/llamagate
+   go build -o llamagate ./cmd/llamagate
    ```
    For concurrent code, also run race detector tests (matches CI):
    - **Windows:** `.\scripts\windows\test-race.ps1`
@@ -53,6 +54,7 @@ Feature suggestions are welcome! Please open an issue describing:
 
 ## Code Style
 
+- Use valid Go string literals: double-quoted strings `"..."` only need `\"` *inside* the string for a literal quote. Do not escape the delimiters in source (e.g. avoid `\"...\"` as the whole literal), so that `go build ./...` succeeds and downstream build-from-source (CI, E2E, forked automation) is not broken.
 - Follow standard Go formatting (`go fmt`)
 - Use `golangci-lint` v2.8.0 for linting:
   - **Windows:** `.\scripts\windows\install-golangci-lint.ps1` then `.\scripts\windows\lint.ps1`

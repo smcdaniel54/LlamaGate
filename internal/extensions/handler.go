@@ -23,6 +23,8 @@ type Handler struct {
 	workflowExecutor *WorkflowExecutor
 	baseDir          string
 	routeManager     *RouteManager // Can be nil if not set
+	// installedExtDir overrides homedir for discovery when set (e.g. in tests). Empty = use homedir.GetExtensionsDir().
+	installedExtDir string
 }
 
 // NewHandler creates a new extension handler
@@ -40,6 +42,12 @@ func NewHandler(registry *Registry, llmHandler LLMHandlerFunc, baseDir string) *
 // SetRouteManager sets the route manager for refreshing routes
 func (h *Handler) SetRouteManager(rm *RouteManager) {
 	h.routeManager = rm
+}
+
+// SetInstalledExtensionsDir overrides the installed extensions directory used during refresh (e.g. for tests).
+// When empty, RefreshExtensions uses homedir.GetExtensionsDir().
+func (h *Handler) SetInstalledExtensionsDir(dir string) {
+	h.installedExtDir = dir
 }
 
 // ListExtensions lists all registered extensions
@@ -214,10 +222,19 @@ func (h *Handler) RefreshExtensions(c *gin.Context) {
 			}
 		}
 		
-		// 2. Discover installed extensions from ~/.llamagate/extensions/installed/
+		// 2. Discover installed extensions from ~/.llamagate/extensions/installed/ (or h.installedExtDir when set, e.g. tests)
 		installedManifests := []*Manifest{}
-		extDir, err := homedir.GetExtensionsDir()
-		if err == nil {
+		var extDir string
+		if h.installedExtDir != "" {
+			extDir = h.installedExtDir
+		} else {
+			var err error
+			extDir, err = homedir.GetExtensionsDir()
+			if err != nil {
+				extDir = ""
+			}
+		}
+		if extDir != "" {
 			entries, err := os.ReadDir(extDir)
 			if err == nil {
 				reg, _ := registry.NewRegistry()
