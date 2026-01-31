@@ -418,7 +418,7 @@ func TestHandler_UpsertExtension_Disabled(t *testing.T) {
 		return nil, nil
 	}
 	handler := NewHandler(registry, llmHandler, "")
-	// upsert disabled by default
+	// handler starts with upsert disabled (zero value); test verifies 501 when disabled
 
 	gin.SetMode(gin.TestMode)
 	router := gin.New()

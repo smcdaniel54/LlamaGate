@@ -47,11 +47,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Build from source**: Resolved invalid string literals in `internal/extensions/workflow.go` (`resolveTemplateString`) that caused Go compile errors on some environments (e.g. Windows) and broke downstream tooling (CI, E2E tests, forked automation) that build LlamaGate from source. Runtime behavior was unchanged; the fix ensures `go build ./...` succeeds everywhere.
 
 ### Changed
+- **Workflow upsert default**: Upsert (`PUT /v1/extensions/:name`) is now **enabled by default**. Set `EXTENSIONS_UPSERT_ENABLED=false` to lock down.
 - **CI / Build**: CI and build-binaries workflows now run an explicit `go build ./...` step so that build-from-source is validated before tests and release builds; failures are caught early for integrators.
 - **Docs**: Installation and contributing docs updated to recommend `go build ./...` before tests and to document valid Go string literal usage so downstream build-from-source remains reliable.
 
 ### Added
-- **Optional workflow upsert**: `PUT /v1/extensions/:name` to create or update an extension manifest in `~/.llamagate/extensions/installed/`. Disabled by default; enable with `EXTENSIONS_UPSERT_ENABLED=true`. Clients (e.g. LlamaGate Control) can save workflows to LlamaGate; after upsert, call `POST /v1/extensions/refresh` to load. When disabled, the endpoint returns 501 with `code: UPSERT_NOT_CONFIGURED`. See [API.md](docs/API.md#upsert-extension-optional) and `.env.example`.
+- **Workflow upsert**: `PUT /v1/extensions/:name` to create or update an extension manifest in `~/.llamagate/extensions/installed/`. **Enabled by default**; set `EXTENSIONS_UPSERT_ENABLED=false` to lock down. Clients (e.g. LlamaGate Control) can save workflows to LlamaGate; after upsert, call `POST /v1/extensions/refresh` to load. When disabled, the endpoint returns 501 with `code: UPSERT_NOT_CONFIGURED`. See [API.md](docs/API.md#upsert-extension-optional) and `.env.example`.
 
 ## [0.9.0] - 2026-01-05
 

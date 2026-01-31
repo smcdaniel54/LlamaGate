@@ -28,7 +28,7 @@ type Config struct {
 	TLSEnabled  bool   // Enable HTTPS/TLS
 	TLSCertFile string // Path to TLS certificate file
 	TLSKeyFile  string // Path to TLS private key file
-	// Extensions: optional workflow/extension upsert via PUT /v1/extensions/:name (disabled by default)
+	// Extensions: workflow/extension upsert via PUT /v1/extensions/:name (enabled by default; set false to lock down)
 	ExtensionsUpsertEnabled bool
 }
 
@@ -103,8 +103,8 @@ func Load() (*Config, error) {
 	viper.SetDefault("TLS_ENABLED", false)
 	viper.SetDefault("TLS_CERT_FILE", "")
 	viper.SetDefault("TLS_KEY_FILE", "")
-	// Extensions upsert (optional; disabled by default for security)
-	viper.SetDefault("EXTENSIONS_UPSERT_ENABLED", false)
+	// Extensions upsert (enabled by default; set false to lock down)
+	viper.SetDefault("EXTENSIONS_UPSERT_ENABLED", true)
 
 	// MCP defaults
 	viper.SetDefault("MCP_ENABLED", false)

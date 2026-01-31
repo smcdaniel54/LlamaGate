@@ -28,7 +28,7 @@ type Handler struct {
 	routeManager     *RouteManager // Can be nil if not set
 	// installedExtDir overrides homedir for discovery when set (e.g. in tests). Empty = use homedir.GetExtensionsDir().
 	installedExtDir string
-	// upsertEnabled allows PUT /v1/extensions/:name to create/update extension manifests (optional; disabled by default).
+	// upsertEnabled allows PUT /v1/extensions/:name to create/update extension manifests (default on; set EXTENSIONS_UPSERT_ENABLED=false to disable).
 	upsertEnabled bool
 }
 
@@ -108,7 +108,7 @@ func (h *Handler) GetExtension(c *gin.Context) {
 	})
 }
 
-// UpsertExtension creates or updates an extension manifest (optional; enabled via EXTENSIONS_UPSERT_ENABLED).
+// UpsertExtension creates or updates an extension manifest (enabled by default; set EXTENSIONS_UPSERT_ENABLED=false to disable).
 // PUT /v1/extensions/:name
 // Body: YAML or JSON manifest. Writes to ~/.llamagate/extensions/installed/:name/manifest.yaml.
 // Call POST /v1/extensions/refresh to load the extension after upsert.
@@ -379,9 +379,7 @@ func (h *Handler) RefreshExtensions(c *gin.Context) {
 		
 		// Combine manifests in priority order: builtin first, then installed, then legacy
 		installedNames := make(map[string]bool)
-		for _, m := range builtinManifests {
-			manifests = append(manifests, m)
-		}
+		manifests = append(manifests, builtinManifests...)
 		for _, m := range installedManifests {
 			installedNames[m.Name] = true
 			// Skip if already added as builtin

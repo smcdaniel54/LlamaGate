@@ -802,16 +802,17 @@ _________________________________________________________________
 
 ### Test 8.4: Upsert Extension (Optional)
 
-**Note:** Upsert is disabled by default (`EXTENSIONS_UPSERT_ENABLED=false`). When disabled, `PUT /v1/extensions/:name` returns 501 with `code: UPSERT_NOT_CONFIGURED`. When enabled, use this test to verify upsert and then refresh.
+**Note:** Upsert is **enabled by default**. To lock down, set `EXTENSIONS_UPSERT_ENABLED=false`; then `PUT /v1/extensions/:name` returns 501 with `code: UPSERT_NOT_CONFIGURED`.
 
 | Test Step | Expected Result | Status | Notes |
 |-----------|----------------|--------|-------|
-| PUT `/v1/extensions/:name` (upsert disabled) | Returns 501, body has `code: UPSERT_NOT_CONFIGURED` | ☐ | Default behavior |
-| (Optional) Enable `EXTENSIONS_UPSERT_ENABLED=true`, PUT valid YAML manifest | Returns 200, manifest written to installed dir | ☐ | |
+| PUT `/v1/extensions/:name` with valid YAML manifest (default) | Returns 200, manifest written to installed dir | ☐ | Default behavior |
 | POST `/v1/extensions/refresh` after upsert | New/updated extension appears in list | ☐ | |
+| (Optional) Set `EXTENSIONS_UPSERT_ENABLED=false`, PUT again | Returns 501, body has `code: UPSERT_NOT_CONFIGURED` | ☐ | Lock-down |
 
-**Test Command (upsert disabled, expect 501):**
+**Test Command (default: upsert enabled, expect 200):**
 ```bash
+# Default: upsert enabled (expect 200)
 curl -X PUT -H "X-API-Key: sk-llamagate" \
   -H "Content-Type: application/yaml" \
   -d 'name: test-upsert
@@ -821,6 +822,8 @@ type: workflow
 enabled: true
 steps: []' \
   http://localhost:11435/v1/extensions/test-upsert
+
+# With EXTENSIONS_UPSERT_ENABLED=false: expect 501 and code UPSERT_NOT_CONFIGURED
 ```
 
 **Actual Result:**

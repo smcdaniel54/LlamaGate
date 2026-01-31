@@ -183,13 +183,7 @@ func ValidateManifest(m *Manifest) error {
 		}
 	}
 
-	// Validate builtin flag (informational warning, not an error)
-	// Note: The builtin flag is typically set automatically by the loader based on directory location,
-	// but it can also be set in the manifest for clarity. The loader will enforce the correct value.
-	if m.Builtin {
-		// This is informational - the loader will set this correctly based on directory location
-		// We don't validate directory location here since we don't have that context
-	}
+	// Builtin flag: typically set by the loader based on directory location; loader enforces the correct value.
 
 	// Validate endpoints (only workflow extensions can have endpoints)
 	if len(m.Endpoints) > 0 && m.Type != "workflow" {

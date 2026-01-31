@@ -80,7 +80,7 @@ chmod +x scripts/unix/test.sh
    - `GET /v1/extensions/:name` - Get extension metadata
 
 2. **Extension Upsert (optional)**
-   - `PUT /v1/extensions/:name` - Create/update manifest (when `EXTENSIONS_UPSERT_ENABLED=true`). When disabled, returns 501 with `code: UPSERT_NOT_CONFIGURED`. Unit tests: `TestHandler_UpsertExtension_Disabled`, `TestHandler_UpsertExtension_Enabled`.
+   - `PUT /v1/extensions/:name` - Create/update manifest (enabled by default; set `EXTENSIONS_UPSERT_ENABLED=false` to disable). When disabled, returns 501 with `code: UPSERT_NOT_CONFIGURED`. Unit tests: `TestHandler_UpsertExtension_Disabled`, `TestHandler_UpsertExtension_Enabled`.
 
 3. **Input Validation**
    - Required inputs validated
@@ -104,7 +104,7 @@ Test extensions are created by placing `manifest.yaml` files in the `extensions/
 ### Expected Results
 
 - ✅ Extension discovery returns list of extensions
-- ✅ Upsert: when disabled, `PUT /v1/extensions/:name` returns 501 with `code: UPSERT_NOT_CONFIGURED`; when enabled, PUT writes manifest (unit tests: `TestHandler_UpsertExtension_Disabled`, `TestHandler_UpsertExtension_Enabled`)
+- ✅ Upsert: enabled by default; when disabled (`EXTENSIONS_UPSERT_ENABLED=false`), `PUT /v1/extensions/:name` returns 501 with `code: UPSERT_NOT_CONFIGURED` (unit tests: `TestHandler_UpsertExtension_Disabled`, `TestHandler_UpsertExtension_Enabled`)
 - ✅ Valid execution returns HTTP 200 with results
 - ✅ Invalid inputs return HTTP 400 with error details
 - ✅ Extension metadata included in responses

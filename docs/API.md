@@ -1003,7 +1003,7 @@ curl -X POST \
 
 ### Upsert Extension (Optional)
 
-Create or update an extension manifest by writing to `~/.llamagate/extensions/installed/:name/`. **Disabled by default**; enable with `EXTENSIONS_UPSERT_ENABLED=true`. Used by clients (e.g. LlamaGate Control) to save workflows to LlamaGate. After upsert, call `POST /v1/extensions/refresh` to load the extension.
+Create or update an extension manifest by writing to `~/.llamagate/extensions/installed/:name/`. **Enabled by default**; set `EXTENSIONS_UPSERT_ENABLED=false` to lock down. Used by clients (e.g. LlamaGate Control) to save workflows to LlamaGate. After upsert, call `POST /v1/extensions/refresh` to load the extension.
 
 **Endpoint:** `PUT /v1/extensions/:name`
 
@@ -1018,7 +1018,7 @@ Create or update an extension manifest by writing to `~/.llamagate/extensions/in
 }
 ```
 
-**Response (Upsert not enabled):**
+**Response (Upsert disabled, EXTENSIONS_UPSERT_ENABLED=false):**
 ```json
 {
   "error": "Workflow upsert is not enabled",
@@ -1044,13 +1044,14 @@ steps:
 **Status Codes:**
 - `200 OK` - Manifest written successfully
 - `400 Bad Request` - Invalid name or manifest body
-- `501 Not Implemented` - Upsert not enabled (`EXTENSIONS_UPSERT_ENABLED` is false)
+- `501 Not Implemented` - Upsert disabled (`EXTENSIONS_UPSERT_ENABLED=false`)
 - `500 Internal Server Error` - Failed to write manifest
 
 **Notes:**
 - Extension name in the path must be alphanumeric, underscore, or hyphen only
 - Writes to `~/.llamagate/extensions/installed/:name/manifest.yaml` (or configured installed dir)
 - Call `POST /v1/extensions/refresh` after upsert to load the extension without restart
+- Set `EXTENSIONS_UPSERT_ENABLED=false` to disable upsert (returns 501)
 
 ### Refresh Extensions
 

@@ -108,7 +108,7 @@ Complete documentation for the LlamaGate Extensions system v0.9.1.
 **Sections:**
 - `GET /v1/extensions` - List all extensions
 - `GET /v1/extensions/:name` - Get extension details
-- `PUT /v1/extensions/:name` - Upsert extension (optional; `EXTENSIONS_UPSERT_ENABLED=true`)
+- `PUT /v1/extensions/:name` - Upsert extension (enabled by default; set `EXTENSIONS_UPSERT_ENABLED=false` to disable)
 - `POST /v1/extensions/:name/execute` - Execute workflow extension
 - `POST /v1/extensions/refresh` - Re-discover extensions
 
