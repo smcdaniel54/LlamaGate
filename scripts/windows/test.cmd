@@ -18,7 +18,7 @@ echo.
 set BASE_URL=http://localhost:11435
 set API_KEY=sk-llamagate
 
-echo [1/9] Testing Health Check...
+echo [1/8] Testing Health Check...
 curl -s %BASE_URL%/health
 if %ERRORLEVEL% EQU 0 (
     echo.
@@ -30,7 +30,7 @@ if %ERRORLEVEL% EQU 0 (
 )
 echo.
 
-echo [2/9] Testing Models Endpoint...
+echo [2/8] Testing Models Endpoint...
 if "%API_KEY%"=="" (
     curl -s %BASE_URL%/v1/models
 ) else (
@@ -45,7 +45,7 @@ if %ERRORLEVEL% EQU 0 (
 )
 echo.
 
-echo [3/9] Testing Chat Completions (Non-Streaming)...
+echo [3/8] Testing Chat Completions (Non-Streaming)...
 if "%API_KEY%"=="" (
     curl -s -X POST %BASE_URL%/v1/chat/completions ^
         -H "Content-Type: application/json" ^
@@ -65,7 +65,7 @@ if %ERRORLEVEL% EQU 0 (
 )
 echo.
 
-echo [4/9] Testing Caching (Same Request Twice)...
+echo [4/8] Testing Caching (Same Request Twice)...
 echo First request (should be slow):
 if "%API_KEY%"=="" (
     curl -s -w "\nTime: %%{time_total}s\n" -X POST %BASE_URL%/v1/chat/completions ^
@@ -93,7 +93,7 @@ echo.
 echo ✓ Cache test completed (check times above - second should be much faster)
 echo.
 
-echo [5/9] Testing Authentication (if enabled)...
+echo [5/8] Testing Authentication (if enabled)...
 if "%API_KEY%"=="" (
     echo Authentication is disabled, skipping auth test
 ) else (
@@ -109,7 +109,7 @@ if "%API_KEY%"=="" (
 )
 echo.
 
-echo [6/9] Testing MCP API Endpoints (if MCP enabled)...
+echo [6/8] Testing MCP API Endpoints (if MCP enabled)...
 if "%API_KEY%"=="" (
     set AUTH_HEADER=
 ) else (
@@ -127,7 +127,7 @@ if %ERRORLEVEL% EQU 0 (
 )
 echo.
 
-echo [7/9] Testing MCP URI Scheme (if MCP enabled)...
+echo [7/8] Testing MCP URI Scheme (if MCP enabled)...
 if "%API_KEY%"=="" (
     set AUTH_HEADER=
 ) else (
@@ -148,27 +148,8 @@ if %ERRORLEVEL% EQU 0 (
 )
 echo.
 
-echo [8/9] Testing Extensions System...
-if "%API_KEY%"=="" (
-    set AUTH_HEADER=
-) else (
-    set AUTH_HEADER=-H "X-API-Key: %API_KEY%"
-)
-echo Testing extension discovery...
-curl -s %AUTH_HEADER% %BASE_URL%/v1/extensions
-if %ERRORLEVEL% EQU 0 (
-    echo.
-    echo ✓ Extensions system is accessible
-    echo   Extensions are auto-discovered from the extensions\ directory
-) else (
-    echo.
-    echo ℹ Extensions system test skipped (Extensions may not be configured)
-)
-echo.
-
-echo [9/9] Testing Extensions (if extensions installed)...
-echo Note: Extensions are discovered from the extensions\ directory
-echo       See docs\EXTENSIONS_QUICKSTART.md for extension examples
+echo [8/8] Core-only: extensions removed in Phase 1...
+echo Note: /v1/extensions endpoints were removed. See docs\core_contract.md
 echo.
 
 :end

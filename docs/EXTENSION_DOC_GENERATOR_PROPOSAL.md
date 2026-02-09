@@ -1,8 +1,8 @@
 # Extension Documentation Generator - Built-in Extension Proposal
 
 **Purpose**: Generate comprehensive markdown documentation for individual extensions or modules  
-**Status**: Proposal  
-**Target**: Builtin LlamaGate extension (YAML-based, included in repo)
+**Status**: **Obsolete** — The extension system was removed in Phase 1. This proposal is retained for historical reference only.  
+**Target**: Was intended as a builtin LlamaGate extension (YAML-based, included in repo)
 
 ---
 

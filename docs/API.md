@@ -769,17 +769,23 @@ When the rate limit is exceeded:
 - Response body follows OpenAI-compatible error format with `rate_limit_error` type
 - Structured logs capture the rate limit decision with request ID and retry information
 
-## Extensions API
+## Extensions API (Removed in Phase 1)
 
-LlamaGate provides a RESTful API for managing and executing extensions. All extension endpoints are available under the `/v1/extensions` prefix.
+**The extension system has been removed.** LlamaGate is now a core-only, OpenAI-compatible gateway. All `/v1/extensions` endpoints (list, get, upsert, execute, refresh) and dynamic extension routes have been removed; requests to these paths return **404**.
 
-### Extension Types
+For current API surface, see [Core Contract](core_contract.md). For migration notes, see the [README Migration Notes](../README.md#migration-notes-phase-1-extensionsmodules-removed).
 
-LlamaGate has three types of extensions:
+---
 
-1. **Builtin Extensions (Go Code)**: Core functionality compiled into binary (`internal/extensions/builtin/`)
-2. **Builtin Extensions (YAML-based)**: Core workflow capabilities in `extensions/builtin/` (e.g., `extension-doc-generator`)
-3. **Default Extensions (YAML-based)**: Workflow extensions in `extensions/` directory
+*The following section is retained for historical reference only.*
+
+### Extension Types (obsolete)
+
+LlamaGate previously had three types of extensions:
+
+1. **Builtin Extensions (Go Code)**: Core functionality compiled into binary (`internal/extensions/builtin/`) — removed
+2. **Builtin Extensions (YAML-based)**: Core workflow capabilities in `extensions/builtin/` — removed
+3. **Default Extensions (YAML-based)**: Workflow extensions in `extensions/` directory — removed
 
 ### List All Extensions
 

@@ -2,6 +2,32 @@
 
 All notable changes to LlamaGate will be documented in this file.
 
+## [Unreleased]
+
+### Breaking Changes (Phase 1 – Core-only gateway)
+
+- **Extensions and agentic modules removed**: The extension system and agentic modules have been removed. LlamaGate is now a lean, OpenAI-compatible gateway only.
+
+  **Removed:**
+  - All `/v1/extensions` endpoints (list, get, upsert, execute, refresh) and dynamic extension routes
+  - Extension and agentic-module loading, discovery, packaging, and registry
+  - The `llamagate-cli` tool (import/export/list/remove/enable/disable extensions and modules, migrate, sync)
+  - Config option `EXTENSIONS_UPSERT_ENABLED`
+  - Root directories `extensions/` and `examples/agenticmodules/`
+
+  **Still supported:**
+  - Core endpoints: `/health`, `/v1/hardware/recommendations`, `POST /v1/chat/completions`, `GET /v1/models`
+  - Full MCP support: `/v1/mcp/*` when MCP is enabled
+  - All existing config except `EXTENSIONS_UPSERT_ENABLED`
+
+  **Migration:** See [Core Contract](docs/core_contract.md) and [Migration Notes](README.md#migration-notes-phase-1-extensionsmodules-removed) in the README.
+
+### Fixed
+- **Build from source**: Resolved invalid string literals that caused Go compile errors on some environments; `go build ./...` succeeds everywhere.
+
+### Changed
+- **CI / Build**: CI and build-binaries workflows run an explicit `go build ./...` step before tests and release builds.
+
 ## [0.9.1] - 2026-01-15
 
 ### Breaking Changes
@@ -40,19 +66,6 @@ All notable changes to LlamaGate will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-## [Unreleased]
-
-### Fixed
-- **Build from source**: Resolved invalid string literals in `internal/extensions/workflow.go` (`resolveTemplateString`) that caused Go compile errors on some environments (e.g. Windows) and broke downstream tooling (CI, E2E tests, forked automation) that build LlamaGate from source. Runtime behavior was unchanged; the fix ensures `go build ./...` succeeds everywhere.
-
-### Changed
-- **Workflow upsert default**: Upsert (`PUT /v1/extensions/:name`) is now **enabled by default**. Set `EXTENSIONS_UPSERT_ENABLED=false` to lock down.
-- **CI / Build**: CI and build-binaries workflows now run an explicit `go build ./...` step so that build-from-source is validated before tests and release builds; failures are caught early for integrators.
-- **Docs**: Installation and contributing docs updated to recommend `go build ./...` before tests and to document valid Go string literal usage so downstream build-from-source remains reliable.
-
-### Added
-- **Workflow upsert**: `PUT /v1/extensions/:name` to create or update an extension manifest in `~/.llamagate/extensions/installed/`. **Enabled by default**; set `EXTENSIONS_UPSERT_ENABLED=false` to lock down. Clients (e.g. LlamaGate Control) can save workflows to LlamaGate; after upsert, call `POST /v1/extensions/refresh` to load. When disabled, the endpoint returns 501 with `code: UPSERT_NOT_CONFIGURED`. See [API.md](docs/API.md#upsert-extension-optional) and `.env.example`.
 
 ## [0.9.0] - 2026-01-05
 

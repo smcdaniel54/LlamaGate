@@ -731,11 +731,11 @@ _________________________________________________________________
 
 ---
 
-## Extension System
+## Extension System (Removed in Phase 1)
 
-**Note:** These tests require extensions to be configured. Skip if extensions are not configured.
+**Note:** Extensions and `/v1/extensions` endpoints were removed in Phase 1. The tests below are obsolete; requests to `/v1/extensions` now return 404. See [Core Contract](core_contract.md).
 
-### Test 8.1: List Extensions
+### Test 8.1: List Extensions (obsolete)
 
 | Test Step | Expected Result | Status | Notes |
 |-----------|----------------|--------|-------|

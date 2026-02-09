@@ -56,11 +56,9 @@ Downstream tooling that builds LlamaGate from source (CI, E2E tests, forked auto
 
 ## Extensions System Testing
 
-The extensions system includes comprehensive tests for extension discovery, validation, and execution.
+**Extensions were removed in Phase 1.** The extension system and `/v1/extensions` endpoints no longer exist. Core tests (health, models, chat completions, caching, auth, MCP if enabled) are run via the test scripts. See [Core Contract](core_contract.md).
 
 ### Quick Test
-
-Extensions are automatically discovered from the `extensions/` directory. Test extensions by:
 
 **Windows:**
 ```cmd
@@ -73,41 +71,7 @@ chmod +x scripts/unix/test.sh
 ./scripts/unix/test.sh
 ```
 
-### What Gets Tested
-
-1. **Extension Discovery**
-   - `GET /v1/extensions` - List all registered extensions
-   - `GET /v1/extensions/:name` - Get extension metadata
-
-2. **Extension Upsert (optional)**
-   - `PUT /v1/extensions/:name` - Create/update manifest (enabled by default; set `EXTENSIONS_UPSERT_ENABLED=false` to disable). When disabled, returns 501 with `code: UPSERT_NOT_CONFIGURED`. Unit tests: `TestHandler_UpsertExtension_Disabled`, `TestHandler_UpsertExtension_Enabled`.
-
-3. **Input Validation**
-   - Required inputs validated
-   - Type validation
-   - Error messages clear
-
-4. **Extension Execution**
-   - `POST /v1/extensions/:name/execute` - Execute workflow extension
-   - Valid inputs return 200 OK
-   - Invalid inputs return 400 Bad Request
-
-### Test Extensions
-
-Test extensions are created by placing `manifest.yaml` files in the `extensions/` directory. See `docs/EXTENSIONS_QUICKSTART.md` for examples.
-
-1. Create extension directory: `extensions/my_test_extension/`
-2. Add `manifest.yaml` with required fields
-3. Restart LlamaGate
-4. Extension is automatically discovered and registered
-
-### Expected Results
-
-- ✅ Extension discovery returns list of extensions
-- ✅ Upsert: enabled by default; when disabled (`EXTENSIONS_UPSERT_ENABLED=false`), `PUT /v1/extensions/:name` returns 501 with `code: UPSERT_NOT_CONFIGURED` (unit tests: `TestHandler_UpsertExtension_Disabled`, `TestHandler_UpsertExtension_Enabled`)
-- ✅ Valid execution returns HTTP 200 with results
-- ✅ Invalid inputs return HTTP 400 with error details
-- ✅ Extension metadata included in responses
+The test scripts exercise health, models, chat completions, caching, authentication, and (if enabled) MCP. Extension steps have been removed.
 
 ## Manual Testing
 

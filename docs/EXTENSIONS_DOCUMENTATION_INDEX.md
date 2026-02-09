@@ -1,13 +1,14 @@
 # LlamaGate Extensions Documentation Index
 
 **Version:** 0.9.1  
-**Last Updated:** 2026-01-10
+**Last Updated:** 2026-01-10  
+**Status:** **Obsolete** — The extension system was removed in Phase 1. This index is retained for historical reference. See [Core Contract](core_contract.md) for the current API.
 
 ---
 
 ## Documentation Overview
 
-Complete documentation for the LlamaGate Extensions system v0.9.1.
+This index covered the LlamaGate Extensions system v0.9.1. **Extensions have been removed.** Links below may point to removed or outdated content.
 
 ---
 

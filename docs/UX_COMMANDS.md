@@ -1,13 +1,13 @@
 # UX Commands Reference
 
 **Version:** 0.9.1+  
-**Status:** Ready for Use
+**Status:** **Obsolete** — Extensions and AgenticModules were removed in Phase 1. This document is retained for historical reference only. See [Core Contract](core_contract.md) for current API.
 
 ---
 
 ## Overview
 
-This document describes the recommended UX commands and endpoints for managing extensions and AgenticModules in LlamaGate.
+This document described the recommended UX commands and endpoints for managing extensions and AgenticModules in LlamaGate. **The extension system and `llamagate-cli` have been removed.** The content below is historical only.
 
 ---
 
