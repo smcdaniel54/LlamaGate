@@ -28,6 +28,21 @@ All notable changes to LlamaGate will be documented in this file.
 ### Changed
 - **CI / Build**: CI and build-binaries workflows run an explicit `go build ./...` step before tests and release builds.
 
+## [0.11.0] - 2026-02-09
+
+### Added
+
+- **Phase 2: Memory & Introspection** – Self-awareness and file-based memory without agentic workflows.
+  - **File-based memory store** (`internal/memory`): atomic JSON writes, per-file locking, configurable caps (pinned/recent/notes).
+  - **System endpoints** (when `INTROSPECTION_ENABLED=true`): `GET /v1/system/info`, `/v1/system/hardware`, `/v1/system/models`, `/v1/system/health`, `/v1/system/config`, `/v1/system/memory`. Response envelope: `{ "ok": true, "data": ... }`.
+  - **Config**: `INTROSPECTION_*`, `MEMORY_*` (dir, limits). Sanitized config and hardware output (no secrets).
+  - **Optional chat system card**: short system message injected into chat when `INTROSPECTION_CHAT_INJECT_ENABLED=true` (hardware/models/LlamaGate summary; optional user memory via `X-LlamaGate-User` header).
+  - **Docs**: `docs/core_contract.md` (Phase 2), `docs/phase2_memory_introspection.md`.
+
+### Fixed
+
+- **Lint**: errcheck and staticcheck fixes across introspection, memory, and proxy tests.
+
 ## [0.9.1] - 2026-01-15
 
 ### Breaking Changes

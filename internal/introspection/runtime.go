@@ -7,7 +7,7 @@ import (
 
 // BuildInfo can be set via ldflags at build time.
 var (
-	BuildAppVersion = "0.10.0"
+	BuildAppVersion = "0.11.0"
 	BuildGitCommit  = ""
 	BuildDate       = ""
 )
