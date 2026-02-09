@@ -28,6 +28,44 @@ type Config struct {
 	TLSEnabled  bool   // Enable HTTPS/TLS
 	TLSCertFile string // Path to TLS certificate file
 	TLSKeyFile  string // Path to TLS private key file
+	// Phase 2: introspection and memory
+	Introspection *IntrospectionConfig
+	Memory        *MemoryConfig
+}
+
+// IntrospectionConfig controls /v1/system/* and optional chat injection.
+type IntrospectionConfig struct {
+	Enabled    bool
+	Hardware   IntrospectionHardwareConfig
+	ChatInject IntrospectionChatInjectConfig
+}
+
+// IntrospectionHardwareConfig controls hardware snapshot detail level.
+type IntrospectionHardwareConfig struct {
+	Enabled     bool
+	DetailLevel string // "minimal", "standard", "full"
+}
+
+// IntrospectionChatInjectConfig controls system card injection into chat.
+type IntrospectionChatInjectConfig struct {
+	Enabled             bool
+	IncludeHardware     bool
+	IncludeModels       bool
+	IncludeLlamaGateInfo bool
+}
+
+// MemoryConfig controls file-based memory store.
+type MemoryConfig struct {
+	Enabled bool
+	Dir     string
+	Limits  MemoryLimitsConfig
+}
+
+// MemoryLimitsConfig holds caps for memory entries.
+type MemoryLimitsConfig struct {
+	PinnedMax     int
+	RecentMax     int
+	MaxEntryChars int
 }
 
 // MCPConfig holds MCP client configuration
@@ -102,6 +140,19 @@ func Load() (*Config, error) {
 	viper.SetDefault("TLS_CERT_FILE", "")
 	viper.SetDefault("TLS_KEY_FILE", "")
 
+	// Phase 2: introspection and memory
+	viper.SetDefault("INTROSPECTION_ENABLED", true)
+	viper.SetDefault("INTROSPECTION_HARDWARE_ENABLED", true)
+	viper.SetDefault("INTROSPECTION_HARDWARE_DETAIL_LEVEL", "minimal")
+	viper.SetDefault("INTROSPECTION_CHAT_INJECT_ENABLED", false)
+	viper.SetDefault("INTROSPECTION_CHAT_INJECT_INCLUDE_HARDWARE", true)
+	viper.SetDefault("INTROSPECTION_CHAT_INJECT_INCLUDE_MODELS", true)
+	viper.SetDefault("INTROSPECTION_CHAT_INJECT_INCLUDE_LLAMAGATE_INFO", true)
+	viper.SetDefault("MEMORY_ENABLED", true)
+	viper.SetDefault("MEMORY_PINNED_MAX", 50)
+	viper.SetDefault("MEMORY_RECENT_MAX", 100)
+	viper.SetDefault("MEMORY_MAX_ENTRY_CHARS", 500)
+
 	// MCP defaults
 	viper.SetDefault("MCP_ENABLED", false)
 	viper.SetDefault("MCP_MAX_TOOL_ROUNDS", 10)
@@ -150,6 +201,10 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("failed to load MCP config: %w", err)
 	}
 	cfg.MCP = mcpConfig
+
+	// Phase 2: introspection and memory
+	cfg.Introspection = loadIntrospectionConfig()
+	cfg.Memory = loadMemoryConfig()
 
 	// Validate configuration
 	if err := cfg.Validate(); err != nil {
@@ -255,6 +310,39 @@ func loadMCPConfig() (*MCPConfig, error) {
 	// This is more complex, so we'll focus on YAML/JSON for now
 
 	return mcp, nil
+}
+
+func loadIntrospectionConfig() *IntrospectionConfig {
+	detail := viper.GetString("INTROSPECTION_HARDWARE_DETAIL_LEVEL")
+	if detail != "minimal" && detail != "standard" && detail != "full" {
+		detail = "minimal"
+	}
+	return &IntrospectionConfig{
+		Enabled: viper.GetBool("INTROSPECTION_ENABLED"),
+		Hardware: IntrospectionHardwareConfig{
+			Enabled:     viper.GetBool("INTROSPECTION_HARDWARE_ENABLED"),
+			DetailLevel: detail,
+		},
+		ChatInject: IntrospectionChatInjectConfig{
+			Enabled:              viper.GetBool("INTROSPECTION_CHAT_INJECT_ENABLED"),
+			IncludeHardware:      viper.GetBool("INTROSPECTION_CHAT_INJECT_INCLUDE_HARDWARE"),
+			IncludeModels:        viper.GetBool("INTROSPECTION_CHAT_INJECT_INCLUDE_MODELS"),
+			IncludeLlamaGateInfo: viper.GetBool("INTROSPECTION_CHAT_INJECT_INCLUDE_LLAMAGATE_INFO"),
+		},
+	}
+}
+
+func loadMemoryConfig() *MemoryConfig {
+	dir := viper.GetString("MEMORY_DIR")
+	return &MemoryConfig{
+		Enabled: viper.GetBool("MEMORY_ENABLED"),
+		Dir:     dir,
+		Limits: MemoryLimitsConfig{
+			PinnedMax:     viper.GetInt("MEMORY_PINNED_MAX"),
+			RecentMax:     viper.GetInt("MEMORY_RECENT_MAX"),
+			MaxEntryChars: viper.GetInt("MEMORY_MAX_ENTRY_CHARS"),
+		},
+	}
 }
 
 // Validate validates all configuration values

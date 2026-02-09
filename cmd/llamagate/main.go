@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 
@@ -15,8 +16,11 @@ import (
 	"github.com/llamagate/llamagate/internal/api"
 	"github.com/llamagate/llamagate/internal/cache"
 	"github.com/llamagate/llamagate/internal/config"
+	"github.com/llamagate/llamagate/internal/homedir"
+	"github.com/llamagate/llamagate/internal/introspection"
 	"github.com/llamagate/llamagate/internal/logger"
 	"github.com/llamagate/llamagate/internal/middleware"
+	"github.com/llamagate/llamagate/internal/memory"
 	"github.com/llamagate/llamagate/internal/ollama"
 	"github.com/llamagate/llamagate/internal/proxy"
 	"github.com/llamagate/llamagate/internal/setup"
@@ -136,12 +140,66 @@ func main() {
 	rateLimitMiddleware := middleware.NewRateLimitMiddleware(cfg.RateLimitRPS)
 	router.Use(rateLimitMiddleware.Handler())
 
+	// Phase 2: memory store (optional)
+	var memoryStore memory.Store
+	if cfg.Memory != nil && cfg.Memory.Enabled {
+		memDir := cfg.Memory.Dir
+		if memDir == "" {
+			home, err := homedir.GetHomeDir()
+			if err != nil {
+				log.Warn().Err(err).Msg("Memory enabled but could not resolve home dir; disabling memory")
+			} else {
+				memDir = filepath.Join(home, "data", "memory")
+			}
+		}
+		if memDir != "" {
+			limits := memory.DefaultLimits()
+			if cfg.Memory.Limits.PinnedMax > 0 {
+				limits.PinnedMax = cfg.Memory.Limits.PinnedMax
+			}
+			if cfg.Memory.Limits.RecentMax > 0 {
+				limits.RecentMax = cfg.Memory.Limits.RecentMax
+			}
+			if cfg.Memory.Limits.MaxEntryChars > 0 {
+				limits.MaxEntryChars = cfg.Memory.Limits.MaxEntryChars
+			}
+			if st, err := memory.NewFileStore(memDir, limits); err != nil {
+				log.Warn().Err(err).Str("dir", memDir).Msg("Failed to create memory store; disabling memory")
+			} else {
+				memoryStore = st
+				log.Info().Str("dir", memDir).Msg("Memory store initialized")
+			}
+		}
+	}
+
+	// Phase 2: optional system card injection into chat
+	if cfg.Introspection != nil && cfg.Introspection.Enabled && cfg.Introspection.ChatInject.Enabled {
+		proxyInstance.SetSystemCardFunc(func(c *gin.Context) string {
+			userID := c.GetHeader("X-LlamaGate-User")
+			return introspection.BuildSystemCard(cfg, memoryStore, cfg.OllamaHost, userID, 3*time.Second)
+		})
+	}
+
 	// All routes below will require authentication when API_KEY is set
 	// OpenAI-compatible endpoints
 	v1 := router.Group("/v1")
 	{
 		v1.POST("/chat/completions", proxyInstance.HandleChatCompletions)
 		v1.GET("/models", proxyInstance.HandleModels)
+
+		// Phase 2: system introspection endpoints
+		if cfg.Introspection != nil && cfg.Introspection.Enabled {
+			systemHandler := api.NewSystemHandler(cfg, memoryStore)
+			sys := v1.Group("/system")
+			{
+				sys.GET("/info", systemHandler.GetInfo)
+				sys.GET("/hardware", systemHandler.GetHardware)
+				sys.GET("/models", systemHandler.GetModels)
+				sys.GET("/health", systemHandler.GetHealth)
+				sys.GET("/config", systemHandler.GetConfig)
+				sys.GET("/memory", systemHandler.GetMemory)
+			}
+		}
 
 		// MCP management endpoints
 		if mcpComponents != nil && mcpComponents.ServerManager != nil && mcpComponents.ToolManager != nil {

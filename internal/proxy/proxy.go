@@ -19,6 +19,9 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+// SystemCardFunc returns an optional system message to prepend to chat (Phase 2). Nil or empty = no injection.
+type SystemCardFunc func(*gin.Context) string
+
 // Proxy handles forwarding requests to Ollama
 type Proxy struct {
 	ollamaHost           string
@@ -29,6 +32,7 @@ type Proxy struct {
 	serverManager        ServerManagerInterface                     // Optional server manager for MCP resource access
 	resourceFetchTimeout time.Duration                              // Timeout for fetching MCP resources
 	responseHookFunc     func(*gin.Context, map[string]interface{}) // Hook function for response observers
+	systemCardFunc       SystemCardFunc                             // Optional: build system card for chat injection
 }
 
 // New creates a new proxy instance with default timeout (5 minutes)
@@ -66,6 +70,11 @@ func (p *Proxy) SetResourceFetchTimeout(timeout time.Duration) {
 // SetResponseHook sets a function to be called after LLM responses
 func (p *Proxy) SetResponseHook(hookFunc func(*gin.Context, map[string]interface{})) {
 	p.responseHookFunc = hookFunc
+}
+
+// SetSystemCardFunc sets the function that returns an optional system card to inject into chat (Phase 2).
+func (p *Proxy) SetSystemCardFunc(f SystemCardFunc) {
+	p.systemCardFunc = f
 }
 
 // Close closes all connections and cleans up resources
@@ -190,6 +199,13 @@ func (p *Proxy) HandleChatCompletions(c *gin.Context) {
 			Msg("Failed to inject MCP resource context, continuing without it")
 		// Continue with original messages if resource injection fails
 		finalMessages = req.Messages
+	}
+
+	// Phase 2: optional system card injection (hardware/models/LlamaGate summary)
+	if p.systemCardFunc != nil {
+		if card := p.systemCardFunc(c); card != "" {
+			finalMessages = append([]Message{{Role: "system", Content: card}}, finalMessages...)
+		}
 	}
 
 	// Build final messages - check if tools will be injected before checking cache
