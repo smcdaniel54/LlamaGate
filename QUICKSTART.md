@@ -2,6 +2,8 @@
 
 **Get from zero to running in 2 minutes.**
 
+**Quickest start:** Clone the repo → copy `.env.example` to `.env` → run the [installer](README.md#-method-1-one-line-command-recommended) for your OS → run `scripts/unix/run.sh` (Mac/Linux) or `scripts\windows\run.cmd` (Windows). Or use **Docker:** `docker compose up -d` (see [README Docker](README.md#-docker)).
+
 ## What is LlamaGate?
 
 LlamaGate is an **OpenAI-compatible API gateway** for local LLMs. Switch from OpenAI to local models with **one line of code**.

@@ -1,0 +1,23 @@
+# LlamaGate + Ollama — run both with: docker compose up -d
+# LlamaGate: http://localhost:11435  |  Ollama: http://localhost:11434
+
+services:
+  ollama:
+    image: ollama/ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+
+  llamagate:
+    build: .
+    ports:
+      - "11435:11435"
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+      # Optional: API_KEY, PORT, MCP_ENABLED — see .env.example
+    depends_on:
+      - ollama
+
+volumes:
+  ollama_data:

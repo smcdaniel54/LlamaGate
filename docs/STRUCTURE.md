@@ -65,7 +65,8 @@ LlamaGate/
 ├── LICENSE                    # License file
 │
 ├── Dockerfile                 # Docker build file
-├── .env.example              # Configuration template
+├── docker-compose.yml         # LlamaGate + Ollama (docker compose up)
+├── .env.example               # Configuration template
 ├── mcp-config.example.yaml    # MCP configuration example
 ├── mcp-demo-config.yaml       # MCP demo configuration
 ├── go.mod                    # Go module definition

@@ -1,13 +1,13 @@
 # LlamaGate
 
-[![Go Version](https://img.shields.io/badge/go-1.23+-00ADD8?style=flat&logo=go)](https://go.dev/)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![CI](https://github.com/smcdaniel54/LlamaGate/actions/workflows/ci.yml/badge.svg)](https://github.com/smcdaniel54/LlamaGate/actions)
+[![Go Version](https://img.shields.io/badge/go-1.24+-00ADD8?style=flat&logo=go)](https://go.dev/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey)](README.md)
 
 LlamaGate is a lean, production-ready, OpenAI-compatible API gateway for local LLMs (Ollama). It lets you point existing OpenAI SDKs (Python, Node, etc.) at local models as a drop-in replacement, with streaming, tool/function calling (via MCP), authentication, rate limiting, caching, and structured logging.
 
-> 🚀 **New to LlamaGate?**  
-> **[Quick Start Guide](QUICKSTART.md)** - Get running in 2 minutes
+> 🚀 **New to LlamaGate?** **[Quick Start Guide](QUICKSTART.md)** — Get running in 2 minutes.
 
 ## Features
 
@@ -180,7 +180,22 @@ docker run -p 11435:11435 -e OLLAMA_HOST=http://host.docker.internal:11434 llama
 docker run -p 11435:11435 -e OLLAMA_HOST=http://host.docker.internal:11434 -e API_KEY=sk-your-key llamagate
 ```
 
-**Key env vars:** `OLLAMA_HOST` (required if Ollama not on localhost), `PORT` (default 11435), `API_KEY` (optional), `MCP_ENABLED` (optional). See [Configuration](#configuration) and `.env.example` for more.
+**Key env vars:** `OLLAMA_HOST` (required if Ollama not on localhost), `PORT` (default 11435), `API_KEY` (optional), `MCP_ENABLED` (optional). See [Configuration](#configuration) for details and **`.env.example`** for all supported env vars.
+
+**Run with Ollama in one command:** `docker compose up` — see below.
+
+#### Docker Compose (LlamaGate + Ollama)
+
+From the repo root, run both LlamaGate and Ollama with one command:
+
+```bash
+docker compose up -d
+```
+
+- **LlamaGate:** http://localhost:11435  
+- **Ollama:** http://localhost:11434 (pull models with `ollama pull llama2` or use the UI)
+
+To rebuild LlamaGate after code changes: `docker compose up -d --build`. See `docker-compose.yml` for env overrides (e.g. `API_KEY`).
 
 ## Development Setup
 
