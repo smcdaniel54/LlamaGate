@@ -20,7 +20,7 @@ import (
 func createMockMCPServerForResources() *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var req mcpclient.JSONRPCRequest
-		json.NewDecoder(r.Body).Decode(&req)
+		_ = json.NewDecoder(r.Body).Decode(&req)
 
 		var resp mcpclient.JSONRPCResponse
 		resp.JSONRPC = mcpclient.JSONRPCVersion
@@ -53,7 +53,7 @@ func createMockMCPServerForResources() *httptest.Server {
 
 		case "resources/read":
 			var params mcpclient.ResourceReadParams
-			json.Unmarshal(req.Params, &params)
+			_ = json.Unmarshal(req.Params, &params)
 			if params.URI == "file:///test.txt" {
 				result := mcpclient.ResourceReadResult{
 					Contents: []mcpclient.ResourceContent{
@@ -71,7 +71,7 @@ func createMockMCPServerForResources() *httptest.Server {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 	}))
 }
 
@@ -90,7 +90,7 @@ func TestProxy_injectMCPResourceContext(t *testing.T) {
 		CacheTTL:       2 * time.Minute,
 	}
 	serverManager := mcpclient.NewServerManager(managerConfig)
-	defer serverManager.Close()
+	defer func() { _ = serverManager.Close() }()
 
 	mcpServer := createMockMCPServerForResources()
 	defer mcpServer.Close()
@@ -98,7 +98,7 @@ func TestProxy_injectMCPResourceContext(t *testing.T) {
 	// Create MCP client
 	client, err := mcpclient.NewClientWithHTTP("test-server", mcpServer.URL, nil, 30*time.Second)
 	require.NoError(t, err)
-	defer client.Close()
+	defer func() { _ = client.Close() }()
 
 	// Add client to server manager
 	err = serverManager.AddServer("test-server", client, "http")
@@ -109,7 +109,7 @@ func TestProxy_injectMCPResourceContext(t *testing.T) {
 
 	// Create tool manager (required for resource injection check)
 	toolManager := tools.NewManager()
-	toolManager.AddClient(client)
+	_ = toolManager.AddClient(client)
 	proxy.SetToolManager(toolManager, nil)
 
 	// Test messages with MCP URI
@@ -148,7 +148,7 @@ func TestProxy_injectMCPResourceContext_NoURIs(t *testing.T) {
 		CacheTTL:       2 * time.Minute,
 	}
 	serverManager := mcpclient.NewServerManager(managerConfig)
-	defer serverManager.Close()
+	defer func() { _ = serverManager.Close() }()
 
 	proxy.SetServerManager(serverManager)
 
@@ -187,7 +187,7 @@ func TestProxy_injectMCPResourceContext_MultipleURIs(t *testing.T) {
 		CacheTTL:       2 * time.Minute,
 	}
 	serverManager := mcpclient.NewServerManager(managerConfig)
-	defer serverManager.Close()
+	defer func() { _ = serverManager.Close() }()
 
 	mcpServer := createMockMCPServerForResources()
 	defer mcpServer.Close()
@@ -195,7 +195,7 @@ func TestProxy_injectMCPResourceContext_MultipleURIs(t *testing.T) {
 	// Create MCP client
 	client, err := mcpclient.NewClientWithHTTP("test-server", mcpServer.URL, nil, 30*time.Second)
 	require.NoError(t, err)
-	defer client.Close()
+	defer func() { _ = client.Close() }()
 
 	// Add client to server manager
 	err = serverManager.AddServer("test-server", client, "http")
@@ -204,7 +204,7 @@ func TestProxy_injectMCPResourceContext_MultipleURIs(t *testing.T) {
 	proxy.SetServerManager(serverManager)
 
 	toolManager := tools.NewManager()
-	toolManager.AddClient(client)
+	_ = toolManager.AddClient(client)
 	proxy.SetToolManager(toolManager, nil)
 
 	// Test messages with multiple MCP URIs
@@ -242,7 +242,7 @@ func TestProxy_injectMCPResourceContext_InvalidServer(t *testing.T) {
 		CacheTTL:       2 * time.Minute,
 	}
 	serverManager := mcpclient.NewServerManager(managerConfig)
-	defer serverManager.Close()
+	defer func() { _ = serverManager.Close() }()
 
 	proxy.SetServerManager(serverManager)
 

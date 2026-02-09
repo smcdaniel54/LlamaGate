@@ -31,7 +31,7 @@ func TestStreaming_SSEFormat(t *testing.T) {
 				`data: {"model":"llama2","message":{"role":"assistant","content":""},"done":true}` + "\n\n",
 			}
 			for _, chunk := range chunks {
-				w.Write([]byte(chunk))
+				_, _ = w.Write([]byte(chunk))
 			}
 		}
 	}))
@@ -124,7 +124,7 @@ func TestStreaming_OpenAICompatibleChunks(t *testing.T) {
 				`data: {"model":"llama2","message":{"role":"assistant","content":""},"done":true}` + "\n\n",
 			}
 			for _, chunk := range chunks {
-				w.Write([]byte(chunk))
+				_, _ = w.Write([]byte(chunk))
 			}
 		}
 	}))
@@ -220,14 +220,14 @@ func TestStreaming_ClientDisconnect(t *testing.T) {
 			// Send chunks slowly to allow client disconnect
 			for i := 0; i < 10; i++ {
 				chunk := `data: {"model":"llama2","message":{"role":"assistant","content":"chunk"},"done":false}` + "\n\n"
-				w.Write([]byte(chunk))
+				_, _ = w.Write([]byte(chunk))
 				if f, ok := w.(http.Flusher); ok {
 					f.Flush()
 				}
 				time.Sleep(50 * time.Millisecond)
 			}
 			chunk := `data: {"model":"llama2","message":{"role":"assistant","content":""},"done":true}` + "\n\n"
-			w.Write([]byte(chunk))
+			_, _ = w.Write([]byte(chunk))
 		}
 	}))
 	defer mockOllama.Close()
@@ -283,7 +283,7 @@ func TestStreaming_ErrorHandling(t *testing.T) {
 	mockOllama := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/api/chat" {
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(`{"error":"Internal server error"}`))
+			_, _ = w.Write([]byte(`{"error":"Internal server error"}`))
 		}
 	}))
 	defer mockOllama.Close()
@@ -327,7 +327,7 @@ func TestStreaming_FinalDoneMarker(t *testing.T) {
 				`data: {"model":"llama2","message":{"role":"assistant","content":""},"done":true}` + "\n\n",
 			}
 			for _, chunk := range chunks {
-				w.Write([]byte(chunk))
+				_, _ = w.Write([]byte(chunk))
 			}
 		}
 	}))

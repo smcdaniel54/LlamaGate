@@ -34,7 +34,7 @@ func TestOpenAICompatibility_BasicChatCompletion(t *testing.T) {
 				"done": true,
 			}
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(ollamaResp)
+			_ = json.NewEncoder(w).Encode(ollamaResp)
 		}
 	}))
 	defer mockOllama.Close()
@@ -120,7 +120,7 @@ func TestOpenAICompatibility_SystemUserRoleHandling(t *testing.T) {
 		if r.URL.Path == "/api/chat" {
 			// Verify request contains system and user messages
 			var req map[string]interface{}
-			json.NewDecoder(r.Body).Decode(&req)
+			_ = json.NewDecoder(r.Body).Decode(&req)
 
 			messages, ok := req["messages"].([]interface{})
 			require.True(t, ok, "Request should contain messages array")
@@ -154,7 +154,7 @@ func TestOpenAICompatibility_SystemUserRoleHandling(t *testing.T) {
 				"done": true,
 			}
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(ollamaResp)
+			_ = json.NewEncoder(w).Encode(ollamaResp)
 		}
 	}))
 	defer mockOllama.Close()
@@ -217,7 +217,7 @@ func TestOpenAICompatibility_StreamingSSE(t *testing.T) {
 				`data: {"model":"llama2","message":{"role":"assistant","content":""},"done":true}` + "\n\n",
 			}
 			for _, chunk := range chunks {
-				w.Write([]byte(chunk))
+				_, _ = w.Write([]byte(chunk))
 			}
 		}
 	}))
@@ -302,7 +302,7 @@ func TestOpenAICompatibility_ToolFunctionCalling(t *testing.T) {
 				"done": true,
 			}
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(ollamaResp)
+			_ = json.NewEncoder(w).Encode(ollamaResp)
 		}
 	}))
 	defer mockOllama.Close()
@@ -478,7 +478,7 @@ func TestOpenAICompatibility_UsageFields(t *testing.T) {
 				"done": true,
 			}
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(ollamaResp)
+			_ = json.NewEncoder(w).Encode(ollamaResp)
 		}
 	}))
 	defer mockOllama.Close()

@@ -24,10 +24,7 @@ func CaptureHardware(ctx context.Context, dataDir string, level DetailLevel) Har
 	if infos, err := cpu.InfoWithContext(ctx); err == nil && len(infos) > 0 {
 		s.CPU.ModelName = infos[0].ModelName
 	}
-	if level == DetailMinimal && s.CPU.ModelName != "" {
-		// Optionally redact model name to avoid fingerprinting; for minimal we keep it short
-		// Per spec: minimal = no hostnames, usernames, serial/MAC. CPU model is usually safe.
-	}
+	// Per spec: minimal = no hostnames, usernames, serial/MAC. CPU model name is kept for all levels.
 
 	// Memory
 	if vm, err := mem.VirtualMemoryWithContext(ctx); err == nil {

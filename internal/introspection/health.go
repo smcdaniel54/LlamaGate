@@ -34,7 +34,7 @@ func CaptureHealth(ctx context.Context, ollamaHost string, timeout time.Duration
 		snap.Message = err.Error()
 		return snap
 	}
-	resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode == http.StatusOK {
 		snap.Status = "ok"
 	} else {

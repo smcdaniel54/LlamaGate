@@ -97,7 +97,7 @@ func TestProxy_HandleChatCompletions_Success(t *testing.T) {
 	mockOllama := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/api/chat" {
 			var req map[string]interface{}
-			json.NewDecoder(r.Body).Decode(&req)
+			_ = json.NewDecoder(r.Body).Decode(&req)
 
 			response := map[string]interface{}{
 				"model": req["model"],
@@ -108,7 +108,7 @@ func TestProxy_HandleChatCompletions_Success(t *testing.T) {
 				"done": true,
 			}
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(response)
+			_ = json.NewEncoder(w).Encode(response)
 		} else {
 			w.WriteHeader(http.StatusNotFound)
 		}
@@ -169,7 +169,7 @@ func TestProxy_HandleChatCompletions_MissingMessages(t *testing.T) {
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Contains(t, response, "error")
 }
 
@@ -196,7 +196,7 @@ func TestProxy_HandleChatCompletions_WithTemperature(t *testing.T) {
 	mockOllama := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/api/chat" {
 			var req map[string]interface{}
-			json.NewDecoder(r.Body).Decode(&req)
+			_ = json.NewDecoder(r.Body).Decode(&req)
 
 			// Verify temperature is passed
 			assert.Contains(t, req, "options")
@@ -212,7 +212,7 @@ func TestProxy_HandleChatCompletions_WithTemperature(t *testing.T) {
 				"done": true,
 			}
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(response)
+			_ = json.NewEncoder(w).Encode(response)
 		}
 	}))
 	defer mockOllama.Close()
@@ -248,7 +248,7 @@ func TestProxy_HandleChatCompletions_CacheHit(t *testing.T) {
 	mockOllama := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/api/chat" {
 			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(`{"model":"llama2","message":{"role":"assistant","content":"First response"}}`))
+			_, _ = w.Write([]byte(`{"model":"llama2","message":{"role":"assistant","content":"First response"}}`))
 		}
 	}))
 	defer mockOllama.Close()
@@ -300,7 +300,7 @@ func TestProxy_HandleChatCompletions_OllamaError(t *testing.T) {
 	mockOllama := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/api/chat" {
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(`{"error":"Internal server error"}`))
+			_, _ = w.Write([]byte(`{"error":"Internal server error"}`))
 		}
 	}))
 	defer mockOllama.Close()
@@ -335,7 +335,7 @@ func TestProxy_HandleModels_OllamaError(t *testing.T) {
 	// Create a mock Ollama server that returns an error
 	mockOllama := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`{"error":"Internal server error"}`))
+		_, _ = w.Write([]byte(`{"error":"Internal server error"}`))
 	}))
 	defer mockOllama.Close()
 
@@ -356,7 +356,7 @@ func TestProxy_HandleModels_OllamaError(t *testing.T) {
 	// When Ollama returns 500, proxy converts to empty models list and returns 200
 	assert.Equal(t, http.StatusOK, w.Code)
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	data, ok := response["data"].([]interface{})
 	assert.True(t, ok)
 	assert.Len(t, data, 0) // Empty models list
@@ -367,7 +367,7 @@ func TestProxy_HandleModels_InvalidResponse(t *testing.T) {
 	mockOllama := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/api/tags" {
 			w.Header().Set("Content-Type", "application/json")
-			w.Write([]byte(`invalid json`))
+			_, _ = w.Write([]byte(`invalid json`))
 		}
 	}))
 	defer mockOllama.Close()

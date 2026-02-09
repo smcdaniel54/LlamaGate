@@ -30,7 +30,7 @@ func CaptureModels(ctx context.Context, ollamaHost string, timeout time.Duration
 	if err != nil {
 		return snap, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode != http.StatusOK {
 		return snap, fmt.Errorf("ollama returned %d", resp.StatusCode)
 	}
