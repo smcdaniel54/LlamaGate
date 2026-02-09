@@ -55,25 +55,15 @@ if (Test-Path "install\windows\install.ps1") {
     Write-Host "  [WARN] Source installer file not found (optional)" -ForegroundColor Yellow
 }
 
-# Test 4: Validate repository URL in binary installer
-Write-Host "[4/8] Validating repository URL in binary installer..." -ForegroundColor Yellow
+# Test 4: Binary installer uses GITHUB_REPO (configurable repo)
+Write-Host "[4/8] Validating binary installer (GITHUB_REPO)..." -ForegroundColor Yellow
 if (Test-Path "install\windows\install-binary.ps1") {
     $binaryContent = Get-Content "install\windows\install-binary.ps1" -Raw
-    $expectedRepo = "smcdaniel54/LlamaGate"
-    $wrongRepo = "llamagate/llamagate"
-    
-    if ($binaryContent -match "github\.com/([^/]+/[^/""']+)") {
-        $foundRepo = $matches[1]
-        if ($foundRepo -eq $expectedRepo) {
-            Write-Host "  [OK] Repository URL is correct: $expectedRepo" -ForegroundColor Green
-        } elseif ($foundRepo -eq $wrongRepo) {
-            Write-Host "  [FAIL] Repository URL is incorrect: $wrongRepo (should be $expectedRepo)" -ForegroundColor Red
-            $errors += "Binary installer uses wrong repository URL: $wrongRepo"
-        } else {
-            Write-Host "  [WARN] Repository URL found: $foundRepo (expected $expectedRepo)" -ForegroundColor Yellow
-        }
+    if ($binaryContent -match "GITHUB_REPO") {
+        Write-Host "  [OK] Binary installer uses GITHUB_REPO for configurable repo" -ForegroundColor Green
     } else {
-        Write-Host "  [WARN] Could not extract repository URL from installer" -ForegroundColor Yellow
+        Write-Host "  [FAIL] Binary installer should use GITHUB_REPO" -ForegroundColor Red
+        $errors += "install-binary.ps1 should use GITHUB_REPO"
     }
 } else {
     Write-Host "  [FAIL] Binary installer file not found" -ForegroundColor Red
@@ -110,34 +100,34 @@ if (Test-Path "install\windows\install.cmd") {
     Write-Host "  [WARN] Source installer launcher not found (optional)" -ForegroundColor Yellow
 }
 
-# Test 7: Test one-liner binary installer download (Method 1)
-Write-Host "[7/8] Testing one-liner binary installer download (Method 1)..." -ForegroundColor Yellow
-$oneLinerUrl = "https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/windows/install-binary.ps1"
-try {
-    $response = Invoke-WebRequest -Uri $oneLinerUrl -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
-    if ($response.StatusCode -eq 200 -and $response.Content -match "LlamaGate Binary Installer") {
-        Write-Host "  [OK] One-liner binary installer is downloadable and valid" -ForegroundColor Green
+# Test 7: Binary installer script exists and is valid (no remote download)
+Write-Host "[7/8] Checking binary installer script..." -ForegroundColor Yellow
+if (Test-Path "install\windows\install-binary.ps1") {
+    $c = Get-Content "install\windows\install-binary.ps1" -Raw
+    if ($c -match "LlamaGate Binary Installer") {
+        Write-Host "  [OK] Binary installer script is present and valid" -ForegroundColor Green
     } else {
-        Write-Host "  [WARN] One-liner binary installer download succeeded but content may be invalid" -ForegroundColor Yellow
+        Write-Host "  [FAIL] Binary installer content invalid" -ForegroundColor Red
+        $errors += "install-binary.ps1 content invalid"
     }
-} catch {
-    Write-Host "  [WARN] Could not test one-liner download (network issue or GitHub unavailable): $_" -ForegroundColor Yellow
-    Write-Host "  This is expected in CI environments without internet access" -ForegroundColor Gray
+} else {
+    Write-Host "  [FAIL] Binary installer not found" -ForegroundColor Red
+    $errors += "install-binary.ps1 missing"
 }
 
-# Test 8: Test one-liner source installer download (Method 3)
-Write-Host "[8/8] Testing one-liner source installer download (Method 3)..." -ForegroundColor Yellow
-$sourceInstallerUrl = "https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/windows/install.ps1"
-try {
-    $response = Invoke-WebRequest -Uri $sourceInstallerUrl -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
-    if ($response.StatusCode -eq 200 -and $response.Content -match "LlamaGate Installer") {
-        Write-Host "  [OK] One-liner source installer is downloadable and valid" -ForegroundColor Green
+# Test 8: Source installer script exists and is valid (no remote download)
+Write-Host "[8/8] Checking source installer script..." -ForegroundColor Yellow
+if (Test-Path "install\windows\install.ps1") {
+    $c = Get-Content "install\windows\install.ps1" -Raw
+    if ($c -match "LlamaGate") {
+        Write-Host "  [OK] Source installer script is present and valid" -ForegroundColor Green
     } else {
-        Write-Host "  [WARN] One-liner source installer download succeeded but content may be invalid" -ForegroundColor Yellow
+        Write-Host "  [FAIL] Source installer content invalid" -ForegroundColor Red
+        $errors += "install.ps1 content invalid"
     }
-} catch {
-    Write-Host "  [WARN] Could not test one-liner download (network issue or GitHub unavailable): $_" -ForegroundColor Yellow
-    Write-Host "  This is expected in CI environments without internet access" -ForegroundColor Gray
+} else {
+    Write-Host "  [FAIL] Source installer not found" -ForegroundColor Red
+    $errors += "install.ps1 missing"
 }
 
 # Summary

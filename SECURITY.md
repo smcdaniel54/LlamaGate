@@ -14,7 +14,7 @@ We release patches for security vulnerabilities. Which versions are eligible for
 If you discover a security vulnerability in LlamaGate, please report it responsibly:
 
 1. **Do NOT** open a public GitHub issue
-2. Create a private security advisory at: https://github.com/llamagate/llamagate/security/advisories/new
+2. Create a private security advisory at: your LlamaGate repository's Security > Advisories > New draft advisory
 3. Include:
    - Description of the vulnerability
    - Steps to reproduce

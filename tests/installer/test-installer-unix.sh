@@ -54,19 +54,14 @@ else
     echo "  ⚠ Source installer file not found (optional)"
 fi
 
-# Test 4: Validate repository URL in binary installer
-echo "[4/9] Validating repository URL in binary installer..."
+# Test 4: Validate binary installer uses configurable repo (GITHUB_REPO)
+echo "[4/9] Validating binary installer (GITHUB_REPO)..."
 if [ -f "install/unix/install-binary.sh" ]; then
-    EXPECTED_REPO="smcdaniel54/LlamaGate"
-    WRONG_REPO="llamagate/llamagate"
-    
-    if grep -q "github.com/$EXPECTED_REPO" install/unix/install-binary.sh; then
-        echo "  ✓ Repository URL is correct: $EXPECTED_REPO"
-    elif grep -q "github.com/$WRONG_REPO" install/unix/install-binary.sh; then
-        echo "  ✗ Repository URL is incorrect: $WRONG_REPO (should be $EXPECTED_REPO)"
-        ERRORS=$((ERRORS + 1))
+    if grep -q "GITHUB_REPO" install/unix/install-binary.sh; then
+        echo "  ✓ Binary installer uses GITHUB_REPO for configurable repo"
     else
-        echo "  ⚠ Could not find repository URL in installer"
+        echo "  ✗ Binary installer should use GITHUB_REPO"
+        ERRORS=$((ERRORS + 1))
     fi
 else
     echo "  ✗ Binary installer file not found"
@@ -113,44 +108,22 @@ else
     echo "  ⚠ Shebang may be missing or incorrect"
 fi
 
-# Test 8: Test one-liner binary installer download (Method 1)
-echo "[8/9] Testing one-liner binary installer download (Method 1)..."
-ONE_LINER_BINARY_URL="https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/unix/install-binary.sh"
-if command -v curl >/dev/null 2>&1; then
-    if curl -fsSL --max-time 10 "$ONE_LINER_BINARY_URL" 2>/dev/null | grep -q "LlamaGate Binary Installer"; then
-        echo "  ✓ One-liner binary installer is downloadable and valid"
-    else
-        echo "  ⚠ One-liner binary installer download succeeded but content may be invalid"
-    fi
-elif command -v wget >/dev/null 2>&1; then
-    if wget -q --timeout=10 -O- "$ONE_LINER_BINARY_URL" 2>/dev/null | grep -q "LlamaGate Binary Installer"; then
-        echo "  ✓ One-liner binary installer is downloadable and valid"
-    else
-        echo "  ⚠ One-liner binary installer download succeeded but content may be invalid"
-    fi
+# Test 8: Binary installer script exists and is valid (no remote download; repo URL is configurable)
+echo "[8/9] Checking binary installer script..."
+if [ -f "install/unix/install-binary.sh" ] && grep -q "LlamaGate Binary Installer" install/unix/install-binary.sh; then
+    echo "  ✓ Binary installer script is present and valid"
 else
-    echo "  ⚠ Cannot test one-liner download (curl/wget not available)"
-    echo "  This is expected in CI environments without internet access"
+    echo "  ✗ Binary installer script missing or invalid"
+    ERRORS=$((ERRORS + 1))
 fi
 
-# Test 9: Test one-liner source installer download (Method 3)
-echo "[9/9] Testing one-liner source installer download (Method 3)..."
-ONE_LINER_SOURCE_URL="https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/unix/install.sh"
-if command -v curl >/dev/null 2>&1; then
-    if curl -fsSL --max-time 10 "$ONE_LINER_SOURCE_URL" 2>/dev/null | grep -q "LlamaGate Installer"; then
-        echo "  ✓ One-liner source installer is downloadable and valid"
-    else
-        echo "  ⚠ One-liner source installer download succeeded but content may be invalid"
-    fi
-elif command -v wget >/dev/null 2>&1; then
-    if wget -q --timeout=10 -O- "$ONE_LINER_SOURCE_URL" 2>/dev/null | grep -q "LlamaGate Installer"; then
-        echo "  ✓ One-liner source installer is downloadable and valid"
-    else
-        echo "  ⚠ One-liner source installer download succeeded but content may be invalid"
-    fi
+# Test 9: Source installer script exists and is valid (no remote download)
+echo "[9/9] Checking source installer script..."
+if [ -f "install/unix/install.sh" ] && grep -q "LlamaGate" install/unix/install.sh; then
+    echo "  ✓ Source installer script is present and valid"
 else
-    echo "  ⚠ Cannot test one-liner download (curl/wget not available)"
-    echo "  This is expected in CI environments without internet access"
+    echo "  ✗ Source installer script missing or invalid"
+    ERRORS=$((ERRORS + 1))
 fi
 
 # Summary

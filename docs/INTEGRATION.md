@@ -152,7 +152,7 @@ if ($siblingPath -and (Test-Path (Join-Path $siblingPath "cmd\llamagate"))) {
             Push-Location $parentDir
             try {
                 Write-Host "  Cloning from GitHub..." -ForegroundColor Gray
-                git clone https://github.com/smcdaniel54/LlamaGate.git
+                git clone <your-llamagate-repo-url>.git
                 if ($LASTEXITCODE -ne 0) {
                     Write-Host "  ✗ Clone failed" -ForegroundColor Red
                     Pop-Location
@@ -712,7 +712,7 @@ netstat -an | findstr :11435  # Windows
 
 1. **Setup Issues**: Check troubleshooting section in this guide
 2. **Integration Patterns**: Follow best practices documented in this guide
-3. **Issues**: Report problems in the [LlamaGate Issues](https://github.com/smcdaniel54/LlamaGate/issues)
+3. **Issues**: Report problems in your LlamaGate repository's issue tracker.
 4. **Community**: Engage with the LlamaGate community for support
 
 ## Best Practices
@@ -735,7 +735,7 @@ netstat -an | findstr :11435  # Windows
 ## Example Projects
 
 ### Production Examples
-- **[LlamaGate OpenAI SDK Examples](https://github.com/smcdaniel54/LlamaGate-openai-sdk-examples)** - Basic integration examples
+- Point the OpenAI SDK at your LlamaGate URL; see [API](API.md).
 
 ### Learning Resources
 - Review integration patterns in this guide

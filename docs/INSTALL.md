@@ -8,15 +8,9 @@ LlamaGate can be installed using three methods:
 
 This method downloads a pre-built binary (no Go required):
 
-**Windows (PowerShell):**
-```powershell
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/windows/install-binary.ps1" -OutFile install-binary.ps1; .\install-binary.ps1
-```
+**Windows (PowerShell):** From repo root, run `.\install\windows\install-binary.ps1` (set `GITHUB_REPO` for binary download).
 
-**Unix/Linux/macOS:**
-```bash
-curl -fsSL https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/unix/install-binary.sh | bash
-```
+**Unix/Linux/macOS:** From repo root, run `./install/unix/install-binary.sh` (set `GITHUB_REPO` for binary download).
 
 **What happens:**
 1. Downloads the installer script from GitHub
@@ -69,17 +63,11 @@ If you need to build from source, you have two options:
 
 ### Option A: One-Line Command (Downloads Source Installer)
 
-**Windows (PowerShell):**
-```powershell
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/windows/install.ps1" -OutFile install.ps1; .\install.ps1
-```
+**Windows (PowerShell):** From repo root, run `.\install\windows\install.ps1`.
 
-**Unix/Linux/macOS:**
-```bash
-curl -fsSL https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/unix/install.sh | bash
-```
+**Unix/Linux/macOS:** From repo root, run `./install/unix/install.sh`.
 
-This downloads and runs the source installer, which handles Go installation and builds from source.
+This runs the source installer, which handles Go installation and builds from source.
 
 ### Option B: Manual Build (If You Have Go Installed)
 
@@ -88,7 +76,7 @@ If you already have Go installed and want to build manually: run `go build ./...
 **Unix/Linux/macOS:**
 ```bash
 # Clone the repository
-git clone https://github.com/smcdaniel54/LlamaGate.git
+git clone <your-llamagate-repo-url>.git
 cd LlamaGate
 
 # Build all packages (required for CI/E2E/build-from-source integrators)
@@ -105,7 +93,7 @@ go install ./cmd/llamagate
 ```powershell
 # Clone the repository (handle stderr output)
 $ErrorActionPreference = "Continue"  # Git writes progress to stderr
-git clone https://github.com/smcdaniel54/LlamaGate.git
+git clone <your-llamagate-repo-url>.git
 $ErrorActionPreference = "Stop"  # Restore if needed
 
 cd LlamaGate
@@ -201,7 +189,7 @@ $oldErrorAction = $ErrorActionPreference
 $ErrorActionPreference = "Continue"
 
 # Clone the repository
-git clone https://github.com/smcdaniel54/LlamaGate.git
+git clone <your-llamagate-repo-url>.git
 
 # Restore original setting
 $ErrorActionPreference = $oldErrorAction
@@ -210,7 +198,7 @@ $ErrorActionPreference = $oldErrorAction
 **Option 2: Check exit code instead**
 ```powershell
 # Clone and check exit code
-git clone https://github.com/smcdaniel54/LlamaGate.git 2>&1 | Out-Null
+git clone <your-llamagate-repo-url>.git 2>&1 | Out-Null
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Git clone failed with exit code $LASTEXITCODE"
     exit 1
@@ -220,7 +208,7 @@ if ($LASTEXITCODE -ne 0) {
 **Option 3: Redirect stderr**
 ```powershell
 # Redirect stderr to null (suppress progress messages)
-git clone https://github.com/smcdaniel54/LlamaGate.git 2>$null
+git clone <your-llamagate-repo-url>.git 2>$null
 ```
 
 **Note:** This is a known Git behavior - progress messages go to stderr even on success. The installers handle this automatically, but manual `git clone` commands in PowerShell scripts need this workaround.

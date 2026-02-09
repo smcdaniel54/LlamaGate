@@ -63,7 +63,7 @@ All notable changes to LlamaGate will be documented in this file.
   - Plugin configuration (`PluginsConfig`) has been removed
   - Extension system is now the only extensibility mechanism
 
-  **Migration Guide:** See `docs/PLANS_REVIEW.md` for migration completion details.
+  **Migration:** See `docs/phase1_remove_modules_extensions.md` and `docs/core_contract.md`.
 
 ### Added
 
@@ -159,6 +159,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Missing request IDs in error responses
 - Cache lookup using incorrect message context (tool injection)
 
-[Unreleased]: https://github.com/llamagate/llamagate/compare/v0.9.1...HEAD
-[0.9.1]: https://github.com/llamagate/llamagate/compare/v0.9.0...v0.9.1
-[0.9.0]: https://github.com/llamagate/llamagate/releases/tag/v0.9.0
+(Release links omitted; use your repository's tags and compare URLs.)

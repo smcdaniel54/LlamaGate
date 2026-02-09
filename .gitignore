@@ -19,6 +19,7 @@ llamagate.log
 # Output of the go coverage tool
 *.out
 coverage
+registry_coverage
 .out
 coverage*.txt
 full_coverage

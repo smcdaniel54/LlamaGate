@@ -1,6 +1,5 @@
 # LlamaGate
 
-[![CI](https://github.com/smcdaniel54/LlamaGate/actions/workflows/ci.yml/badge.svg)](https://github.com/smcdaniel54/LlamaGate/actions/workflows/ci.yml)
 [![Go Version](https://img.shields.io/badge/go-1.23+-00ADD8?style=flat&logo=go)](https://go.dev/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey)](README.md)
@@ -38,8 +37,7 @@ LlamaGate is a lean, production-ready, OpenAI-compatible API gateway for local L
 
 ## Example Repositories
 
-- 📚 **[OpenAI SDK Examples](https://github.com/smcdaniel54/LlamaGate-openai-sdk-examples)** - Minimal examples showing how to use the OpenAI SDK with LlamaGate (streaming and non-streaming)
-- 🎯 **MCP Examples** - Coming soon
+- 🎯 **MCP Examples** - See [MCP Demo Guide](docs/MCP_DEMO_QUICKSTART.md) and [MCP Quick Start](docs/MCP_QUICKSTART.md).
 
 ## Installation
 
@@ -49,19 +47,15 @@ LlamaGate is a lean, production-ready, OpenAI-compatible API gateway for local L
 
 This method downloads a pre-built binary (no Go required):
 
-**Windows (PowerShell):**
-```powershell
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/windows/install-binary.ps1" -OutFile install-binary.ps1; .\install-binary.ps1
-```
+**Windows (PowerShell):**  
+If you have the repo locally, run `install\windows\install-binary.ps1`. Otherwise build from source (see Method 3).
 
-**Unix/Linux/macOS:**
-```bash
-curl -fsSL https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/unix/install-binary.sh | bash
-```
+**Unix/Linux/macOS:**  
+If you have the repo locally, run `install/unix/install-binary.sh`. Otherwise build from source (see Method 3).
 
 **What happens:**
-1. Downloads the installer script from GitHub
-2. Runs the installer automatically
+1. Installer (or you) downloads the pre-built binary from your release host, or you build from source
+2. Runs the installer / places the binary
 3. Installer downloads the pre-built binary for your platform
 4. Sets up the executable and automatically creates `.env` configuration file if missing
 
@@ -112,12 +106,12 @@ If you need to build from source, you have two options:
 
 **Windows (PowerShell):**
 ```powershell
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/windows/install.ps1" -OutFile install.ps1; .\install.ps1
+# From repo root: .\install\windows\install.ps1
 ```
 
 **Unix/Linux/macOS:**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/smcdaniel54/LlamaGate/main/install/unix/install.sh | bash
+# From repo root: ./install/unix/install.sh
 ```
 
 This downloads and runs the source installer, which handles Go installation and builds from source.
@@ -128,8 +122,8 @@ A full build of all packages (`go build ./...`) must succeed so that downstream 
 
 **Unix/Linux/macOS:**
 ```bash
-# Clone the repository
-git clone https://github.com/smcdaniel54/LlamaGate.git
+# Clone the repository (replace with your repo URL if you host elsewhere)
+git clone <your-llamagate-repo-url>.git
 cd LlamaGate
 
 # Build all packages (required for CI/E2E/build-from-source integrators)
@@ -146,7 +140,7 @@ go install ./cmd/llamagate
 ```powershell
 # Clone the repository (handle stderr output)
 $ErrorActionPreference = "Continue"  # Git writes progress to stderr
-git clone https://github.com/smcdaniel54/LlamaGate.git
+git clone <your-llamagate-repo-url>.git
 $ErrorActionPreference = "Stop"  # Restore if needed
 
 cd LlamaGate
@@ -162,6 +156,31 @@ go install ./cmd/llamagate
 ```
 
 **Note:** Git writes progress messages to stderr even on success. In PowerShell with `$ErrorActionPreference = "Stop"`, this can cause failures. See [Troubleshooting](#troubleshooting) section below for details.
+
+### 🐳 Docker
+
+Build and run LlamaGate in a container. The image does **not** include Ollama; set `OLLAMA_HOST` to your Ollama instance (host, another container, or service URL).
+
+**Build:**
+```bash
+docker build -t llamagate .
+```
+
+**Run (Ollama on host):**
+```bash
+# Linux
+docker run -p 11435:11435 -e OLLAMA_HOST=http://host.docker.internal:11434 llamagate
+
+# Windows/macOS (host.docker.internal works)
+docker run -p 11435:11435 -e OLLAMA_HOST=http://host.docker.internal:11434 llamagate
+```
+
+**Run with optional API key:**
+```bash
+docker run -p 11435:11435 -e OLLAMA_HOST=http://host.docker.internal:11434 -e API_KEY=sk-your-key llamagate
+```
+
+**Key env vars:** `OLLAMA_HOST` (required if Ollama not on localhost), `PORT` (default 11435), `API_KEY` (optional), `MCP_ENABLED` (optional). See [Configuration](#configuration) and `.env.example` for more.
 
 ## Development Setup
 
@@ -299,7 +318,7 @@ if ($siblingPath -and (Test-Path (Join-Path $siblingPath "cmd\llamagate"))) {
             Push-Location $parentDir
             try {
                 Write-Host "  Cloning from GitHub..." -ForegroundColor Gray
-                git clone https://github.com/smcdaniel54/LlamaGate.git
+                git clone <your-llamagate-repo-url>.git
                 if ($LASTEXITCODE -ne 0) {
                     Write-Host "  ✗ Clone failed" -ForegroundColor Red
                     Pop-Location
@@ -728,7 +747,7 @@ Authentication errors return HTTP `401 Unauthorized` with a JSON response in Ope
 > 🎯 **Want to see MCP in action?** Check out the [MCP Demo QuickStart](docs/MCP_DEMO_QUICKSTART.md) for a complete example with multiple document processing servers.
 
 > 📚 **Looking for more examples?** Check out our example repositories:
-> - [OpenAI SDK Examples](https://github.com/smcdaniel54/LlamaGate-openai-sdk-examples) - Minimal examples showing how to use the OpenAI SDK with LlamaGate
+> - Use the OpenAI SDK with `base_url` pointing at your LlamaGate instance (see [API](docs/API.md)).
 > - More example repositories coming soon: Extension examples, MCP examples
 
 ### Usage Examples
@@ -946,7 +965,7 @@ console.log(response.choices[0].message.content);
 
 **Note:** Authentication is optional. If `API_KEY` is not set in LlamaGate, you can omit the `api_key` parameter or use any value.
 
-> 📚 **For more complete SDK examples**, see the [LlamaGate OpenAI SDK Examples repository](https://github.com/smcdaniel54/LlamaGate-openai-sdk-examples) which includes runnable examples for both streaming and non-streaming requests.
+> 📚 **For SDK usage**, point your OpenAI client at your LlamaGate URL; see [API](docs/API.md) and [Testing](docs/TESTING.md).
 
 ### Health Check
 
@@ -1121,7 +1140,7 @@ except Exception as e:
 - Monitor rate limits and adjust request patterns
 - Use structured logging for debugging
 
-📚 **See more examples:** [OpenAI SDK Examples Repository](https://github.com/smcdaniel54/LlamaGate-openai-sdk-examples)
+📚 **See more:** [API reference](docs/API.md) and [Testing guide](docs/TESTING.md) for request examples.
 
 ## API Endpoints
 
@@ -1586,8 +1605,8 @@ $oldErrorAction = $ErrorActionPreference
 # Temporarily allow errors during git clone
 $ErrorActionPreference = "Continue"
 
-# Clone the repository
-git clone https://github.com/smcdaniel54/LlamaGate.git
+# Clone the repository (replace with your repo URL if you host elsewhere)
+git clone <your-llamagate-repo-url>.git
 
 # Restore original setting
 $ErrorActionPreference = $oldErrorAction
@@ -1596,7 +1615,7 @@ $ErrorActionPreference = $oldErrorAction
 **Option 2: Check exit code instead**
 ```powershell
 # Clone and check exit code
-git clone https://github.com/smcdaniel54/LlamaGate.git 2>&1 | Out-Null
+git clone <your-llamagate-repo-url>.git 2>&1 | Out-Null
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Git clone failed with exit code $LASTEXITCODE"
     exit 1
@@ -1606,7 +1625,7 @@ if ($LASTEXITCODE -ne 0) {
 **Option 3: Redirect stderr**
 ```powershell
 # Redirect stderr to null (suppress progress messages)
-git clone https://github.com/smcdaniel54/LlamaGate.git 2>$null
+git clone <your-llamagate-repo-url>.git 2>$null
 ```
 
 **Note:** This is a known Git behavior - progress messages go to stderr even on success. The installers handle this automatically, but manual `git clone` commands in PowerShell scripts need this workaround.

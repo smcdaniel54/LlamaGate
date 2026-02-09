@@ -40,8 +40,13 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 TARGET_PATH="$PROJECT_ROOT/$TARGET_NAME"
 
-# Latest release URL
-LATEST_RELEASE_URL="https://github.com/smcdaniel54/LlamaGate/releases/latest/download/$BINARY_NAME"
+# Set GITHUB_REPO (e.g. your-org/LlamaGate) to download from GitHub releases; leave unset to require build from source
+GITHUB_REPO="${GITHUB_REPO:-}"
+if [ -n "$GITHUB_REPO" ]; then
+  LATEST_RELEASE_URL="https://github.com/${GITHUB_REPO}/releases/latest/download/$BINARY_NAME"
+else
+  LATEST_RELEASE_URL=""
+fi
 
 echo "========================================"
 echo -e "${CYAN}LlamaGate Binary Installer${NC}"
@@ -51,6 +56,14 @@ echo ""
 echo -e "${YELLOW}[1/3]${NC} Detecting platform..."
 echo "  Platform: $PLATFORM" | sed 's/-/ /g' | awk '{print "  " $1 " (" $2 ")"}'
 echo ""
+
+if [ -z "$LATEST_RELEASE_URL" ]; then
+    echo -e "${YELLOW}[INFO]${NC} GITHUB_REPO not set - no release URL to download from."
+    echo "  Set GITHUB_REPO=your-org/LlamaGate to download from GitHub releases, or build from source:"
+    echo -e "${GRAY}    ./install/unix/install.sh${NC}"
+    echo -e "${GRAY}    go build -o llamagate ./cmd/llamagate${NC}"
+    exit 1
+fi
 
 echo -e "${YELLOW}[2/3]${NC} Downloading LlamaGate binary..."
 echo "  URL: $LATEST_RELEASE_URL" | sed 's/.*\///' | sed 's/^/  /'
@@ -82,8 +95,7 @@ elif [ "$HTTP_CODE" = "404" ]; then
     echo -e "${CYAN}  1.${NC} Build from source using the source installer:"
     echo -e "${GRAY}     ./install/unix/install.sh${NC}"
     echo ""
-    echo -e "${CYAN}  2.${NC} Wait for binaries to be published to releases:"
-    echo -e "${GRAY}     https://github.com/smcdaniel54/LlamaGate/releases${NC}"
+    echo -e "${CYAN}  2.${NC} Set GITHUB_REPO (e.g. your-org/LlamaGate) and re-run, or publish binaries to your repo releases."
     echo ""
     echo -e "${CYAN}  3.${NC} Build manually:"
     echo -e "${GRAY}     go build -o llamagate ./cmd/llamagate${NC}"
@@ -92,7 +104,7 @@ else
     echo -e "${RED}✗${NC} Download failed (HTTP $HTTP_CODE)"
     echo ""
     echo "Please try again or download manually from:"
-    echo -e "${CYAN}  https://github.com/smcdaniel54/LlamaGate/releases/latest${NC}"
+    echo -e "${CYAN}  Set env GITHUB_REPO=your-org/LlamaGate and re-run, or build from source.${NC}"
     exit 1
 fi
 

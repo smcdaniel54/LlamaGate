@@ -5,9 +5,9 @@ This document provides a quick reference to all available examples for using Lla
 ## Quick Links
 
 ### Basic Examples
-- [Simple Chat](https://github.com/smcdaniel54/LlamaGate-openai-sdk-examples) - Basic chat completion
-- [Streaming Chat](https://github.com/smcdaniel54/LlamaGate-openai-sdk-examples) - Streaming responses
-- [With Authentication](https://github.com/smcdaniel54/LlamaGate-openai-sdk-examples) - Authenticated requests
+- Simple Chat - See [API](API.md) and [README usage examples](../README.md#usage-examples)
+- Streaming Chat - See [README streaming](../README.md#streaming-with-python-sdk)
+- With Authentication - See [README authentication](../README.md#5-authentication-example-if-enabled)
 
 ### Advanced Examples
 - [Error Handling](../README.md#error-handling) - Proper error handling patterns
@@ -17,28 +17,13 @@ This document provides a quick reference to all available examples for using Lla
 
 ### Integration Examples
 - [LangChain Integration](../README.md#using-with-langchain) - Using LlamaGate with LangChain
-- [OpenAI SDK Examples](https://github.com/smcdaniel54/LlamaGate-openai-sdk-examples) - Complete Python examples repository
+- [API](API.md) and [README](../README.md) - Python and cURL examples
 
-## External Example Repositories
+## Example Sources
 
-### OpenAI SDK Examples
-**Repository:** [LlamaGate-openai-sdk-examples](https://github.com/smcdaniel54/LlamaGate-openai-sdk-examples)
+In-repo examples: see [API](API.md), [README](../README.md) (usage examples, streaming, authentication), and [MCP Quick Start](MCP_QUICKSTART.md).
 
-Minimal, runnable examples showing how to use the OpenAI Python SDK with LlamaGate:
-- Basic chat completions
-- Streaming responses
-- Authentication patterns
-- Error handling
-
-### Extension Examples
-**Repository:** [LlamaGate-extension-examples](https://github.com/smcdaniel54/LlamaGate-extension-examples)
-
-High-value, copy/paste-ready examples of LlamaGate Extensions and AgenticModules:
-- **Structured Intake Summary** - Converts raw request text into structured JSON
-- **ROI Assessment** - Calculates ROI from costs, savings, and risk factors
-- **Intake and Routing** - Orchestrates intake processing and urgency-based routing
-- **Templates** - Ready-to-use templates for quick starts
-- Demonstrates real-world patterns for workflows, routing, evaluation, and orchestration
+(External example repositories previously linked here have been removed.)
 
 ### MCP Examples
 **Status:** Coming soon
@@ -55,7 +40,7 @@ Examples for Model Context Protocol integration:
 #### Python
 - [OpenAI Python SDK](../README.md#usage-examples) - Main examples in README
 - [LangChain](../README.md#using-with-langchain) - LangChain integration
-- [External Examples](https://github.com/smcdaniel54/LlamaGate-openai-sdk-examples) - Complete repository
+- [API](API.md) and [README](../README.md) - In-repo examples
 
 #### Node.js
 - [OpenAI Node.js SDK](../README.md#4-using-openai-nodejs-sdk) - Basic Node.js examples
@@ -82,7 +67,7 @@ Examples for Model Context Protocol integration:
 
 #### Integrations
 1. [LangChain](../README.md#using-with-langchain) - LangChain integration
-2. [OpenAI SDK Examples](https://github.com/smcdaniel54/LlamaGate-openai-sdk-examples) - External examples repository
+2. [API](API.md) and [README](../README.md) - In-repo examples
 
 ## Prerequisites
 
@@ -166,10 +151,10 @@ curl http://localhost:11435/v1/chat/completions \
 
 Have a great example to share? Contributions are welcome!
 
-1. **External Repository Examples:** Submit PRs to [LlamaGate-openai-sdk-examples](https://github.com/smcdaniel54/LlamaGate-openai-sdk-examples)
+1. **Examples:** See [API](API.md) and [README](../README.md); submit changes to your LlamaGate repository.
 2. **Documentation Examples:** Submit PRs to this repository with examples in README.md or new docs
 
 ---
 
 **Last Updated:** 2026-01-15  
-**Examples Repository:** [LlamaGate-openai-sdk-examples](https://github.com/smcdaniel54/LlamaGate-openai-sdk-examples)
+**Examples:** In-repo; see [API](API.md) and [README](../README.md).

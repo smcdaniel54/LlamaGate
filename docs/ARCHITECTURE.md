@@ -822,7 +822,6 @@ type Config struct {
 
 - [Project Structure](STRUCTURE.md) - Directory structure
 - [MCP Integration](MCP.md) - MCP client details
-- [Extension System](EXTENSIONS_SPEC_V0.9.1.md) - Extension system details
 - [API Reference](API.md) - HTTP API details
 - [Configuration Guide](../README.md#configuration) - Configuration options
 

@@ -13,9 +13,18 @@ $arch = "amd64"  # Default, can be extended for ARM64 if needed
 $binaryName = "llamagate-windows-amd64.exe"
 $targetName = "llamagate.exe"
 
-# Get latest release URL
-$latestReleaseUrl = "https://github.com/smcdaniel54/LlamaGate/releases/latest/download/$binaryName"
+# Set your repo (e.g. your-org/LlamaGate) to download from GitHub releases; leave empty to skip binary download
+$env:GITHUB_REPO = if ($env:GITHUB_REPO) { $env:GITHUB_REPO } else { "" }
+$latestReleaseUrl = if ($env:GITHUB_REPO) { "https://github.com/$($env:GITHUB_REPO)/releases/latest/download/$binaryName" } else { $null }
 $targetPath = Join-Path $PSScriptRoot "..\..\$targetName"
+
+if (-not $latestReleaseUrl) {
+    Write-Host "  [INFO] GITHUB_REPO not set - no release URL to download from." -ForegroundColor Yellow
+    Write-Host "  Set GITHUB_REPO=your-org/LlamaGate to download from GitHub releases, or build from source:" -ForegroundColor Cyan
+    Write-Host "    install\windows\install.ps1" -ForegroundColor Gray
+    Write-Host "    go build -o llamagate.exe ./cmd/llamagate" -ForegroundColor Gray
+    exit 1
+}
 
 Write-Host "[1/3] Downloading LlamaGate binary..." -ForegroundColor Yellow
 Write-Host "  URL: $latestReleaseUrl" -ForegroundColor Gray
@@ -33,8 +42,7 @@ try {
         Write-Host "  1. Build from source using the source installer:" -ForegroundColor Cyan
         Write-Host "     install\windows\install.ps1" -ForegroundColor Gray
         Write-Host ""
-        Write-Host "  2. Wait for binaries to be published to releases:" -ForegroundColor Cyan
-        Write-Host "     https://github.com/smcdaniel54/LlamaGate/releases" -ForegroundColor Gray
+        Write-Host "  2. Set GITHUB_REPO (e.g. your-org/LlamaGate) and re-run, or publish binaries to your repo releases." -ForegroundColor Cyan
         Write-Host ""
         Write-Host "  3. Build manually:" -ForegroundColor Cyan
         Write-Host "     go build -o llamagate.exe ./cmd/llamagate" -ForegroundColor Gray
@@ -42,7 +50,7 @@ try {
         Write-Host "  [ERROR] Download failed: $_" -ForegroundColor Red
         Write-Host ""
         Write-Host "Please try again or download manually from:" -ForegroundColor Yellow
-        Write-Host "  https://github.com/smcdaniel54/LlamaGate/releases/latest" -ForegroundColor Cyan
+        Write-Host "  Set env GITHUB_REPO=your-org/LlamaGate and re-run, or build from source." -ForegroundColor Cyan
     }
     exit 1
 }
