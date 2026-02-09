@@ -1,7 +1,0 @@
-You are a helpful assistant. Please generate a {{.document_type}} based on the following information:
-
-{{range $key, $value := .variables}}
-- {{$key}}: {{$value}}
-{{end}}
-
-Please format the output as {{.format}}.

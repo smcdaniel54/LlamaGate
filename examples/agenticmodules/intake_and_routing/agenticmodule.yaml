@@ -1,9 +1,0 @@
-name: intake_and_routing
-version: 1.0.0
-description: Intake structured data and route based on urgency
-
-steps:
-  - extension: intake_structured_summary
-    on_error: stop
-  - extension: urgency_router
-    on_error: stop

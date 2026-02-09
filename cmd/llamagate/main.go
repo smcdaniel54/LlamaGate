@@ -15,11 +15,9 @@ import (
 	"github.com/llamagate/llamagate/internal/api"
 	"github.com/llamagate/llamagate/internal/cache"
 	"github.com/llamagate/llamagate/internal/config"
-	"github.com/llamagate/llamagate/internal/extensions"
 	"github.com/llamagate/llamagate/internal/logger"
 	"github.com/llamagate/llamagate/internal/middleware"
 	"github.com/llamagate/llamagate/internal/ollama"
-	"github.com/llamagate/llamagate/internal/startup"
 	"github.com/llamagate/llamagate/internal/proxy"
 	"github.com/llamagate/llamagate/internal/setup"
 	"github.com/rs/zerolog/log"
@@ -121,7 +119,6 @@ func main() {
 
 	// Hardware recommendations endpoint - register BEFORE auth middleware
 	// This allows clients to check hardware recommendations without API key
-	// Extensions can access this via HTTP calls to /v1/hardware/recommendations
 	// Data is embedded in the binary, no external file needed
 	hardwareHandler := api.NewHardwareHandler()
 	router.GET("/v1/hardware/recommendations", hardwareHandler.GetRecommendations)
@@ -138,84 +135,6 @@ func main() {
 	// Rate limiting middleware
 	rateLimitMiddleware := middleware.NewRateLimitMiddleware(cfg.RateLimitRPS)
 	router.Use(rateLimitMiddleware.Handler())
-
-	// Initialize extension system
-	extensionRegistry := extensions.NewRegistry()
-	extensionBaseDir := "extensions"
-
-	// Load installed extensions (from ~/.llamagate/extensions/installed/) and legacy extensions (from extensions/)
-	loadedCount, failures := startup.LoadInstalledExtensions(extensionRegistry, extensionBaseDir)
-	if len(failures) > 0 {
-		log.Warn().
-			Int("failure_count", len(failures)).
-			Strs("failures", failures).
-			Msg("Some extensions failed to load")
-	}
-	log.Info().
-		Int("loaded", loadedCount).
-		Int("failures", len(failures)).
-		Msg("Extension loading complete")
-
-	// Discover installed modules (for logging/info, execution still uses agenticmodule_runner)
-	moduleCount, moduleFailures := startup.LoadInstalledModules()
-	if len(moduleFailures) > 0 {
-		log.Warn().
-			Int("failure_count", len(moduleFailures)).
-			Strs("failures", moduleFailures).
-			Msg("Some modules failed to load")
-	}
-	if moduleCount > 0 {
-		log.Info().
-			Int("modules", moduleCount).
-			Msg("Discovered installed modules")
-	}
-
-	// Get all registered manifests for route registration
-	manifests := extensionRegistry.List()
-
-	// Create extension hook manager
-	extensionHookManager := extensions.NewHookManager(extensionRegistry, extensionBaseDir)
-
-	// Add extension middleware hooks (for request-inspector)
-	router.Use(extensionHookManager.CreateMiddlewareHook())
-
-	// Set response hooks in proxy (for cost-usage-reporter)
-	proxyInstance.SetResponseHook(extensionHookManager.ExecuteResponseHooks)
-
-	// Create LLM handler for extensions (needed for workflow executor)
-	llmHandler := proxyInstance.CreateExtensionLLMHandler()
-
-	// Create workflow executor for extension endpoints
-	workflowExecutor := extensions.NewWorkflowExecutor(llmHandler, extensionBaseDir)
-	workflowExecutor.SetRegistry(extensionRegistry) // Enable extension-to-extension calls
-
-	// Create route manager for dynamic extension endpoints
-	routeManager := extensions.NewRouteManager(
-		router,
-		extensionRegistry,
-		workflowExecutor,
-		extensionBaseDir,
-		cfg.APIKey,
-		rateLimitMiddleware,
-	)
-
-	// Register extension routes
-	for _, manifest := range manifests {
-		if len(manifest.Endpoints) > 0 {
-			if err := routeManager.RegisterExtensionRoutes(manifest); err != nil {
-				log.Error().
-					Str("extension", manifest.Name).
-					Err(err).
-					Msg("Failed to register extension routes")
-				// Continue with other extensions
-			} else {
-				log.Info().
-					Str("extension", manifest.Name).
-					Int("endpoints", len(manifest.Endpoints)).
-					Msg("Registered extension routes")
-			}
-		}
-	}
 
 	// All routes below will require authentication when API_KEY is set
 	// OpenAI-compatible endpoints
@@ -253,19 +172,6 @@ func main() {
 				// Refresh and management
 				mcp.POST("/servers/:name/refresh", mcpHandler.RefreshServerMetadata)
 			}
-		}
-
-		// Extension system endpoints
-		extensionHandler := extensions.NewHandler(extensionRegistry, llmHandler, extensionBaseDir)
-		extensionHandler.SetRouteManager(routeManager) // Set route manager for refresh endpoint
-		extensionHandler.SetUpsertEnabled(cfg.ExtensionsUpsertEnabled)
-		extensionsGroup := v1.Group("/extensions")
-		{
-			extensionsGroup.GET("", extensionHandler.ListExtensions)
-			extensionsGroup.GET("/:name", extensionHandler.GetExtension)
-			extensionsGroup.PUT("/:name", extensionHandler.UpsertExtension)
-			extensionsGroup.POST("/:name/execute", extensionHandler.ExecuteExtension)
-			extensionsGroup.POST("/refresh", extensionHandler.RefreshExtensions)
 		}
 	}
 
@@ -338,9 +244,6 @@ func main() {
 			}
 		}
 	}
-
-	// Note: Extension HTTP clients are managed per-request and don't need explicit cleanup
-	// They will be garbage collected when the server shuts down
 
 	// Graceful shutdown with configurable timeout
 	// Stop accepting new requests and allow in-flight requests to complete

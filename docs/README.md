@@ -1,6 +1,6 @@
 # LlamaGate Documentation
 
-Welcome to the LlamaGate documentation! This directory contains detailed guides and references for using and developing LlamaGate.
+LlamaGate is a **lean, OpenAI-compatible gateway** for local LLMs (Ollama). Agentic modules and the extension system were removed in Phase 1; see [Core Contract](core_contract.md) and [Phase 1 Removal](phase1_remove_modules_extensions.md).
 
 ## Getting Started
 - [Quick Start Guide](../QUICKSTART.md) - Get running in 2 minutes
@@ -14,6 +14,10 @@ Welcome to the LlamaGate documentation! This directory contains detailed guides 
 - [MCP Demo Guide](MCP_DEMO_QUICKSTART.md) - Full demo with multiple servers
 - [MCP HTTP API](API.md) - Complete API reference for MCP management endpoints
 
+## Core (Post–Phase 1)
+- [Core Contract](core_contract.md) - Core endpoints and config; what was removed
+- [Phase 1 Removal](phase1_remove_modules_extensions.md) - Impact map for extensions/modules removal
+
 ## Development
 - [Architecture](ARCHITECTURE.md) - System architecture and design
 - [Testing Guide](TESTING.md) - How to test your setup (includes build-from-source for CI/E2E/integrators)
@@ -23,7 +27,6 @@ Welcome to the LlamaGate documentation! This directory contains detailed guides 
 
 ## Example Repositories
 - [OpenAI SDK Examples](https://github.com/smcdaniel54/LlamaGate-openai-sdk-examples) - Minimal examples showing how to use the OpenAI SDK with LlamaGate
-- [Extension Examples](https://github.com/smcdaniel54/LlamaGate-extension-examples) - High-value, copy/paste-ready examples of LlamaGate Extensions and AgenticModules
 - MCP Examples - Coming soon
 
 ## Main Documentation

@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey)](README.md)
 
-LlamaGate is a production-ready, OpenAI-compatible API gateway for local LLMs (Ollama). It lets you point existing OpenAI SDKs (Python, Node, etc.) at local models as a drop-in replacement, while adding production features like streaming, tool/function calling guardrails, authentication, rate limiting, caching, and structured logging.
+LlamaGate is a lean, production-ready, OpenAI-compatible API gateway for local LLMs (Ollama). It lets you point existing OpenAI SDKs (Python, Node, etc.) at local models as a drop-in replacement, with streaming, tool/function calling (via MCP), authentication, rate limiting, caching, and structured logging.
 
 > 🚀 **New to LlamaGate?**  
 > **[Quick Start Guide](QUICKSTART.md)** - Get running in 2 minutes
@@ -20,8 +20,8 @@ LlamaGate is a production-ready, OpenAI-compatible API gateway for local LLMs (O
 - ✅ **Request Correlation & Structured Logging**: JSON logging with request IDs using Zerolog
 - ✅ **Caching**: In-memory caching for identical prompts to reduce Ollama load
 - ✅ **MCP Client Support**: Connect to MCP servers and expose their tools to models ([MCP Guide](docs/MCP.md) | [Quick Start](docs/MCP_QUICKSTART.md))
-- ✅ **Extension System**: YAML-based extensions for workflows, middleware, and observability ([Extension Guide](docs/EXTENSIONS_SPEC_V0.9.1.md) | [Quick Start](docs/EXTENSIONS_QUICKSTART.md))
-- ✅ **AgenticModules**: Bundle extensions into versioned, reusable modules ([AgenticModules Guide](docs/AGENTICMODULES.md))
+
+**Note:** Agentic modules and the extension system (workflows, middleware, observability) were removed in Phase 1. LlamaGate is now a core-only OpenAI-compatible gateway. See [Core Contract](docs/core_contract.md) and [Phase 1 Removal](docs/phase1_remove_modules_extensions.md).
 
 ## Documentation
 
@@ -31,8 +31,7 @@ LlamaGate is a production-ready, OpenAI-compatible API gateway for local LLMs (O
 - 🚀 **[MCP Quick Start](docs/MCP_QUICKSTART.md)** - Get started with MCP in 5 minutes
 - 🎯 **[MCP Demo Guide](docs/MCP_DEMO_QUICKSTART.md)** - Full demo with multiple servers
 - 🌐 **[MCP HTTP API](docs/API.md)** - Complete API reference for MCP management
-- 🔧 **[Extension System](docs/EXTENSIONS_SPEC_V0.9.1.md)** - YAML-based extensions (v0.9.1)
-- 🚀 **[Extension Quick Start](docs/EXTENSIONS_QUICKSTART.md)** - Write, validate, load, and run extensions
+- 📋 **[Core Contract](docs/core_contract.md)** - Core endpoints and config (post–Phase 1)
 - 🧪 **[Testing Guide](docs/TESTING.md)** - Testing your setup
 - 📦 **[Installation Guide](docs/INSTALL.md)** - Detailed installation instructions
 - ✅ **[Manual Acceptance Test](docs/ACCEPTANCE_TEST.md)** - Comprehensive acceptance test checklist for human verification
@@ -40,8 +39,6 @@ LlamaGate is a production-ready, OpenAI-compatible API gateway for local LLMs (O
 ## Example Repositories
 
 - 📚 **[OpenAI SDK Examples](https://github.com/smcdaniel54/LlamaGate-openai-sdk-examples)** - Minimal examples showing how to use the OpenAI SDK with LlamaGate (streaming and non-streaming)
-- 🔧 **[Extension Examples](https://github.com/smcdaniel54/LlamaGate-extension-examples)** - High-value, copy/paste-ready examples of LlamaGate Extensions and AgenticModules demonstrating real-world patterns for workflows, routing, evaluation, and orchestration
-- 📦 **In-Repo Examples** - See `extensions/` directory and `examples/agenticmodules/` for AgenticModule examples
 - 🎯 **MCP Examples** - Coming soon
 
 ## Installation
@@ -588,6 +585,13 @@ LlamaGate can be configured via:
 | `MCP_DENY_TOOLS` | (empty) | Comma-separated glob patterns for denied tools |
 
 **Note:** MCP server configuration is best done via YAML/JSON config file. See [mcp-config.example.yaml](mcp-config.example.yaml) and [MCP Documentation](docs/MCP.md).
+
+### Migration Notes (Phase 1: Extensions/Modules Removed)
+
+- **Removed endpoints:** All `/v1/extensions` routes (GET/PUT/POST list, get, upsert, execute, refresh) and any dynamic extension endpoints. Requests to these paths now return **404**.
+- **Config:** `EXTENSIONS_UPSERT_ENABLED` has been removed; remove it from your `.env` or config if present.
+- **CLI:** The `llamagate-cli` tool (import/export/list/remove/enable/disable extensions and agentic modules, migrate, sync) has been removed.
+- **What remains:** Core OpenAI-compatible endpoints (`/v1/chat/completions`, `/v1/models`), `/health`, `/v1/hardware/recommendations`, and when MCP is enabled, all `/v1/mcp/*` endpoints. See [Core Contract](docs/core_contract.md).
 
 ### Using .env File (Recommended)
 

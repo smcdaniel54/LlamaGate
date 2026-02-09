@@ -1,9 +1,0 @@
-{"ip":"::1","max_length":120,"method":"POST","path":"/v1/extensions/refresh","redacted":true,"request_id":"1823c037-6ed0-4181-a07f-bcf1ff1f9c9e","timestamp":"2026-01-23T23:27:26Z"}
-{"ip":"::1","max_length":120,"method":"POST","path":"/v1/chat/completions","redacted":true,"request_id":"4597a09f-083f-4673-8119-7a9aa40cef12","timestamp":"2026-01-24T05:02:16Z"}
-{"ip":"::1","max_length":120,"method":"POST","path":"/v1/chat/completions","redacted":true,"request_id":"6ce0af69-1bc8-41a5-ada7-c87ad1d3f008","timestamp":"2026-01-24T05:03:30Z"}
-{"ip":"::1","max_length":120,"method":"POST","path":"/v1/chat/completions","redacted":true,"request_id":"bd6d2efe-21fd-4161-9177-1b44e9427c8a","timestamp":"2026-01-24T05:03:40Z"}
-{"ip":"::1","max_length":120,"method":"POST","path":"/v1/chat/completions","redacted":true,"request_id":"28d5ad8e-defe-4800-8d72-b8a9dd1e75c2","timestamp":"2026-01-24T05:03:53Z"}
-{"ip":"::1","max_length":120,"method":"POST","path":"/v1/chat/completions","redacted":true,"request_id":"79d91b0f-7e1f-4817-adb3-f16931768f32","timestamp":"2026-01-24T05:04:15Z"}
-{"ip":"::1","max_length":120,"method":"POST","path":"/v1/chat/completions","redacted":true,"request_id":"45d6be68-bfc1-41f1-b8cb-fad5348aec25","timestamp":"2026-01-24T05:05:14Z"}
-{"ip":"::1","max_length":120,"method":"POST","path":"/v1/chat/completions","redacted":true,"request_id":"f4631348-c46f-43f2-8f73-76dae3ab17e1","timestamp":"2026-01-24T05:06:12Z"}
-{"ip":"::1","max_length":120,"method":"POST","path":"/v1/chat/completions","redacted":true,"request_id":"dabb3922-9780-44ee-a7cd-68b60654d6aa","timestamp":"2026-01-24T05:08:22Z"}

@@ -28,8 +28,6 @@ type Config struct {
 	TLSEnabled  bool   // Enable HTTPS/TLS
 	TLSCertFile string // Path to TLS certificate file
 	TLSKeyFile  string // Path to TLS private key file
-	// Extensions: workflow/extension upsert via PUT /v1/extensions/:name (enabled by default; set false to lock down)
-	ExtensionsUpsertEnabled bool
 }
 
 // MCPConfig holds MCP client configuration
@@ -103,8 +101,6 @@ func Load() (*Config, error) {
 	viper.SetDefault("TLS_ENABLED", false)
 	viper.SetDefault("TLS_CERT_FILE", "")
 	viper.SetDefault("TLS_KEY_FILE", "")
-	// Extensions upsert (enabled by default; set false to lock down)
-	viper.SetDefault("EXTENSIONS_UPSERT_ENABLED", true)
 
 	// MCP defaults
 	viper.SetDefault("MCP_ENABLED", false)
@@ -124,9 +120,7 @@ func Load() (*Config, error) {
 		// TLS configuration
 		TLSEnabled:  viper.GetBool("TLS_ENABLED"),
 		TLSCertFile: viper.GetString("TLS_CERT_FILE"),
-		TLSKeyFile:  viper.GetString("TLS_KEY_FILE"),
-		// Extensions upsert
-		ExtensionsUpsertEnabled: viper.GetBool("EXTENSIONS_UPSERT_ENABLED"),
+		TLSKeyFile: viper.GetString("TLS_KEY_FILE"),
 	}
 
 	// Parse timeout duration

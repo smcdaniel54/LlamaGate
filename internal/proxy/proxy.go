@@ -674,3 +674,34 @@ func (p *Proxy) HandleModels(c *gin.Context) {
 		Int("count", len(models)).
 		Msg("Models list retrieved")
 }
+
+// convertOllamaToOpenAIFormat converts Ollama chat response to OpenAI format (used for cache response conversion).
+func convertOllamaToOpenAIFormat(ollamaResp map[string]interface{}, model string) map[string]interface{} {
+	var content string
+	if message, ok := ollamaResp["message"].(map[string]interface{}); ok {
+		if msgContent, ok := message["content"].(string); ok {
+			content = msgContent
+		}
+	}
+	return map[string]interface{}{
+		"id":      fmt.Sprintf("chatcmpl-%d", time.Now().Unix()),
+		"object":  "chat.completion",
+		"created": time.Now().Unix(),
+		"model":   model,
+		"choices": []map[string]interface{}{
+			{
+				"index": 0,
+				"message": map[string]interface{}{
+					"role":    "assistant",
+					"content": content,
+				},
+				"finish_reason": "stop",
+			},
+		},
+		"usage": map[string]interface{}{
+			"prompt_tokens":     0,
+			"completion_tokens": 0,
+			"total_tokens":      0,
+		},
+	}
+}
