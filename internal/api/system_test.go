@@ -21,10 +21,10 @@ func TestSystemHandler_GetInfo_returns200WhenEnabled(t *testing.T) {
 	router.Use(middleware.RequestIDMiddleware())
 
 	cfg := &config.Config{
-		OllamaHost:          "http://localhost:11434",
-		HealthCheckTimeout:  5 * time.Second,
-		Introspection:       &config.IntrospectionConfig{Enabled: true},
-		Memory:              &config.MemoryConfig{Enabled: false},
+		OllamaHost:         "http://localhost:11434",
+		HealthCheckTimeout: 5 * time.Second,
+		Introspection:      &config.IntrospectionConfig{Enabled: true},
+		Memory:             &config.MemoryConfig{Enabled: false},
 	}
 	handler := NewSystemHandler(cfg, nil)
 	router.GET("/v1/system/info", handler.GetInfo)

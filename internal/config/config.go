@@ -48,9 +48,9 @@ type IntrospectionHardwareConfig struct {
 
 // IntrospectionChatInjectConfig controls system card injection into chat.
 type IntrospectionChatInjectConfig struct {
-	Enabled             bool
-	IncludeHardware     bool
-	IncludeModels       bool
+	Enabled              bool
+	IncludeHardware      bool
+	IncludeModels        bool
 	IncludeLlamaGateInfo bool
 }
 
@@ -171,7 +171,7 @@ func Load() (*Config, error) {
 		// TLS configuration
 		TLSEnabled:  viper.GetBool("TLS_ENABLED"),
 		TLSCertFile: viper.GetString("TLS_CERT_FILE"),
-		TLSKeyFile: viper.GetString("TLS_KEY_FILE"),
+		TLSKeyFile:  viper.GetString("TLS_KEY_FILE"),
 	}
 
 	// Parse timeout duration

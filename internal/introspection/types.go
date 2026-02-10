@@ -4,13 +4,13 @@ import "time"
 
 // RuntimeSnapshot holds app runtime info (version, uptime, etc.).
 type RuntimeSnapshot struct {
-	AppVersion   string    `json:"app_version"`
-	GitCommit    string    `json:"git_commit,omitempty"`
-	BuildDate    string    `json:"build_date,omitempty"`
-	GoVersion    string    `json:"go_version"`
-	UptimeSecs   float64   `json:"uptime_secs"`
-	ProcessRSS   int64     `json:"process_rss_bytes,omitempty"`
-	CurrentTime  time.Time `json:"current_time"`
+	AppVersion  string    `json:"app_version"`
+	GitCommit   string    `json:"git_commit,omitempty"`
+	BuildDate   string    `json:"build_date,omitempty"`
+	GoVersion   string    `json:"go_version"`
+	UptimeSecs  float64   `json:"uptime_secs"`
+	ProcessRSS  int64     `json:"process_rss_bytes,omitempty"`
+	CurrentTime time.Time `json:"current_time"`
 }
 
 // HardwareSnapshot holds hardware info (best-effort, redacted).
@@ -38,18 +38,18 @@ type HardwareSnapshot struct {
 
 // ModelsSnapshot holds model/provider info.
 type ModelsSnapshot struct {
-	Provider   string         `json:"provider"`
-	Endpoint   string         `json:"endpoint,omitempty"` // sanitized
-	Models     []ModelEntry   `json:"models"`
+	Provider     string       `json:"provider"`
+	Endpoint     string       `json:"endpoint,omitempty"` // sanitized
+	Models       []ModelEntry `json:"models"`
 	DefaultModel string       `json:"default_model,omitempty"`
 }
 
 // ModelEntry is a single model in the snapshot.
 type ModelEntry struct {
-	ID       string `json:"id"`
-	Name     string `json:"name,omitempty"`
-	OwnedBy  string `json:"owned_by,omitempty"`
-	Enabled  bool   `json:"enabled"`
+	ID      string `json:"id"`
+	Name    string `json:"name,omitempty"`
+	OwnedBy string `json:"owned_by,omitempty"`
+	Enabled bool   `json:"enabled"`
 }
 
 // HealthSnapshot holds backend health.

@@ -2,9 +2,9 @@ package memory
 
 // Default limits for memory entries (can be overridden by config).
 const (
-	DefaultPinnedMax    = 50
-	DefaultRecentMax    = 100
-	DefaultNotesMax     = 100
+	DefaultPinnedMax     = 50
+	DefaultRecentMax     = 100
+	DefaultNotesMax      = 100
 	DefaultMaxEntryChars = 500
 )
 

@@ -5,10 +5,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"os"
 	"os/exec"
-	"runtime"
-	"syscall"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -88,30 +85,7 @@ func checkOllamaCommand() error {
 	return nil
 }
 
-// startOllama starts the Ollama server process.
-func startOllama() (*exec.Cmd, error) {
-	cmd := exec.Command("ollama", "serve")
-
-	// Set process attributes based on platform
-	if runtime.GOOS == "windows" {
-		// On Windows, hide the window
-		cmd.SysProcAttr = &syscall.SysProcAttr{
-			HideWindow: true,
-		}
-	}
-	// On Unix/Linux/macOS, no special attributes needed
-	// The process will run in background by default when started with cmd.Start()
-
-	// Redirect output to prevent cluttering console
-	cmd.Stdout = os.Stderr // Log to stderr so it's visible but not mixed with normal output
-	cmd.Stderr = os.Stderr
-
-	if err := cmd.Start(); err != nil {
-		return nil, err
-	}
-
-	return cmd, nil
-}
+// startOllama is implemented in ollama_windows.go and ollama_unix.go (build-tagged).
 
 // waitForOllama waits for Ollama to become ready, checking at regular intervals.
 func waitForOllama(ctx context.Context, ollamaURL string) bool {

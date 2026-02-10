@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	systemFile = "system.json"
-	usersDir   = "users"
+	systemFile  = "system.json"
+	usersDir    = "users"
 	sessionsDir = "sessions"
 )
 

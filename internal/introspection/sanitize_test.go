@@ -9,10 +9,10 @@ import (
 
 func TestSanitizeConfig_redacts(t *testing.T) {
 	m := map[string]interface{}{
-		"api_key":    "secret123",
-		"name":       "hello",
-		"password":   "pw",
-		"token":      "t",
+		"api_key":  "secret123",
+		"name":     "hello",
+		"password": "pw",
+		"token":    "t",
 		"nested": map[string]interface{}{
 			"auth": "hidden",
 			"ok":   "visible",

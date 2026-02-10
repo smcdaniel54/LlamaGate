@@ -13,9 +13,9 @@ import (
 
 // SystemHandler handles GET /v1/system/* introspection endpoints.
 type SystemHandler struct {
-	cfg          *config.Config
-	memoryStore  memory.Store
-	ollamaHost   string
+	cfg           *config.Config
+	memoryStore   memory.Store
+	ollamaHost    string
 	healthTimeout time.Duration
 }
 
@@ -35,7 +35,7 @@ func (h *SystemHandler) ok(c *gin.Context, data interface{}) {
 
 func (h *SystemHandler) fail(c *gin.Context, code string, message string, status int) {
 	c.JSON(status, gin.H{
-		"ok": false,
+		"ok":    false,
 		"error": gin.H{"code": code, "message": message},
 	})
 }
