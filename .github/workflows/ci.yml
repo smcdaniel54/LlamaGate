@@ -68,7 +68,7 @@ jobs:
         go test -v -coverprofile=coverage.out -covermode=atomic -timeout=10m $PACKAGES
     
     - name: Upload coverage reports
-      uses: codecov/codecov-action@v5
+      uses: codecov/codecov-action@v6
       with:
         file: ./coverage.out
         flags: unittests
